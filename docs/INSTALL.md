@@ -30,6 +30,11 @@ The plugin lives at [github.com/anujg21/job-search-plugin](https://github.com/an
 7. Type `/job-search:onboard` and press Enter. You can also type `/` to browse the plugin's
    commands.
 
+Run onboarding in Claude Desktop, not in claude.ai in a browser. A browser session runs in
+a cloud sandbox: it can reach your data folder through your connected Mac, but it cannot
+check job boards, your Chrome sign-ins, or run the setup check. Use the browser for quick
+questions and the dashboard commands.
+
 Menu labels can differ a little between app versions. Anthropic's guide is
 [Use plugins in Claude](https://support.claude.com/en/articles/13837440-use-plugins-in-claude).
 
@@ -136,6 +141,7 @@ Your data stays in `~/JobSearch` until you delete that folder yourself.
 
 | Problem | Fix |
 |---|---|
+| Desktop still runs the old version after an update | claude.ai can show the new version before Claude Desktop does. Quit and reopen Claude Desktop so it syncs plugins again. |
 | Not sure what to do next | Type `/job-search:help`. It looks at your setup and suggests the next step. |
 | `/job-search:...` commands do not show up | Check the plugin is installed and enabled under Customize, Plugins. Start a new task or session after installing. |
 | "No job-search home" | Run `/job-search:onboard`, or pick your data folder as the task's working folder. |

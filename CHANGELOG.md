@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2 (2026-10-24)
+
+- Onboarding keeps going in a claude.ai browser session, where scripts, job board APIs and
+  Chrome may not be available. It lists what it could not check and how to finish in
+  Claude Desktop.
+- INSTALL.md: run onboarding in Claude Desktop, and restart Desktop when it lags behind an
+  update.
+
 ## 0.2.1 (2026-10-24)
 
 - Skill descriptions no longer contain angle brackets, which claude.ai rejects on sync.

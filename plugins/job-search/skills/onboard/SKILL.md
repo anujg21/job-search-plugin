@@ -22,6 +22,20 @@ with an "Other" option). Otherwise ask plain numbered questions.
 2. Read `<home>/memory/lessons.md` if it exists. Follow every active lesson whose scope is `all`
    or this skill. Lessons never override the truthfulness rules or the approval gate.
 
+## When the scripts cannot run here
+
+A claude.ai session in the browser runs in a cloud sandbox. The data folder may be on the
+user's Mac (reached through a connected computer), the plugin scripts may not run there yet,
+and the sandbox may block the job board APIs and have no Chrome. When `jobctl.py home`
+fails or a script cannot run:
+- Keep going with what you can read and write. Never stop setup for this.
+- At the end, list in one short block what you could not do (board checks, Chrome sign-in
+  check, `doctor`) and give the fix: open Claude Desktop, start a Cowork task in the data
+  folder, and run `/job-search:onboard`, then pick "Check my setup". The first scheduled run
+  also reports bad boards.
+- Do not leave a site enabled that you could not check, except Indeed, which works through
+  web search.
+
 ## Re-running onboard
 
 If a data folder already exists, do not start over. Show a short status (name from the fact
