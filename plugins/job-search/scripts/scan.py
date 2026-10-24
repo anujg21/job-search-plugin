@@ -209,15 +209,18 @@ def run_scan(home, wanted: Optional[List[str]] = None, dry_run: bool = False,
     cfg = jslib.load_sources(home)
     prefs = jslib.load_preferences(home)
     result = sl.new_result()
+    tried = blocked = 0
     for source in selected_sources(cfg, wanted):
         conf = (cfg.get("sources", {}) or {}).get(source) or {}
         for entry in conf.get("companies") or []:
             token, name = _company_entry(entry)
             if not token:
                 continue
+            tried += 1
             try:
                 items = fetch_board(source, token, name)
             except sl.FetchError as e:
+                blocked += 1 if e.blocked else 0
                 _record_error(home, result, source, token, str(e), dry_run)
                 continue
             except Exception as e:  # malformed payload, keep going
@@ -225,6 +228,10 @@ def run_scan(home, wanted: Optional[List[str]] = None, dry_run: bool = False,
                 continue
             sl.ingest(home, items, prefs, result, use_filter=True, dry_run=dry_run,
                       limit_per_company=limit_per_company)
+    if tried and blocked == tried:
+        # every board refused the same way: the network, not the tokens
+        result["network_blocked"] = True
+        result["errors"].insert(0, "network blocked: " + sl.BLOCKED_HINT)
     if wanted:
         for w in wanted:
             if w not in API_SOURCES:

@@ -34,6 +34,10 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    Add `--source <name>` for each named source, and `--dry-run` for a dry run.
    The JSON has `fetched`, `matched`, `new`, `known`, `new_ids`, `errors` and a `filtered`
    breakdown. Errors are already logged as `source_error` signals by the script.
+   If it has `network_blocked: true`, every board was refused by the network where this
+   runs (usually a claude.ai cloud sandbox), not by bad tokens. Put the first error line in
+   the summary as is: it names the domains to allow. Do not tell the user their tokens are
+   wrong, and do not claim their own computer is blocked too. Still do step 4.
    The guides `sources/greenhouse.md`, `sources/lever.md` and `sources/ashby.md` explain how
    board tokens work, in case an error says a token is wrong.
 
@@ -55,7 +59,10 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
      (`sources/check-access.md`).
    - A sign-in page during the scan: name the site in the summary's Problems line and say
      "sign in to <site> in Chrome".
-   - Chrome tools missing: use the guide's fallback section.
+   - Chrome tools missing, or no browser connected (common in scheduled and cloud runs):
+     Indeed never needs a sign-in, so always run its fallback section (WebSearch and
+     WebFetch). Do not skip Indeed because the run is unattended. Dice and LinkedIn need the
+     user's signed-in Chrome, so skip them and say so.
    - Login wall or CAPTCHA: the guide says to stop that source and log a `source_error`.
    For a dry run, pass `--dry-run` to `add_job.py`.
 

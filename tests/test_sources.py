@@ -332,6 +332,21 @@ class TestScan(HomeCase):
         self.assertEqual(len(sigs), 2)
         self.assertEqual(sigs[0]["skill"], "scan")
 
+    def test_all_boards_blocked_reports_network(self):
+        routes = {k: urllib.error.URLError(OSError("Tunnel connection failed: 403 Forbidden"))
+                  for k in self.routes}
+        with mock.patch("urllib.request.urlopen", fake_urlopen_factory(routes)):
+            res = scan.run_scan(self.home)
+        self.assertTrue(res.get("network_blocked"))
+        self.assertIn("Domain allowlist", res["errors"][0])
+        # a single blocked board among working ones is just an error
+        routes = dict(self.routes)
+        routes["boards-api.greenhouse.io/v1/boards/stripe/"] = 403
+        with mock.patch("urllib.request.urlopen", fake_urlopen_factory(routes)):
+            res = scan.run_scan(self.home)
+        self.assertFalse(res.get("network_blocked"))
+        self.assertTrue(any("403" in e for e in res["errors"]))
+
     def test_cli_json(self):
         out = io.StringIO()
         with mock.patch("urllib.request.urlopen", fake_urlopen_factory(self.routes)), \

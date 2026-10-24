@@ -94,10 +94,16 @@ your data folder, or run `/job-search:onboard`.
 The plugin is not installed where the task runs. In Claude Desktop, add it in the Cowork
 plugins panel. In Claude Code, run `/plugin install job-search@job-search-tools`.
 
-**The run did not happen.**
-The task uses a folder on your Mac, so it runs on your Mac. If the Mac was asleep or Claude
-Desktop was closed, the run could not start. Pick a time the Mac is usually on and keep Claude
-Desktop running.
+**The run did not happen, or says it could not reach the data folder.**
+A Cowork scheduled task runs in Claude's cloud sandbox and reaches your data folder through
+your connected Mac. If the Mac was asleep or Claude Desktop was closed, it cannot reach the
+folder. Pick a time the Mac is usually on and keep Claude Desktop running.
+
+**Every Greenhouse, Lever and Ashby board failed with "network blocked" or HTTP 403.**
+The cloud sandbox only reaches allowed domains. On claude.ai open Settings, then
+Capabilities, and under Domain allowlist add `boards-api.greenhouse.io`, `api.lever.co` and
+`api.ashbyhq.com`. Your company list is fine; the next run picks the boards up. Indeed still
+runs in the meantime through web search.
 
 **The run stopped halfway, waiting for approval.**
 The task's approval mode asks before each step. Edit the task and pick the approval mode that

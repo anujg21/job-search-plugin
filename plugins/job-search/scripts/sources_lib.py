@@ -28,7 +28,20 @@ TIMEOUT = 20
 
 
 class FetchError(Exception):
-    pass
+    def __init__(self, msg: str, blocked: bool = False) -> None:
+        super().__init__(msg)
+        self.blocked = blocked
+
+
+BLOCKED_HINT = ("the job board sites are blocked from where this runs. In a claude.ai cloud "
+                "session or scheduled task, add boards-api.greenhouse.io, api.lever.co and "
+                "api.ashbyhq.com under Settings > Capabilities > Domain allowlist, or run it in "
+                "Claude Desktop on your computer")
+
+
+def _looks_blocked(reason: Any) -> bool:
+    text = str(reason).lower()
+    return "403" in text or "tunnel connection failed" in text or "proxy" in text
 
 
 def fetch_json(url: str, timeout: int = TIMEOUT) -> Any:
@@ -45,11 +58,14 @@ def fetch_json(url: str, timeout: int = TIMEOUT) -> Any:
     except urllib.error.HTTPError as e:
         if e.code == 404:
             raise FetchError("HTTP 404 (board not found, check the company token)")
+        if e.code == 403:
+            raise FetchError("HTTP 403 (blocked)", blocked=True)
         raise FetchError("HTTP %s" % e.code)
     except urllib.error.URLError as e:
-        raise FetchError("network error: %s" % getattr(e, "reason", e))
+        reason = getattr(e, "reason", e)
+        raise FetchError("network error: %s" % reason, blocked=_looks_blocked(reason))
     except (TimeoutError, OSError) as e:  # socket.timeout is an OSError subclass
-        raise FetchError("network error: %s" % e)
+        raise FetchError("network error: %s" % e, blocked=_looks_blocked(e))
     try:
         if isinstance(raw, bytes):
             raw = raw.decode("utf-8", "replace")

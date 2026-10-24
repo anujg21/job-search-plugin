@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.3 (2026-10-24)
+
+- Scan says when the network blocks every job board (a claude.ai cloud sandbox) and names
+  the domains to allow, instead of a list of failed boards.
+- Scheduled and cloud runs without Chrome still search Indeed through web search.
+- SCHEDULING.md: scheduled tasks run in Claude's cloud sandbox and reach your folder through
+  your Mac; how to allow the job board domains.
+
 ## 0.2.2 (2026-10-24)
 
 - Onboarding keeps going in a claude.ai browser session, where scripts, job board APIs and
