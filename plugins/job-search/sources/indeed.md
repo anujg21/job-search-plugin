@@ -14,9 +14,9 @@ Three routes, tried in this order. Use the first one that works:
 1. ToolSearch with `indeed search_jobs`. Tool names look like
    `mcp__Indeed__search_jobs` (claude.ai) or `mcp__plugin_job-search_indeed__search_jobs`
    (Claude Code), with a matching `get_job_details`. None found, or a call says the connector is
-   not connected or needs sign-in: run
-   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector indeed missing`, go to the
-   next route and note `indeed: connector not connected` for the summary.
+   not connected or needs sign-in: with the user in the chat (not in a scheduled run), run
+   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector indeed missing`. Go to the
+   next route and note `indeed: connector not available in this run` for the summary.
    When a call works, run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector indeed ok`.
 2. Read the tool's input schema. Call `search_jobs` once per query in
    `sources.indeed.queries`, with the title as the search text and the location (use

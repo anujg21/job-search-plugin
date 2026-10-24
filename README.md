@@ -102,7 +102,9 @@ you.
 
 In Claude Code, run `/mcp`, pick `dice` or `indeed`, and follow the prompt.
 
-Scheduled runs need these most, because they have no Chrome. Onboarding shows these steps,
+Scheduled runs need these most, because they have no Chrome. Scheduled runs sometimes
+start before connectors load, so also add `mcp.dice.com` to the claude.ai domain allowlist
+(Settings, Capabilities), next to the job board domains. Then Dice works in every run. Onboarding shows these steps,
 and `jobctl.py doctor` warns "Connector dice" or "Connector indeed" until each one works.
 
 LinkedIn is read only and low volume on purpose. Its terms forbid scraping and bots, so the

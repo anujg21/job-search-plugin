@@ -70,10 +70,15 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    from those edits where the facts allow.
 2. **Scan.** Follow `skills/scan/SKILL.md`. It runs `scan.py` and the browser sources.
    Do every item in the `browser_next` list `scan.py` returns. Do not skip these:
-   - **Connectors.** ToolSearch `dice search_jobs` and `indeed search_jobs`. In claude.ai the
-     tools are named like `mcp__Dice__search_jobs` and `mcp__Indeed__search_jobs`; in Claude
-     Code like `mcp__plugin_job-search_dice__search_jobs`. Record each with
-     `JOBCTL connector <dice|indeed> <ok|missing>`.
+   - **Connectors.** ToolSearch `dice search_jobs` and `indeed search_jobs`. If that finds
+     nothing, ToolSearch `select:mcp__Dice__search_jobs,mcp__Dice__get_job_details,mcp__Indeed__search_jobs,mcp__Indeed__get_job_details`
+     (claude.ai names), then
+     `select:mcp__plugin_job-search_dice__search_jobs,mcp__plugin_job-search_indeed__search_jobs`
+     (Claude Code names). When a connector's tool loads and a call works, record
+     `JOBCTL connector <name> ok`. In an unattended run, never record `missing`: scheduled
+     runs sometimes start before connectors load, so a tool that is not there says nothing
+     about whether the user connected it. Note `<name>: connector did not load in this run`
+     instead.
    - **Dice.** If `scan.py` returned `"dice": "blocked"` or `"failed"` and the Dice tool is
      there, search Dice through it (`sources/dice.md`, "When scan.py cannot reach Dice").
    - **Indeed.** The Indeed connector first, then Chrome, then WebSearch

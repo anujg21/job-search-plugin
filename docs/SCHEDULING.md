@@ -120,6 +120,11 @@ A scheduled cloud run has no Chrome, so it always skips LinkedIn. To include Lin
 `/job-search:scan linkedin` in a chat while Chrome is open and you are signed in. If you do
 not want LinkedIn, turn it off with `/job-search:onboard`.
 
+**Dice or Indeed say "connector did not load in this run".**
+Scheduled runs sometimes start before connectors load, even when they are connected. Add
+`mcp.dice.com` to the domain allowlist so Dice works without its connector. Indeed falls
+back to web search in that run; `/job-search:scan indeed` in a chat uses the connector.
+
 **Indeed shows "connector not connected".**
 Connect it once: Customize, then Connectors, find Indeed and click Connect, then sign in to
 Indeed. Until then Indeed uses web search.

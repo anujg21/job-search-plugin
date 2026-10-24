@@ -53,11 +53,14 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    no longer pass, so a preference change (new title words to skip, a different country) also
    cleans up jobs found before the change.
 
-4. Connector check. ToolSearch `dice search_jobs`, then `indeed search_jobs`. For each, run
-   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector <name> ok` when the tool is
-   there, else `... connector <name> missing`. This is how `doctor` knows to remind the user.
-   When one is missing, add one Problems line: "connect <name>: Customize, Plugins, Job
-   search, Connectors, Connect".
+4. Connector check. ToolSearch `dice search_jobs`, then `indeed search_jobs`. If nothing
+   comes back, try `select:mcp__Dice__search_jobs,mcp__Indeed__search_jobs` and
+   `select:mcp__plugin_job-search_dice__search_jobs,mcp__plugin_job-search_indeed__search_jobs`.
+   When a tool loads, run
+   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector <name> ok`. This is how
+   `doctor` knows. Record `... connector <name> missing` only with the user in the chat (not
+   in a scheduled run, where connectors sometimes load late). Then add one Problems line:
+   "connect <name>: Customize, Plugins, Job search, Connectors, Connect".
 
 5. Connector and browser sources. Do every item in `browser_next` from step 2 (or, if
    `scan.py` did not run, each enabled one of indeed, linkedin). Read

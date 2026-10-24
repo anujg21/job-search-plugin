@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2 (2026-10-24)
+
+- Scheduled runs no longer mark the Dice or Indeed connector as missing when its tools have
+  not loaded yet. They retry the lookup by exact tool name, and note "did not load in this
+  run" instead.
+- README and SCHEDULING.md: add `mcp.dice.com` to the domain allowlist so Dice works in
+  every scheduled run.
+
 ## 0.4.1 (2026-10-24)
 
 - Runs no longer skip a source because an earlier run found nothing. Every run calls every
