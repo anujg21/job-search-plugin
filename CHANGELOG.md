@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1 (2026-10-24)
+
+- Cloud runs print tailored resumes to PDF on your computer as a separate step, and no
+  longer say Chrome is missing when only the sandbox lacks it. The command uses a throwaway
+  Chrome profile so your open Chrome is not touched.
+- Cloud runs keep their staging archives out of your data folder and delete them.
+
 ## 0.3.0 (2026-10-24)
 
 - Dice no longer needs Chrome or a Dice account. `scan.py` searches Dice through its public

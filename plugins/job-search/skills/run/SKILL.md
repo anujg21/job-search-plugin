@@ -75,16 +75,23 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    If you are working on a copy of the data folder (a cloud run that staged it from the
    user's computer), add `--home-label "<the user's real data folder path>"` so the page
    shows their path, then copy every changed file back to the real folder.
-   No PDF because this sandbox has no Chrome, but you can run commands on the user's
-   computer: after copying back, print each resume tailored this run to PDF there, one
-   command per job (it needs no network):
-   `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --no-pdf-header-footer --print-to-pdf="<real home>/jobs/<id>/resume.pdf" "file://<real home>/jobs/<id>/resume.html"`
-   Write spaces in the `file://` path as `%20`. If Chrome is not at that path, skip it and
-   note `pdf: Chrome not found`.
-7. **Mark lessons used.** For each lesson that changed what you did in this run, run
+   Staging rule: any archive or temp file you make to move the folder (a `.tgz`, a list of
+   files) goes in the computer's temp folder (`/tmp`), never inside the data folder, and you
+   delete it when done.
+7. **PDFs on the user's computer (cloud runs only).** Do this whenever tailoring said "no
+   PDF" because this sandbox has no Chrome. The user's own computer usually has Chrome, and
+   printing needs no network. With your tool that runs commands on the user's computer, for
+   each job with a `resume.html` and no `resume.pdf`, run:
+   `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --no-pdf-header-footer --user-data-dir="$(mktemp -d)" --print-to-pdf="<real home>/jobs/<id>/resume.pdf" "file://<real home>/jobs/<id>/resume.html"`
+   Write spaces in the `file://` path as `%20`. Check the PDF exists afterwards, then put an
+   empty file at `jobs/<id>/resume.pdf` in your staged copy too, so the dashboard rebuilt in
+   step 9 links the PDF (do not copy that empty file back). Only if Chrome is not at that
+   path, note `pdf: Chrome not found on your computer`. Never tell the user Chrome is missing
+   because this sandbox lacks it.
+8. **Mark lessons used.** For each lesson that changed what you did in this run, run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/memory.py" lesson-touch <id>`. Unused lessons
    retire after 60 days, so this keeps the useful ones.
-8. **Log the run.**
+9. **Log the run.**
    ```
    JOBCTL runlog --kind <daily|weekly> --found N --new N --scored N --prepared N --needs-approval N --errors "<error 1>" --errors "<error 2>"
    ```
