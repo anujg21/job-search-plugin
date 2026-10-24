@@ -24,10 +24,12 @@ stays in one folder on your computer.
    **Add marketplace**, and enter `anujg21/job-search-plugin`.
 2. Under **Discover**, install **job-search**.
 3. Start a Cowork task in a folder called `JobSearch` and type `/job-search:onboard`. It reads
-   your resume, asks what jobs you want and which boards to search.
+   your resume, researches job titles that fit it, and sets up which boards to search.
 4. Type `/job-search:schedule` and copy its values into two scheduled tasks, one daily and one
    weekly.
 5. After the first run, open `~/JobSearch/dashboard.html` in your browser.
+
+Stuck at any point? Type `/job-search:help`, or just ask how something works.
 
 Claude Code users: `claude plugin marketplace add anujg21/job-search-plugin`, then
 `claude plugin install job-search@job-search-tools`. Details for both are in
@@ -74,6 +76,7 @@ resume changes wait for your approval. The plugin never submits an application.
 | `/job-search:dashboard` | Rebuild the dashboard and open it |
 | `/job-search:feedback <text>` | Tell it what is wrong, or paste a dashboard command |
 | `/job-search:retro` | Turn recent feedback into lessons and suggestions |
+| `/job-search:help` | Ask how anything works, or what to do next |
 
 ## Job sources
 

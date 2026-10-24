@@ -45,11 +45,16 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    no longer pass, so a preference change (new title words to skip, a different country) also
    cleans up jobs found before the change.
 
-4. Browser sources (indeed, dice, linkedin). For each one that is enabled and has
-   `has_access: true`, read `${CLAUDE_PLUGIN_ROOT}/sources/<name>.md` and follow it exactly.
+4. Browser sources (indeed, dice, linkedin). For each one that is enabled, read
+   `${CLAUDE_PLUGIN_ROOT}/sources/<name>.md` and follow it exactly.
    Do them one at a time, LinkedIn last. Each guide ends by running `add_job.py`, which
    prints the same JSON counts. Add those to the totals.
-   - Enabled but `has_access` is false: skip it and say so in the summary.
+   - Enabled but `has_access` is false: for Indeed, use only the guide's fallback section
+     (web search, no Chrome). For Dice and LinkedIn, skip it and say in the summary that the
+     user can turn it on by signing in and running the access check
+     (`sources/check-access.md`).
+   - A sign-in page during the scan: name the site in the summary's Problems line and say
+     "sign in to <site> in Chrome".
    - Chrome tools missing: use the guide's fallback section.
    - Login wall or CAPTCHA: the guide says to stop that source and log a `source_error`.
    For a dry run, pass `--dry-run` to `add_job.py`.

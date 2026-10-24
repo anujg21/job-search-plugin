@@ -85,6 +85,8 @@ Do all daily steps first (but log the run once, at the end, with `--kind weekly`
 2. **Retro.** Follow `skills/retro/SKILL.md`.
 3. **Career radar, when due.** Run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/radar.py" status --json`.
    - If `due` is false, skip this step. Note `radar: not due (<age_days> days old)`.
+   - If `started_today_unfinished` is true, skip this step. Note
+     `radar: last run did not finish, skipped`.
    - If `due` is true, follow `${CLAUDE_PLUGIN_ROOT}/skills/radar/SKILL.md` in unattended mode:
      do not ask to confirm inputs, take them from the data folder and list them under
      Assumptions. It saves the report and `radar/latest.json`. Then run

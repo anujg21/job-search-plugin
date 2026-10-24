@@ -125,6 +125,7 @@ Each dashboard button copies one of these. You can also type them yourself.
 | `/job-search:dashboard` | Rebuild the dashboard and open it |
 | `/job-search:feedback <text>` | Tell it anything, or paste a dashboard command |
 | `/job-search:retro` | Turn recent feedback into lessons and suggestions |
+| `/job-search:help` | Ask how anything works, or what to do next |
 
 ## How resumes stay truthful
 
@@ -150,7 +151,12 @@ The radar researches live postings and hiring reports, then shows the titles tha
 the one to bet on, skills that are rising, how job descriptions are likely to change over the
 next three years, and wording the market uses for work you have already done. Every claim
 links to a source. New titles and job boards it finds arrive as suggestions you accept or
-decline. It never edits your resume or fact bank. Run it any time with `/job-search:radar`.
+decline. It never edits your resume or fact bank.
+
+It runs once during setup and then about every 30 days on the weekly run (change this with
+`radar_every_days`). `/job-search:radar` shows the saved radar and its date, and asks before
+researching again, since the research takes 5 to 10 minutes and the market does not change
+daily. Say "refresh the radar" when you want a new one.
 
 ## What it learns from you
 
@@ -182,6 +188,10 @@ they cost about $1.10 and $1.40. On a Claude plan they count toward your normal 
 instead. The radar adds 5 to 10 minutes of research about once a month.
 
 ## Questions
+
+For anything not covered here, type `/job-search:help` or ask in plain words. It checks your
+setup and answers.
+
 
 **Will it apply to jobs for me?** No. It prepares everything and can fill in forms, but you
 click Submit.

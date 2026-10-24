@@ -5,7 +5,9 @@ Usage:
   radar.py local-tally [--json] [--days 90]
   radar.py save --file radar.json [--report radar/radar-YYYY-MM-DD.md] [--json]
   radar.py propose [--json]
-  radar.py status [--json]          # age of the latest radar and whether it is due
+  radar.py status [--json]          # age of the latest radar, whether it is due, last start
+  radar.py mark-start               # record that a radar run started (call before researching)
+  radar.py boards [--json]          # ATS boards linked in the latest radar, not yet configured
   radar.py latest                   # print radar/latest.json
 
 See docs/DATA_MODEL.md (radar/) and skills/radar/SKILL.md.
@@ -185,6 +187,9 @@ def save(home: Path, radar: dict, report: Optional[str] = None) -> (Path, List[s
     path = d / ("radar-%s.json" % cleaned["as_of"][:10])
     jslib.write_json(path, cleaned)
     jslib.write_json(d / "latest.json", cleaned)
+    st = load_state(home)
+    st["last_finished"] = jslib.today()
+    jslib.write_json(state_path(home), st)
     return path, notes
 
 
@@ -292,18 +297,58 @@ def propose_boards(home: Path, radar: dict) -> List[dict]:
     return made
 
 
+# ---------- run state ----------
+
+def state_path(home: Path) -> Path:
+    return radar_dir(home) / "state.json"
+
+
+def load_state(home: Path) -> dict:
+    return jslib.read_json(state_path(home)) or {}
+
+
+def mark_start(home: Path, today: Optional[str] = None) -> dict:
+    st = load_state(home)
+    st["last_started"] = today or jslib.today()
+    radar_dir(home).mkdir(parents=True, exist_ok=True)
+    jslib.write_json(state_path(home), st)
+    return st
+
+
+def unconfigured_boards(home: Path) -> List[dict]:
+    radar = load_latest(home)
+    if not radar:
+        return []
+    sources = jslib.load_sources(home)
+    return [{"source": s, "token": t} for s, t in board_tokens(radar)
+            if t not in _configured_tokens(sources, s)]
+
+
 # ---------- status ----------
 
 def status(home: Path, today: Optional[str] = None) -> dict:
+    """Latest radar age and whether a refresh is due.
+
+    `started_today_unfinished` is true when a run was started today and no radar was saved
+    after it: a run that failed part way, so callers should not start another one on their own.
+    """
     prefs = jslib.load_preferences(home)
     every = prefs.get("radar_every_days", DEFAULT_EVERY_DAYS)
+    today = today or jslib.today()
+    st = load_state(home)
     radar = load_latest(home)
+    started = st.get("last_started")
+    finished = st.get("last_finished") or (radar or {}).get("as_of", "")[:10] or None
+    unfinished = bool(started) and started[:10] == today and (not finished or finished[:10] < started[:10])
+    base = {"every_days": every, "last_started": started, "last_finished": finished,
+            "started_today_unfinished": unfinished}
     if not radar:
-        return {"exists": False, "age_days": None, "every_days": every, "due": bool(every)}
-    today_d = datetime.strptime(today or jslib.today(), "%Y-%m-%d")
-    age = (today_d - datetime.strptime(radar.get("as_of", jslib.today())[:10], "%Y-%m-%d")).days
-    return {"exists": True, "as_of": radar.get("as_of"), "age_days": age, "every_days": every,
-            "due": bool(every) and age >= every, "report": radar.get("report")}
+        return dict(base, exists=False, age_days=None, due=bool(every))
+    today_d = datetime.strptime(today, "%Y-%m-%d")
+    age = (today_d - datetime.strptime(radar.get("as_of", today)[:10], "%Y-%m-%d")).days
+    return dict(base, exists=True, as_of=radar.get("as_of"), age_days=age,
+                due=bool(every) and age >= every, report=radar.get("report"),
+                verdict=radar.get("verdict"))
 
 
 # ---------- cli ----------
@@ -322,6 +367,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     p = sub.add_parser("propose")
     p.add_argument("--json", action="store_true")
     p = sub.add_parser("status")
+    p.add_argument("--json", action="store_true")
+    sub.add_parser("mark-start")
+    p = sub.add_parser("boards")
     p.add_argument("--json", action="store_true")
     sub.add_parser("latest")
     args = ap.parse_args(argv)
@@ -366,6 +414,22 @@ def main(argv: Optional[List[str]] = None) -> int:
         else:
             print("Latest radar %s, %d days old. Refresh every %s days. Due: %s"
                   % (s["as_of"], s["age_days"], s["every_days"], "yes" if s["due"] else "no"))
+        if not args.json and s["started_today_unfinished"]:
+            print("A radar run started today and did not finish.")
+        return 0
+    if args.cmd == "mark-start":
+        st = mark_start(home)
+        print("Radar run started %s" % st["last_started"])
+        return 0
+    if args.cmd == "boards":
+        b = unconfigured_boards(home)
+        if args.json:
+            print(json.dumps(b, indent=2))
+        else:
+            for x in b:
+                print("%s %s" % (x["source"], x["token"]))
+            if not b:
+                print("No new job boards in the latest radar.")
         return 0
     if args.cmd == "latest":
         r = load_latest(home)

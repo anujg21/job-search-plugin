@@ -4,6 +4,18 @@
 
 Career Trend Radar.
 
+- New `/job-search:help` skill. It answers questions about the plugin and suggests the next
+  step from your current setup. Claude also uses it when you seem unsure how something works.
+- Onboarding runs the career radar before asking for job titles, then offers the titles it
+  found and asks if you want others.
+- The radar is not run again in a new chat. `/job-search:radar` shows the saved radar and its
+  date and asks before researching again. `radar/state.json` records when a run started and
+  finished, so a run that failed today is not retried on its own.
+- Companies are optional in onboarding. It offers the job boards the radar found, and builds
+  Indeed, Dice and LinkedIn searches from your titles and locations.
+- Onboarding checks Indeed, Dice and LinkedIn access in your Chrome instead of asking whether
+  you are signed in (`sources/check-access.md`). Without Chrome, Indeed falls back to web
+  search.
 - New guides: docs/INSTALL.md (Claude Desktop, Claude Code and local installs), docs/USER_GUIDE.md (dashboard tour and everyday tasks), docs/PUBLISHING.md (releasing updates). The README is now a short landing page that links to them.
 - Skills fall back to their own folder when `${CLAUDE_PLUGIN_ROOT}` is not set.
 - Dashboard is more visual and less wordy: pipeline funnel with weekly trend, score meters, fit split bar with skill chips, rewrite bar and change chips, status timeline, run chart, and plain-language proposal and verify text.
@@ -20,7 +32,6 @@ Career Trend Radar.
   shows skills that are trending but not in your jobs yet.
 - The weekly run refreshes the radar when it is older than `radar_every_days` (default 30).
   Daily runs never do. New target titles and job boards from it wait for your answer.
-- Onboarding offers to run the radar when you are not sure which titles to target.
 - `/job-search:feedback radar` runs the radar now.
 - Tailoring: a stricter reviewer checklist (merged numbers, qualifiers, outcomes, names, verb
   level, skills, verify warnings). Bullets now echo the posting's own words where a fact

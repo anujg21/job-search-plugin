@@ -318,8 +318,10 @@ def run_doctor(home: Path, quick: bool = False) -> List[dict]:
             v = sources[k]
             if k in API_SOURCES and not v.get("companies"):
                 add("Source %s" % k, "warn", "enabled but no companies listed")
-            if k in BROWSER_SOURCES and not v.get("has_access"):
-                add("Source %s" % k, "warn", "enabled but you have not confirmed you are signed in")
+            if k == "indeed" and not v.get("has_access"):
+                add("Source indeed", "warn", "Chrome not checked, using web search instead")
+            elif k in BROWSER_SOURCES and not v.get("has_access"):
+                add("Source %s" % k, "warn", "enabled but Chrome access not confirmed (see sources/check-access.md)")
 
     for name in ("lessons.json", "proposals.json"):
         path = home / "memory" / name

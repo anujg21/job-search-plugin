@@ -258,7 +258,7 @@ fact bank does not list. The ledger itself stays built from the user's own score
 `lessons.json`:
 ```json
 {"schema_version": 1, "lessons": [
-  {"id": "L-001", "text": "Never use the word 'spearheaded'.", "scope": "all|scan|score|tailor|apply|gaps|dashboard|feedback|retro|run",
+  {"id": "L-001", "text": "Never use the word 'spearheaded'.", "scope": "all|scan|score|tailor|apply|gaps|dashboard|feedback|retro|run|onboard|radar|help",
    "kind": "auto|approved", "status": "active|retired", "created": "...", "last_applied": null,
    "evidence": ["<signal id>", "..."], "source": "retro|feedback|user"}
 ]}
@@ -298,6 +298,9 @@ Written by the `radar` skill through `scripts/radar.py save`.
 
 - `radar/radar-<YYYY-MM-DD>.md`: the full report for the user.
 - `radar/radar-<YYYY-MM-DD>.json` and `radar/latest.json`: the structured radar.
+- `radar/state.json`: `{"last_started": "YYYY-MM-DD", "last_finished": "YYYY-MM-DD"}`.
+  `radar.py mark-start` sets the first, `radar.py save` the second. `radar.py status` uses them
+  to report a run that started today and did not finish, so no skill starts another one.
 
 ```json
 {

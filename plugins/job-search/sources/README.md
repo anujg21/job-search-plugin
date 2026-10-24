@@ -13,6 +13,9 @@ runs `scripts/scan.py` (API sources) or follows the matching guide here (browser
 | Dice | `dice.md` | Claude in Chrome reads search results, then `add_job.py` |
 | LinkedIn | `linkedin.md` | Claude in Chrome reads a few saved searches, then `add_job.py` |
 
+`check-access.md` checks, in the user's Chrome, whether Indeed, Dice and LinkedIn can be read
+(signed in, no block page). Onboarding uses it instead of asking the user.
+
 ## Adding a new source
 
 1. Add `<name>.md` to this folder. Copy the closest existing guide and change the parts

@@ -22,6 +22,30 @@ This skill works in two modes:
 
 `RADAR` below means `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/radar.py"`.
 
+## Reuse a recent radar first (plugin mode)
+
+The research takes 5 to 10 minutes and a lot of usage, and the market does not change from
+one day to the next. Never run it again just because a new chat started. Check first:
+`RADAR status --json`.
+
+- **No radar yet** (`exists` false): go on to Inputs and run it.
+- **A radar exists:**
+  - **Interactive** (the user is in the chat): show one line, "Your career radar is from
+    <as_of> (<age_days> days ago): <verdict>". Then ask with two options:
+    "Use this radar (recommended)" and "Run it again (5 to 10 minutes)". If `due` is true,
+    say it is older than the user's refresh setting (`every_days`) and recommend running it
+    again instead. If the user picks "Use this radar", answer from `radar/latest.json` and the
+    report it names. Do not research.
+  - **The user asked for a fresh one** ("rerun the radar", "refresh it", "it's outdated"):
+    run it without asking.
+  - **Unattended** (called from `/job-search:run` or a schedule): run only when `due` is true.
+- **`started_today_unfinished` is true**: a run started today and did not save. Do not start
+  another one on your own. Interactive: tell the user and ask before trying again.
+  Unattended: skip it and report `radar: last run did not finish, skipped`.
+
+Right before you start researching, run `RADAR mark-start`. `RADAR save` records when it
+finished. Together they keep the "last run" date that the checks above use.
+
 ## Inputs (confirm before researching)
 
 Research is expensive and every finding is judged against the resume and preferences, so lock both down first.

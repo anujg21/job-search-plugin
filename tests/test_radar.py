@@ -82,6 +82,28 @@ class RadarTest(unittest.TestCase):
         jslib.write_json(self.home / "profile" / "preferences.json", prefs)
         self.assertFalse(radar.status(self.home, today="2027-06-01")["due"])
 
+    def test_unfinished_run_is_flagged_until_saved(self):
+        today = jslib.today()
+        radar.mark_start(self.home)
+        s = radar.status(self.home, today=today)
+        self.assertTrue(s["started_today_unfinished"])
+        self.assertEqual(s["last_started"], today)
+        self.assertFalse(radar.status(self.home, today="2099-01-01")["started_today_unfinished"])
+        r = good_radar()
+        r["as_of"] = today
+        radar.save(self.home, r)
+        s = radar.status(self.home, today=today)
+        self.assertFalse(s["started_today_unfinished"])
+        self.assertEqual(s["last_finished"], today)
+        self.assertEqual(s["age_days"], 0)
+        self.assertTrue(s["verdict"])
+
+    def test_unconfigured_boards(self):
+        self.assertEqual(radar.unconfigured_boards(self.home), [])
+        radar.save(self.home, good_radar())
+        tokens = sorted(b["token"] for b in radar.unconfigured_boards(self.home))
+        self.assertEqual(tokens, ["acme", "mercury"])
+
     def test_status_without_radar(self):
         s = radar.status(self.home)
         self.assertFalse(s["exists"])

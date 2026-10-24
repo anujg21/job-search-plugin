@@ -39,7 +39,8 @@ def _sig_key(sig: dict) -> str:
     return sig.get("id") or sig.get("ts")
 
 
-SCOPES = ("all", "scan", "score", "tailor", "apply", "gaps", "dashboard", "feedback", "retro", "run")
+SCOPES = ("all", "scan", "score", "tailor", "apply", "gaps", "dashboard", "feedback", "retro", "run",
+          "onboard", "radar", "help")
 LESSON_KINDS = ("auto", "approved")
 LESSON_SOURCES = ("retro", "feedback", "user")
 PROPOSAL_KINDS = ("preference", "source", "fact_bank", "cap", "maintainer")

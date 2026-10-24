@@ -106,9 +106,9 @@ Rules. These are not negotiable:
   own: a role that mentions a tool does not mean the person used it for the whole role. You may
   offer estimates from role dates when you show the fact bank ("Python looks like about 5 years
   from your roles. Save that?") and save only the ones the user confirms.
-- `headlines` and `title_aliases` are the only titles the tailored resume may use. Start with
-  the titles on the resume and ask which others they are comfortable with, as long as the
-  titles are honest descriptions of the work.
+- `headlines` and `title_aliases` are the only titles the tailored resume may use. Fill them
+  with the titles on the resume. Do not ask the user for other titles here: step 4 runs the
+  career radar first and offers the titles it finds, which can then become headlines.
 
 Show the fact bank back in a compact, readable form (not raw JSON), for example:
 
@@ -129,23 +129,36 @@ a metric that is not in its bullet text, evidence ids that do not exist).
 
 ## Step 4: preferences interview
 
-**Offer the career radar first.** Before asking for target titles, ask:
-"Not sure which titles to target? I can run the career radar now (about 5 to 10 minutes of
-research)". Offer two choices: "Yes, run it" and "No, I know my titles".
-- If yes: write the answers you already have to `preferences.json` (at least location and
-  remote, so the research looks in the right place), then follow
-  `${CLAUDE_PLUGIN_ROOT}/skills/radar/SKILL.md` in plugin mode. Skip its "Before you start"
-  section. When it is done, show the titles from `radar/latest.json` `titles_now` with fit
-  `high` as options for `target_titles` (multiple choice, plus "Other"), each with its
-  momentum and one line of why. Save only the ones the user picks. Do not run `radar.py
-  propose` here: the user just chose. Then go on with the rest of the questions.
-- If no: ask for target titles as usual.
+**Titles come from the career radar.** Do not ask "which titles do you want?" first. Most
+people do not know the market's names for their work, so research the titles before asking.
+
+1. Ask only where they want to work: locations and remote (remote, hybrid, onsite, any).
+   Write them to `preferences.json` so the research looks in the right place.
+2. Run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/radar.py" status --json`.
+   - A radar already exists: use it. Say "Using your career radar from <as_of>." Do not run
+     it again unless the user asks, or `due` is true and the user agrees.
+   - No radar yet: say in one line that you are researching titles that fit their resume
+     (5 to 10 minutes) and that they can say "skip" to name titles themselves. Then follow
+     `${CLAUDE_PLUGIN_ROOT}/skills/radar/SKILL.md` in plugin mode. Skip its "Before you start"
+     section and its input confirmation: the user just confirmed the fact bank, so use the
+     files and the answers from this interview.
+   - The research fails or the user says skip: ask for target titles directly and go on.
+3. Show the titles from `radar/latest.json` `titles_now` with fit `high` or `medium` as
+   multiple choice (multi-select), each with its fit, momentum and one line of why. Save the
+   ones the user picks to `target_titles`.
+4. Then ask once: "Any other titles you want me to search for?" Free text, and "No" is a
+   fine answer.
+5. Ask once whether the picked titles may also appear as the headline on their tailored
+   resumes. Add a title to `headlines` only if the user says it honestly describes work they
+   have done. Never add one on your own.
+
+Do not run `radar.py propose` here: the user just chose.
 
 Ask these, a few at a time, and write `<home>/profile/preferences.json`:
 
 | Question | Key |
 |---|---|
-| Which job titles do you want? | `target_titles` |
+| (from the radar step above) | `target_titles` |
 | Words that should appear in a good job (tech, domain)? | `keywords` |
 | Seniority levels (senior, staff, principal, lead, manager, director)? | `seniority` |
 | Where? Cities, or remote only? | `locations`, `remote` (remote, hybrid, onsite, any) |
@@ -164,31 +177,46 @@ values. Those control the approval gate and only the user, editing the file by h
 
 ## Step 5: sources
 
-Show this list and ask which to use:
+Nothing in this step blocks setup. If the user skips a question, use the default and go on.
+Ask everything in one short message with the options below, not one source at a time.
 
 | Source | Login needed | Notes |
 |---|---|---|
-| Greenhouse | No | Public API. Needs a list of companies. |
-| Lever | No | Public API. Needs a list of companies. |
-| Ashby | No | Public API. Needs a list of companies. |
-| Indeed | Uses your Chrome | Search results read in your browser. |
-| Dice | Uses your Chrome | Needs you signed in to Dice in Chrome. |
-| LinkedIn | Uses your Chrome | Read-only and low volume. It only reads a few of your saved searches. It never applies or messages anyone. |
+| Greenhouse | No | Public API. Watches the companies you name. |
+| Lever | No | Public API. Watches the companies you name. |
+| Ashby | No | Public API. Watches the companies you name. |
+| Indeed | No | Search results read in your Chrome. |
+| Dice | Yes, in Chrome | Read in your Chrome while you are signed in. |
+| LinkedIn | Yes, in Chrome | Read-only and low volume. Never applies or messages anyone. |
 
-For Greenhouse, Lever and Ashby:
-- Ask for target company names.
-- Find each company's board token and check it works:
+**Companies are optional.** Ask "Any companies you would like me to watch? (optional, you can
+skip)". Then:
+- Add the job boards the radar found: run
+  `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/radar.py" boards --json` and offer them as a
+  multi-select ("The radar found jobs that fit you on these boards"). This gives the user
+  companies without having to name any.
+- For each company the user names, find its board token and check it works:
   - Greenhouse: `https://boards-api.greenhouse.io/v1/boards/<token>/jobs`
   - Lever: `https://api.lever.co/v0/postings/<token>?mode=json`
   - Ashby: `https://api.ashbyhq.com/posting-api/job-board/<token>`
   Try the obvious slug first (`stripe`, `datadog`). If it fails, search the web for
   "<company> careers greenhouse" (or lever, ashby) and read the token from the careers URL.
-  A company is on one board, usually. Put it in the list for the board that answered.
-- Tell the user which companies you found and which you could not.
+  Put the company in the list for the board that answered. Tell the user which you found
+  and which you could not, and move on.
+- No companies at all is fine. Indeed, Dice and LinkedIn still search by title, and the
+  weekly radar suggests boards later.
 
-For Indeed, Dice and LinkedIn, ask "Are you signed in to <site> in Chrome?" Set `has_access`
-to their answer. Only set `enabled: true` when `has_access` is true. Ask for a search (title and
-location) for Indeed and Dice, and for one to three saved search URLs for LinkedIn.
+**Searches are built for the user.** Do not ask for search terms or saved search URLs. For
+Indeed and Dice, make one query per target title (up to 3) with the first location, or
+`Remote` for remote-only. For LinkedIn, build up to 3 search URLs:
+`https://www.linkedin.com/jobs/search/?keywords=<title>&location=<location>&f_TPR=r604800`
+(URL-encoded; add `&f_WT=2` for remote only). The user can paste their own saved searches
+later.
+
+**Check Chrome access yourself.** Do not ask "are you signed in?". Follow
+`${CLAUDE_PLUGIN_ROOT}/sources/check-access.md`. It opens each site in the user's Chrome,
+sees whether they are signed in, and sets `enabled` and `has_access`. If Chrome is not
+connected it explains how to connect it, and setup goes on with the API sources.
 
 Write `<home>/profile/sources.json` with all six sources present:
 

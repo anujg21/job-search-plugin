@@ -69,12 +69,17 @@ edits what is there instead of starting over.
    bullet, number, skill, certificate and date, each with an id. It shows you the result.
    Correct anything wrong. This fact bank is the only thing a tailored resume can draw from,
    so it is worth five careful minutes.
-3. **Preferences.** Target titles, seniority, locations and remote, salary floor, deal
-   breakers, title words to skip, countries you can work in, how many resumes to prepare per
-   day, and the minimum fit score. Not sure which titles to target? Say yes when it offers the
-   Career Trend Radar (about 5 to 10 minutes of research).
-4. **Job sources.** Name companies you like; it finds their Greenhouse, Lever or Ashby job
-   boards. For Indeed, Dice and LinkedIn it asks whether you are signed in to them in Chrome.
+3. **Preferences.** It asks where you want to work, then runs the Career Trend Radar (about
+   5 to 10 minutes of research) and shows the job titles that fit your resume. Pick the ones
+   you want and add any others. Then come seniority, salary floor, deal breakers, title words
+   to skip, countries you can work in, how many resumes to prepare per day, and the minimum
+   fit score. Say "skip" during the research to name titles yourself. The radar runs once
+   here; later chats reuse it and ask before running it again.
+4. **Job sources.** Naming companies is optional. It offers the company job boards the radar
+   found, and checks any company you name on Greenhouse, Lever and Ashby. For Indeed, Dice and
+   LinkedIn it opens each site in your Chrome and checks whether you are signed in. If you are
+   not, it leaves the site open so you can sign in, or you can skip it. It builds the searches
+   from your titles and locations.
 5. **Health check.** It runs `jobctl.py doctor` and offers to set up the schedule and do a
    first run.
 
@@ -131,9 +136,10 @@ Your data stays in `~/JobSearch` until you delete that folder yourself.
 
 | Problem | Fix |
 |---|---|
+| Not sure what to do next | Type `/job-search:help`. It looks at your setup and suggests the next step. |
 | `/job-search:...` commands do not show up | Check the plugin is installed and enabled under Customize, Plugins. Start a new task or session after installing. |
 | "No job-search home" | Run `/job-search:onboard`, or pick your data folder as the task's working folder. |
 | A scheduled run cannot find your data | Set the task's folder to your data folder. See [SCHEDULING.md](SCHEDULING.md). |
 | No PDF next to a tailored resume | Chrome was not available where the run happened. Open `resume.html` and print it to PDF, or install Chrome. |
-| Indeed, Dice or LinkedIn found nothing | Sign in to that site in Chrome and make sure the Claude in Chrome extension is connected. A login wall or CAPTCHA is logged and skipped, never solved. |
+| Indeed, Dice or LinkedIn found nothing | Sign in to that site in Chrome and make sure the Claude in Chrome extension is connected. Then run `/job-search:onboard`, pick Job sources, and it checks access again. A login wall or CAPTCHA is logged and skipped, never solved. |
 | Too many or too few jobs | Change target titles, title words to skip, or countries with `/job-search:onboard`. Jobs still waiting to be scored are re-filtered on the next run. |
