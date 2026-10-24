@@ -29,7 +29,7 @@ awake, like 8:00 AM. Weekly runs on Sunday at the same time unless they say othe
 Print this, with `<home>` and `<time>` filled in:
 
 ```
-In Claude Desktop (Cowork):
+In Claude Desktop:
 1. Click "Scheduled" in the left sidebar.
 2. Click "New task" (top right), then "Set up manually".
 3. In "Create scheduled task", fill in:
@@ -54,11 +54,12 @@ Then add these notes, one line each:
   that time, or that run may not happen.
 - The approval mode matters too. If the task stops to ask before each step, nobody is there
   to answer. The run itself never submits an application or sends anything.
-- The job-search plugin has to be installed in Cowork (the plugins panel), or the task will not
-  know `/job-search:run`.
+- The job-search plugin has to be installed in Claude Desktop (Customize, Plugins), or the task
+  will not know `/job-search:run`.
 - On Sunday both tasks run. That is fine. The second run finds nothing new and finishes fast.
 - Instead of "Set up manually" you can pick "Create with Claude" and paste the values above
-  when it asks.
+  when it asks. Or, from any conversation, ask Claude to run `/job-search:run daily` every day
+  at <time> in <home>, check what it proposes, and click "Schedule".
 
 ## Step 2b: Claude Code CLI (other path)
 

@@ -138,7 +138,7 @@ short command; the user pastes it into Claude. The page never changes data by it
 
 ## Scheduled runs
 
-Claude Desktop, Cowork tab, Scheduled, New task. Two tasks: `/job-search:run daily` every day
+Claude Desktop, Scheduled (left sidebar), New task. Two tasks: `/job-search:run daily` every day
 and `/job-search:run weekly` on Sundays, each with the data folder as its folder. The computer
 must be awake with Claude Desktop open at that time. `/job-search:schedule` prints the exact
 values.

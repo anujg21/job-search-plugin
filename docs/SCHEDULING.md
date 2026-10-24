@@ -14,8 +14,8 @@ The quickest way to set this up is `/job-search:schedule`. This page is the long
 
 ## Claude Desktop (recommended)
 
-A Cowork scheduled task runs in Claude's cloud sandbox and reaches your data folder through
-your connected Mac
+A scheduled task in Claude Desktop runs in Claude's cloud sandbox and reaches your data folder
+through your connected Mac
 ([Anthropic help article](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork)).
 So the Mac should be awake, with Claude Desktop open, at the scheduled time. The sandbox only
 reaches the web domains your account allows, so add the job board domains first (see
@@ -23,7 +23,7 @@ reaches the web domains your account allows, so add the job board domains first 
 connect the Indeed connector for the best Indeed results. The sandbox has no Chrome, so
 LinkedIn is skipped. Resume PDFs are made with `xhtml2pdf`, which the run installs.
 
-1. Open Claude Desktop and switch to Cowork.
+1. Open Claude Desktop.
 2. Click **Scheduled** in the left sidebar.
 3. Click **New task** in the upper right, then **Set up manually**.
 4. In **Create scheduled task**, fill in:
@@ -93,12 +93,12 @@ The working folder is wrong, or onboarding has not run. Set the task's working f
 your data folder, or run `/job-search:onboard`.
 
 **The task says the skill or command is unknown.**
-The plugin is not installed where the task runs. In Claude Desktop, add it in the Cowork
-plugins panel. In Claude Code, run `/plugin install job-search@job-search-tools`.
+The plugin is not installed where the task runs. In Claude Desktop, add it under
+**Customize**, **Plugins**. In Claude Code, run `/plugin install job-search@job-search-tools`.
 
 **The run did not happen, or says it could not reach the data folder.**
-A Cowork scheduled task runs in Claude's cloud sandbox and reaches your data folder through
-your connected Mac. If the Mac was asleep or Claude Desktop was closed, it cannot reach the
+A scheduled task runs in Claude's cloud sandbox and reaches your data folder through your
+connected Mac. If the Mac was asleep or Claude Desktop was closed, it cannot reach the
 folder. Pick a time the Mac is usually on and keep Claude Desktop running.
 
 **Every board failed with "network blocked" or HTTP 403.**

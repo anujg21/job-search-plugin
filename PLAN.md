@@ -62,7 +62,7 @@ Read each project's relevant files while writing the matching skill. Credit them
 ## 3. Why a plugin and not a web app (for now)
 
 - Users run it on their own Claude subscription. No API keys, no hosting, no auth.
-- Scheduled tasks in Claude Desktop (Cowork) can use installed plugins, skills and connectors ([help article](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork)). Available on all paid plans.
+- Scheduled tasks in Claude Desktop can use installed plugins, skills and connectors ([help article](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork)). Available on all paid plans.
 - Distribution is a GitHub repo that doubles as a plugin marketplace (`/plugin marketplace add owner/repo`).
 - ChatGPT: the closest equivalent is Codex, which reads the same skill files (career-ops and JobPilot already ship for both). Keep skills as plain Markdown so one repo serves both. ChatGPT desktop "Tasks" cannot drive local files, so treat it as phase 2.
 

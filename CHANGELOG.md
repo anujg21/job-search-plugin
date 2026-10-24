@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 (2026-10-24)
+
+- Instructions no longer send you to a Cowork tab or Cowork task. Claude merged chat and
+  Cowork into one conversation, so setup, scheduling and help now say "conversation" and
+  point to Customize > Plugins and the Scheduled sidebar.
+
 ## 0.6.0 (2026-10-24)
 
 - The dashboard has a **Start here** tab for first-time users: what it offers, live counts,

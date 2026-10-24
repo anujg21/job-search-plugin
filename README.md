@@ -20,12 +20,12 @@ stays in one folder on your computer.
 
 ## Set up in Claude Desktop
 
-1. In the **Cowork** tab, open **Customize**, then **Plugins**. Click **Add**, then
+1. In Claude Desktop, open **Customize**, then **Plugins**. Click **Add**, then
    **Add marketplace**, and enter `anujg21/job-search-plugin`.
 2. Under **Discover**, install **job-search**.
 3. Connect the Dice and Indeed connectors and set them to Always allow (see
    [Connectors](#connectors)).
-4. Start a Cowork task in a folder called `JobSearch` and type `/job-search:onboard`. It reads
+4. Start a conversation, give Claude a folder called `JobSearch`, and type `/job-search:onboard`. It reads
    your resume, researches job titles that fit it, and sets up which boards to search.
 5. Type `/job-search:schedule` and copy its values into two scheduled tasks, one daily and one
    weekly.
@@ -130,7 +130,7 @@ Anthropic's guides:
 [Use connectors](https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities),
 [Browse the directory](https://support.claude.com/en/articles/14328846-browse-skills-connectors-and-plugins-in-one-directory),
 [Custom connectors with remote MCP](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp),
-[Scheduled tasks in Cowork](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork).
+[Schedule recurring tasks](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork).
 
 LinkedIn is read only and low volume on purpose. Its terms forbid scraping and bots, so the
 plugin reads a few of your saved searches and never applies or messages anyone.

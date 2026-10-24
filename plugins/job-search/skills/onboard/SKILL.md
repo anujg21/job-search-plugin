@@ -30,7 +30,7 @@ and the sandbox may block the job board APIs and have no Chrome. When `jobctl.py
 fails or a script cannot run:
 - Keep going with what you can read and write. Never stop setup for this.
 - At the end, list in one short block what you could not do (board checks, Chrome sign-in
-  check, `doctor`) and give the fix: open Claude Desktop, start a Cowork task in the data
+  check, `doctor`) and give the fix: open Claude Desktop, start a conversation with the data
   folder, and run `/job-search:onboard`, then pick "Check my setup". The first scheduled run
   also reports bad boards.
 - Do not leave a site enabled that you could not check, except Indeed, which works through

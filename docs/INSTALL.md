@@ -18,13 +18,18 @@ The plugin lives at [github.com/anujg21/job-search-plugin](https://github.com/an
 
 ## Option A: Claude Desktop (recommended)
 
-1. Open Claude Desktop and switch to the **Cowork** tab.
+Chat and Cowork are now one conversation in Claude
+([Anthropic's note](https://support.claude.com/en/articles/16761823)). If your message box
+still shows **Chat** and **Cowork** options, your account has not moved over yet: pick
+**Cowork** before step 6.
+
+1. Open Claude Desktop.
 2. Click **Customize** in the left sidebar, then open **Plugins**.
 3. Click **Add**, choose **Add marketplace**, then **Add from a repository**.
 4. Enter `anujg21/job-search-plugin` (or the full `https://github.com/anujg21/job-search-plugin`
    URL) and confirm.
 5. Open the **Discover** tab, find **job-search**, and click **Install**.
-6. Start a new Cowork task. When it asks which folder to work in, create or pick a folder
+6. Start a new conversation and give Claude access to a folder: create or pick a folder
    called `JobSearch` in your home folder. The plugin keeps all your data there.
 7. Connect the bundled connectors: in **Customize**, **Plugins**, open **Job search**, then
    the **Connectors** tab. Click **Connect** next to **Dice** (no account needed) and next to

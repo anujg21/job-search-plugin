@@ -29,7 +29,7 @@ description: Rebuilds the local job search dashboard (one static HTML file with 
 4. Show it to the user right away, do not just name the path:
    - On the user's own computer (Claude Code, or Claude Desktop with a real shell): build
      with `--open` (`build_dashboard.py --open`), which opens it in their browser.
-   - In a cloud session (claude.ai, Cowork, a scheduled task), `--open` cannot reach their
+   - In a cloud session (claude.ai, a cloud conversation in Claude Desktop, a scheduled task), `--open` cannot reach their
      browser. Share `dashboard.html` with the tool that presents or shares files in the
      chat, so it opens there with one click.
    Then tell them, in a few short lines:
