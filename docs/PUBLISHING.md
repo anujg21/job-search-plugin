@@ -54,7 +54,8 @@ lessons and runs, which is handy for checking the dashboard.
 
 ## Releasing an update
 
-1. Bump `version` in `plugins/job-search/.claude-plugin/plugin.json`.
+1. Bump `version` in `plugins/job-search/.claude-plugin/plugin.json`, in the same commit as
+   the change. Never push the change first and the bump second.
 2. Move the `Unreleased` notes in CHANGELOG.md under the new version.
 3. Run the checks and push to the default branch.
 

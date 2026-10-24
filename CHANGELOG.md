@@ -1,8 +1,6 @@
 # Changelog
 
-## Unreleased
-
-Career Trend Radar.
+## 0.2.0 (2026-10-24)
 
 - New `/job-search:help` skill. It answers questions about the plugin and suggests the next
   step from your current setup. Claude also uses it when you seem unsure how something works.
@@ -16,6 +14,11 @@ Career Trend Radar.
 - Onboarding checks Indeed, Dice and LinkedIn access in your Chrome instead of asking whether
   you are signed in (`sources/check-access.md`). Without Chrome, Indeed falls back to web
   search.
+
+## Earlier changes, published with 0.1.0
+
+Career Trend Radar.
+
 - New guides: docs/INSTALL.md (Claude Desktop, Claude Code and local installs), docs/USER_GUIDE.md (dashboard tour and everyday tasks), docs/PUBLISHING.md (releasing updates). The README is now a short landing page that links to them.
 - Skills fall back to their own folder when `${CLAUDE_PLUGIN_ROOT}` is not set.
 - Dashboard is more visual and less wordy: pipeline funnel with weekly trend, score meters, fit split bar with skill chips, rewrite bar and change chips, status timeline, run chart, and plain-language proposal and verify text.
