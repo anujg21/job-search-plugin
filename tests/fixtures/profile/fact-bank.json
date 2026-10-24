@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "person": {"name": "Jordan Rivera", "email": "jordan@example.com", "phone": "555-0100", "location": "Denver, CO",
+             "links": [{"label": "LinkedIn", "url": "https://www.linkedin.com/in/example"}]},
+  "headlines": ["Platform Architect", "Principal Platform Engineer"],
+  "summary_facts": [
+    {"id": "sum.1", "text": "14 years building cloud platforms and developer tooling for regulated industries"},
+    {"id": "sum.2", "text": "Leads teams of 6 to 12 engineers through platform migrations"}
+  ],
+  "roles": [
+    {"id": "r1", "company": "Northwind Health", "title": "Lead Platform Architect", "title_aliases": ["Platform Architect"],
+     "start": "2021-03", "end": "present", "location": "Denver, CO",
+     "bullets": [
+       {"id": "r1.b1", "text": "Led migration of 40 services from VMs to Kubernetes on AWS EKS, cutting infrastructure cost 30%", "skills": ["kubernetes", "aws", "eks"], "metrics": ["40", "30%"]},
+       {"id": "r1.b2", "text": "Designed an internal developer platform used by 220 engineers, reducing new service setup from 2 weeks to 1 day", "skills": ["platform engineering", "backstage"], "metrics": ["220", "2 weeks", "1 day"]},
+       {"id": "r1.b3", "text": "Built an LLM-based support triage service with Python and AWS Bedrock handling 5,000 tickets per month", "skills": ["python", "llm", "aws bedrock"], "metrics": ["5,000"]},
+       {"id": "r1.b4", "text": "Set HIPAA-aligned guardrails for CI/CD pipelines in GitHub Actions", "skills": ["github actions", "ci/cd", "hipaa"], "metrics": []}
+     ]},
+    {"id": "r2", "company": "Contoso Bank", "title": "Senior Software Engineer", "title_aliases": [],
+     "start": "2015-06", "end": "2021-02", "location": "Charlotte, NC",
+     "bullets": [
+       {"id": "r2.b1", "text": "Built payment APIs in Java and Spring Boot processing 2 million transactions per day", "skills": ["java", "spring boot", "apis"], "metrics": ["2 million"]},
+       {"id": "r2.b2", "text": "Introduced Docker and Jenkins pipelines, cutting release time from monthly to weekly", "skills": ["docker", "jenkins", "ci/cd"], "metrics": []},
+       {"id": "r2.b3", "text": "Mentored 4 junior engineers", "skills": ["mentoring"], "metrics": ["4"]}
+     ]}
+  ],
+  "skills": [
+    {"id": "s.kubernetes", "name": "Kubernetes", "level": "expert", "years": 5, "evidence": ["r1.b1"]},
+    {"id": "s.aws", "name": "AWS", "level": "expert", "years": 7, "evidence": ["r1.b1", "r1.b3"]},
+    {"id": "s.python", "name": "Python", "level": "working", "years": 4, "evidence": ["r1.b3"]},
+    {"id": "s.java", "name": "Java", "level": "expert", "years": 8, "evidence": ["r2.b1"]},
+    {"id": "s.docker", "name": "Docker", "level": "expert", "years": 8, "evidence": ["r2.b2"]},
+    {"id": "s.githubactions", "name": "GitHub Actions", "level": "working", "years": 3, "evidence": ["r1.b4"]},
+    {"id": "s.llm", "name": "LLM applications", "level": "familiar", "years": 2, "evidence": ["r1.b3"]}
+  ],
+  "education": [{"id": "e1", "school": "University of South Florida", "degree": "B.S. Computer Science", "year": "2011"}],
+  "certifications": [{"id": "c1", "name": "AWS Certified Solutions Architect - Professional", "year": "2023"}],
+  "projects": [{"id": "p1", "name": "kube-cost-report", "text": "Open source CLI that reports Kubernetes cost per namespace", "skills": ["go", "kubernetes"]}]
+}

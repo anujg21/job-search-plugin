@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "target_titles": ["Platform Architect", "Platform Engineer", "Infrastructure Architect", "AI Platform Engineer"],
+  "keywords": ["platform", "kubernetes", "infrastructure", "developer experience"],
+  "seniority": ["senior", "staff", "principal", "lead"],
+  "locations": ["Remote", "Denver, CO"],
+  "remote": "remote",
+  "salary_min": 170000,
+  "must_have": [],
+  "deal_breakers": ["contract", "clearance required"],
+  "exclude_title_words": ["marketing", "sales", "account executive", "ios", "android"],
+  "industries_like": ["healthcare", "fintech", "developer tools"],
+  "industries_avoid": ["gambling"],
+  "daily_cap": 5,
+  "min_score": 3.5,
+  "auto_approve_minor": true,
+  "major_rewrite_ratio": 0.30
+}

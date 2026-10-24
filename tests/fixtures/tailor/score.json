@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "score": 4.1,
+  "recommendation": "apply",
+  "summary": "Strong Kubernetes, AWS and developer platform track record in a regulated industry. Missing Terraform, which the posting lists as required, and no Prometheus or Grafana evidence.",
+  "matched": [
+    {"requirement": "Kubernetes in production", "evidence": ["r1.b1", "s.kubernetes"], "strength": "strong"},
+    {"requirement": "Internal developer platform", "evidence": ["r1.b2"], "strength": "strong"},
+    {"requirement": "AWS at scale", "evidence": ["r1.b1", "s.aws"], "strength": "strong"},
+    {"requirement": "CI/CD with GitHub Actions", "evidence": ["r1.b4", "r2.b2"], "strength": "partial"},
+    {"requirement": "Python", "evidence": ["r1.b3", "s.python"], "strength": "partial"},
+    {"requirement": "Regulated industry", "evidence": ["sum.1", "r1.b4"], "strength": "strong"}
+  ],
+  "missing": [
+    {"item": "Terraform", "category": "tool", "required": true},
+    {"item": "Prometheus", "category": "tool", "required": false},
+    {"item": "Grafana", "category": "tool", "required": false},
+    {"item": "Argo CD", "category": "tool", "required": false},
+    {"item": "PCI DSS", "category": "cert", "required": false}
+  ],
+  "keywords": ["platform engineering", "kubernetes", "terraform", "aws", "eks", "ci/cd", "github actions", "golden paths", "self-service", "developer platform", "infrastructure as code"],
+  "deal_breakers_hit": []
+}

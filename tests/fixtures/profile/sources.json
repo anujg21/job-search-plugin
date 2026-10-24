@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "greenhouse": {"enabled": true, "has_access": true, "companies": ["stripe", "datadog"]},
+    "lever": {"enabled": true, "has_access": true, "companies": ["spotify"]},
+    "ashby": {"enabled": true, "has_access": true, "companies": ["ramp"]},
+    "indeed": {"enabled": false, "has_access": false, "queries": [{"q": "platform architect", "l": "Remote"}], "max_per_run": 20},
+    "dice": {"enabled": false, "has_access": false, "queries": [{"q": "platform architect", "l": "Remote"}], "max_per_run": 20},
+    "linkedin": {"enabled": false, "has_access": false, "saved_search_urls": [], "max_per_run": 15}
+  }
+}

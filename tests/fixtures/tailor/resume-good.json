@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "job_id": "manual-lumen-payments-staff-platform",
+  "headline": "Platform Architect",
+  "summary": {
+    "text": "14 years building cloud platforms and developer tooling for regulated industries. Leads teams of 6 to 12 engineers through platform migrations on Kubernetes and AWS.",
+    "source_ids": ["sum.1", "sum.2", "s.kubernetes", "s.aws"]
+  },
+  "roles": [
+    {"role_id": "r1", "company": "Northwind Health", "title": "Lead Platform Architect", "start": "2021-03", "end": "present", "location": "Denver, CO",
+     "bullets": [
+       {"text": "Designed an internal developer platform for 220 engineers that cut new service setup from 2 weeks to 1 day", "source_ids": ["r1.b2"]},
+       {"text": "Led migration of 40 services from VMs to Kubernetes on AWS EKS, cutting infrastructure cost 30%", "source_ids": ["r1.b1"]},
+       {"text": "Set HIPAA-aligned guardrails for CI/CD pipelines in GitHub Actions", "source_ids": ["r1.b4"]},
+       {"text": "Built an LLM-based support triage service with Python and AWS Bedrock handling 5000 tickets per month", "source_ids": ["r1.b3"]}
+     ]},
+    {"role_id": "r2", "company": "Contoso Bank", "title": "Senior Software Engineer", "start": "2015-06", "end": "2021-02", "location": "Charlotte, NC",
+     "bullets": [
+       {"text": "Introduced Docker and Jenkins CI/CD pipelines, cutting release time from monthly to weekly", "source_ids": ["r2.b2"]},
+       {"text": "Built payment APIs in Java and Spring Boot processing 2 million transactions per day", "source_ids": ["r2.b1"]},
+       {"text": "Mentored 4 junior engineers", "source_ids": ["r2.b3"]}
+     ]}
+  ],
+  "skills": [
+    {"name": "Kubernetes", "source_ids": ["s.kubernetes"]},
+    {"name": "AWS", "source_ids": ["s.aws"]},
+    {"name": "EKS", "source_ids": ["r1.b1"]},
+    {"name": "GitHub Actions", "source_ids": ["s.githubactions"]},
+    {"name": "Python", "source_ids": ["s.python"]},
+    {"name": "Docker", "source_ids": ["s.docker"]},
+    {"name": "Java", "source_ids": ["s.java"]},
+    {"name": "LLM applications", "source_ids": ["s.llm"]}
+  ],
+  "education": ["e1"],
+  "certifications": ["c1"],
+  "projects": [{"id": "p1", "text": "Open source CLI that reports Kubernetes cost per namespace", "source_ids": ["p1"]}]
+}

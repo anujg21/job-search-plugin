@@ -1,0 +1,14 @@
+{
+  "name": "job-search-tools",
+  "description": "Truthful job search automation for Claude",
+  "owner": {
+    "name": "anujg21"
+  },
+  "plugins": [
+    {
+      "name": "job-search",
+      "source": "./plugins/job-search",
+      "description": "Finds jobs, scores fit, tailors your resume without inventing facts, tracks skill gaps, and learns from your feedback."
+    }
+  ]
+}

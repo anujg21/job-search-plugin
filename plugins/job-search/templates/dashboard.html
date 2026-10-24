@@ -1,0 +1,2007 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Job Search Dashboard</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f2f1ed;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #6f6d68;
+  --line: #e1e0d9;
+  --line-strong: #c3c2b7;
+  --accent: #2a78d6;
+  --accent-ink: #1c5cab;
+  --accent-wash: rgba(42, 120, 214, 0.10);
+  --focus: #2a78d6;
+  --bar-req: #256abf;
+  --bar-opt: #9ec5f4;
+  --spark: #2a78d6;
+  --good: #006300;
+  --good-wash: rgba(12, 163, 12, 0.12);
+  --warn-ink: #8a5a00;
+  --warn-wash: rgba(250, 178, 25, 0.20);
+  --bad-ink: #a52a2a;
+  --bad-wash: rgba(208, 59, 59, 0.12);
+  --neutral-wash: rgba(11, 11, 11, 0.06);
+  --violet-ink: #4f3fc0;
+  --violet-wash: rgba(98, 80, 214, 0.12);
+  --del-wash: rgba(208, 59, 59, 0.10);
+  --ins-wash: rgba(12, 163, 12, 0.10);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  /* chart marks: categorical slots 1 to 3 (validated as a set), status marks */
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --mark-good: #0ca30c;
+  --mark-bad: #d03b3b;
+  --mark-warn: #fab219;
+  --mark-muted: #c3c2b7;
+  --radius: 8px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #232321;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --muted: #9a988f;
+    --line: #2c2c2a;
+    --line-strong: #46463f;
+    --accent: #3987e5;
+    --accent-ink: #86b6ef;
+    --accent-wash: rgba(57, 135, 229, 0.16);
+    --focus: #86b6ef;
+    --bar-req: #5598e7;
+    --bar-opt: #1c5cab;
+    --spark: #6da7ec;
+    --good: #4cc44c;
+    --good-wash: rgba(12, 163, 12, 0.20);
+    --warn-ink: #fab219;
+    --warn-wash: rgba(250, 178, 25, 0.16);
+    --bad-ink: #f08080;
+    --bad-wash: rgba(208, 59, 59, 0.22);
+    --neutral-wash: rgba(255, 255, 255, 0.08);
+    --violet-ink: #b3abf2;
+    --violet-wash: rgba(144, 133, 233, 0.18);
+    --del-wash: rgba(208, 59, 59, 0.20);
+    --ins-wash: rgba(12, 163, 12, 0.18);
+    --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --mark-muted: #57564f;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font: 15px/1.5 var(--font);
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+a { color: var(--accent-ink); }
+@media (prefers-color-scheme: dark) { a { color: var(--accent-ink); } }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+header.top { padding: 20px 0 8px; }
+header.top h1 { font-size: 22px; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+header.top p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+nav.tabs {
+  display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line);
+  margin-top: 12px; scrollbar-width: none;
+}
+nav.tabs::-webkit-scrollbar { display: none; }
+nav.tabs button {
+  appearance: none; border: 0; background: none; color: var(--ink-2);
+  font: inherit; font-size: 14px; padding: 10px 12px; cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs .count {
+  display: inline-block; min-width: 18px; padding: 0 6px; margin-left: 6px; border-radius: 9px;
+  background: var(--warn-wash); color: var(--warn-ink); font-size: 12px; font-weight: 600; text-align: center;
+}
+main { padding: 20px 0 40px; }
+section[role="tabpanel"][hidden] { display: none; }
+h2 { font-size: 17px; margin: 24px 0 10px; font-weight: 650; }
+h2:first-child { margin-top: 0; }
+h3 { font-size: 15px; margin: 18px 0 8px; font-weight: 650; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.stack > * + * { margin-top: 12px; }
+/* pipeline funnel */
+.funnel { display: grid; grid-template-columns: 1.6fr repeat(6, minmax(0, 1fr)); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius); }
+.fstep { appearance: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; background: none; border: 0;
+  border-left: 1px solid var(--line); padding: 10px 12px 10px 16px; position: relative; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.fstep:first-child { border-left: 0; border-radius: var(--radius) 0 0 var(--radius); padding-left: 14px; }
+.fstep:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+.fstep + .fstep::before { content: ""; position: absolute; left: -5px; top: 50%; width: 8px; height: 8px; background: var(--surface);
+  border-top: 1px solid var(--line-strong); border-right: 1px solid var(--line-strong); transform: translateY(-50%) rotate(45deg); }
+.fstep:hover { background: var(--surface-2); }
+.fstep:hover::before { background: var(--surface-2); }
+.fstep[aria-pressed="true"] { background: var(--accent-wash); }
+.fstep[aria-pressed="true"]::before { background: var(--surface); }
+.fstep .fv { font-size: 24px; font-weight: 650; line-height: 1.1; }
+.fstep .fk { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fstep .ftrack { height: 4px; border-radius: 2px; background: var(--accent-wash); margin-top: 6px; position: relative; }
+.fstep .ffill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--accent); }
+.fstep.hot .fv { color: var(--warn-ink); }
+.fstep .ftop { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.fstep .fspark { flex: none; }
+@media (max-width: 760px) {
+  .funnel { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .fstep:first-child { grid-column: span 2; }
+  .fstep { padding: 8px 8px 8px 12px; }
+  .fstep:nth-child(n+4) { border-top: 1px solid var(--line); }
+  .fstep:nth-child(4) { border-left: 0; padding-left: 10px; }
+  .fstep:nth-child(4)::before { display: none; }
+  .fstep, .fstep:first-child, .fstep:last-child { border-radius: 0; }
+  .fstep .fv { font-size: 20px; }
+  .fstep .fk { font-size: 11.5px; white-space: normal; line-height: 1.25; }
+}
+/* small meters */
+.smeter { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.smeter .trk { width: 36px; height: 6px; border-radius: 3px; background: var(--accent-wash); position: relative; flex: none; }
+.smeter .fil { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+.lv-lo { background: var(--mark-muted); }
+.lv-ok { background: var(--accent); }
+.lv-hi { background: var(--accent-ink); }
+.meter { position: relative; height: 10px; border-radius: 5px; background: var(--accent-wash); }
+.meter .fil { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
+.meter .mk { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink-2); border-radius: 1px; }
+.meter-wrap { flex: 1 1 200px; min-width: 160px; }
+.meter-scale { position: relative; height: 16px; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+.meter-scale span { position: absolute; top: 0; white-space: nowrap; }
+.split { display: flex; gap: 2px; height: 10px; margin: 10px 0 6px; }
+.split span { display: block; height: 100%; min-width: 4px; }
+.split span:first-child { border-radius: 4px 0 0 4px; }
+.split span:last-child { border-radius: 0 4px 4px 0; }
+.split span:only-child { border-radius: 4px; }
+.k-good { background: var(--mark-good); }
+.k-bad { background: var(--mark-bad); }
+.k-none { background: var(--mark-muted); }
+.k-warn { background: var(--mark-warn); }
+.keyline { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--ink-2); }
+.keyline i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.keyline i.ring { background: none; border: 1.5px solid var(--line-strong); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; padding: 2px 9px; border-radius: 999px; border: 1px solid transparent;
+  background: var(--neutral-wash); color: var(--ink-2); max-width: 100%; overflow-wrap: anywhere; line-height: 1.4; }
+.tag.ok { background: var(--good-wash); color: var(--ink); }
+.tag.ok.partial { background: none; border-color: var(--good); }
+.tag.req { background: var(--bad-wash); color: var(--ink); }
+.tag.opt { background: none; border-color: var(--line-strong); }
+a.tag { text-decoration: none; }
+a.tag:hover { border-color: var(--accent); }
+.rw { display: inline-flex; align-items: center; gap: 8px; }
+.rw .trk { width: 72px; height: 6px; border-radius: 3px; background: var(--neutral-wash); position: relative; }
+.rw .fil { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+.rw .mk { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--ink-2); }
+.subhead { font-size: 12.5px; font-weight: 600; color: var(--ink-2); margin: 12px 0 0; }
+.more > summary { font-size: 13px; margin-top: 4px; }
+.more { margin-top: 8px; }
+/* status history */
+.htl { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; row-gap: 12px; }
+.htl li { position: relative; padding: 18px 14px 0 0; min-width: 88px; font-size: 12.5px; line-height: 1.3; }
+.htl li::before { content: ""; position: absolute; left: 0; top: 2px; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--mark-muted); box-shadow: 0 0 0 2px var(--surface); z-index: 1; }
+.htl li::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 2px; background: var(--line); }
+.htl li:last-child::after { right: auto; width: 0; }
+.htl li:last-child::before { background: var(--accent); }
+.htl .st { font-weight: 600; display: block; }
+.htl .dt { color: var(--muted); }
+.htl .nt { display: block; color: var(--ink-2); max-width: 160px; overflow-wrap: anywhere; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 18px 0 10px; }
+input[type="search"], input[type="text"] {
+  font: inherit; font-size: 14px; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 6px; padding: 7px 10px; min-width: 0;
+}
+input[type="search"] { flex: 1 1 220px; max-width: 360px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  appearance: none; font: inherit; font-size: 13px; cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2);
+  border-radius: 999px; padding: 3px 10px;
+}
+.chip[aria-pressed="true"] { background: var(--accent-wash); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.chip .n { color: var(--muted); margin-left: 4px; font-weight: 400; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-size: 12.5px; font-weight: 600; color: var(--ink-2); background: var(--surface-2); white-space: nowrap; position: sticky; top: 0; }
+th button { appearance: none; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; padding: 0; }
+th button::after { content: ""; margin-left: 4px; color: var(--muted); }
+th[aria-sort="ascending"] button::after { content: "\2191"; }
+th[aria-sort="descending"] button::after { content: "\2193"; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr.clickable { cursor: pointer; }
+tbody tr.clickable:hover { background: var(--accent-wash); }
+tbody tr.selected { background: var(--accent-wash); }
+.nowrap { white-space: nowrap; }
+.role-btn {
+  appearance: none; border: 0; background: none; padding: 0; font: inherit; color: var(--ink);
+  font-weight: 600; text-align: left; cursor: pointer;
+}
+.role-btn:hover { text-decoration: underline; }
+.links { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.badge {
+  display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  white-space: nowrap; background: var(--neutral-wash); color: var(--ink-2);
+}
+.b-blue { background: var(--accent-wash); color: var(--accent-ink); }
+.b-amber { background: var(--warn-wash); color: var(--warn-ink); }
+.b-green { background: var(--good-wash); color: var(--good); }
+.b-red { background: var(--bad-wash); color: var(--bad-ink); }
+.b-violet { background: var(--violet-wash); color: var(--violet-ink); }
+.score { font-variant-numeric: tabular-nums; font-weight: 600; }
+.btn {
+  appearance: none; font: inherit; font-size: 13.5px; cursor: pointer; border-radius: 6px;
+  padding: 6px 12px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+  white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--bad-ink); }
+.btn.small { padding: 3px 9px; font-size: 12.5px; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.ask { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+.ask input { flex: 1 1 200px; }
+.ask label { width: 100%; font-size: 13px; color: var(--ink-2); }
+.empty {
+  border: 1px dashed var(--line-strong); border-radius: var(--radius); padding: 28px 16px;
+  text-align: center; color: var(--ink-2); background: var(--surface);
+}
+.empty strong { display: block; color: var(--ink); margin-bottom: 4px; font-size: 15px; }
+.empty code { font-family: var(--mono); background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
+ul.plain { list-style: none; margin: 0; padding: 0; }
+ul.plain > li { padding: 6px 0; border-bottom: 1px solid var(--line); }
+ul.plain > li:last-child { border-bottom: 0; }
+ul.plain.card { padding: 4px 16px; }
+.table-scroll table.jobs { min-width: 860px; }
+.ids { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-left: 4px; }
+.id { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; color: var(--ink-2); }
+.diff { display: grid; gap: 4px; margin-top: 6px; }
+.diff div { padding: 6px 8px; border-radius: 6px; font-size: 13.5px; overflow-wrap: anywhere; }
+.diff .del { background: var(--del-wash); }
+.diff .ins { background: var(--ins-wash); }
+.diff .lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-right: 6px; }
+.issues li { color: var(--bad-ink); }
+/* detail panel */
+.scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); z-index: 20; }
+.scrim[hidden] { display: none; }
+aside.panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(600px, 100vw); z-index: 21;
+  background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow);
+  overflow-y: auto; overscroll-behavior: contain;
+}
+aside.panel[hidden] { display: none; }
+.panel-head {
+  position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--line);
+  padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; z-index: 1;
+}
+.panel-head .t { flex: 1; min-width: 0; }
+.panel-head h2 { margin: 0; font-size: 18px; overflow-wrap: anywhere; }
+.panel-head p { margin: 2px 0 0; color: var(--ink-2); font-size: 13.5px; }
+.panel-body { padding: 4px 16px 32px; }
+.panel-body h3 { border-top: 1px solid var(--line); padding-top: 14px; }
+.close {
+  appearance: none; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+  border-radius: 6px; width: 34px; height: 34px; font-size: 20px; line-height: 1; cursor: pointer; flex: none;
+}
+.bigscore { font-size: 34px; font-weight: 650; line-height: 1; }
+.bigscore span { font-size: 15px; color: var(--muted); font-weight: 400; }
+.row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+/* gaps */
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin: 4px 0 12px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.gap-list { list-style: none; margin: 0; padding: 0; }
+.gap {
+  display: grid; grid-template-columns: 28px minmax(0, 1.2fr) minmax(0, 2fr) 104px; gap: 12px;
+  align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line);
+}
+.gap:last-child { border-bottom: 0; }
+.gap .rank { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.gap .name { font-weight: 600; overflow-wrap: anywhere; }
+.gap .sub { font-size: 12.5px; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
+.bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bar-track { flex: 1; min-width: 40px; height: 14px; position: relative; }
+.bar { position: absolute; left: 0; top: 0; bottom: 0; display: flex; gap: 2px; }
+.bar span { display: block; height: 100%; min-width: 0; }
+.bar span:first-child { border-radius: 0; }
+.bar span:last-child { border-radius: 0 4px 4px 0; }
+.bar .req { background: var(--bar-req); }
+.bar .opt { background: var(--bar-opt); }
+.bar-val { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+.spark { display: block; }
+.spark-cell { font-size: 11.5px; color: var(--muted); text-align: right; }
+.gap-actions { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.gap-note { font-size: 13px; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .gap { grid-template-columns: 24px minmax(0, 1fr) 84px; }
+  .gap .bar-wrap { grid-column: 2 / -1; grid-row: 2; }
+  .gap .spark-cell { grid-column: 3; grid-row: 1; }
+  .gap-actions { grid-column: 2 / -1; }
+}
+/* career radar */
+.verdict { font-size: 16px; font-weight: 600; line-height: 1.45; }
+/* radar report rendered from markdown */
+.md-sec { margin-top: 14px; padding: 0; overflow: hidden; scroll-margin-top: 12px; }
+.md-sec > summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; align-items: center; gap: 8px; }
+.md-sec > summary::-webkit-details-marker { display: none; }
+.md-sec > summary::before { content: ""; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; flex: none; }
+.md-sec[open] > summary::before { transform: rotate(45deg); }
+.md-sec > summary h2 { margin: 0; font-size: 16px; }
+.md-sec.lead { border-color: var(--accent); }
+.md-sec.lead > summary { background: var(--accent-wash); }
+.md-body { padding: 4px 16px 14px; line-height: 1.55; font-size: 14px; }
+.md-body > :first-child { margin-top: 6px; }
+.md-body h3 { font-size: 14.5px; margin: 16px 0 6px; }
+.md-body h4 { font-size: 13.5px; margin: 12px 0 4px; color: var(--ink-2); }
+.md-body p { margin: 8px 0; }
+.md-body ul, .md-body ol { margin: 6px 0; padding-left: 22px; }
+.md-body li { margin: 3px 0; }
+.md-body li.task { list-style: none; margin-left: -20px; display: flex; gap: 8px; align-items: flex-start; }
+.md-body li.task input { margin-top: 4px; flex: none; }
+.md-body code { font-family: var(--mono); font-size: 12.5px; background: var(--neutral-wash); padding: 1px 5px; border-radius: 4px; }
+.md-body pre { background: var(--neutral-wash); padding: 10px 12px; border-radius: 6px; overflow-x: auto; }
+.md-body pre code { background: none; padding: 0; }
+.md-body blockquote { margin: 8px 0; padding: 4px 12px; border-left: 3px solid var(--line-strong); color: var(--ink-2); }
+.md-body hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+.md-body a { word-break: break-word; }
+.md-table { overflow-x: auto; margin: 10px 0; border: 1px solid var(--line); border-radius: 6px; }
+.md-table table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.md-table th, .md-table td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.md-table th { background: var(--neutral-wash); font-weight: 600; white-space: nowrap; }
+.md-table tr:last-child td { border-bottom: 0; }
+.md-head { padding: 14px 16px; }
+.md-head h1 { font-size: 18px; margin: 0 0 4px; }
+.md-head p { margin: 4px 0 0; color: var(--ink-2); font-size: 13px; }
+.radar-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13px; color: var(--ink-2); margin-top: 6px; }
+.hint { margin-top: 10px; padding: 8px 12px; border-radius: 6px; background: var(--warn-wash); color: var(--ink); font-size: 13.5px; }
+.hint code, .card code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.quad { display: grid; grid-template-columns: 58px repeat(3, minmax(0, 1fr)); }
+.quad .cap { grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.quad .cap.x { text-align: center; margin: 4px 0 0; padding-left: 58px; }
+.quad .yt { font-size: 11.5px; color: var(--muted); align-self: center; text-align: right; padding-right: 8px; }
+.quad .xt { font-size: 11.5px; color: var(--muted); text-align: center; padding-top: 4px; }
+.qcell { min-height: 72px; border-right: 1px solid var(--line); border-top: 1px solid var(--line); padding: 6px;
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start; min-width: 0; }
+.qcell.c0 { border-left: 1px solid var(--line-strong); }
+.qcell.r2 { border-bottom: 1px solid var(--line-strong); }
+.qcell.best { background: var(--accent-wash); }
+.qcell .ql { font-size: 11px; color: var(--muted); line-height: 1.2; }
+.qdot { appearance: none; border: 0; background: none; font: inherit; color: var(--ink); text-align: left; padding: 2px 0; cursor: default;
+  font-size: 12.5px; line-height: 1.25; display: flex; gap: 6px; align-items: flex-start; max-width: 100%; overflow-wrap: break-word; min-width: 0; }
+.qdot span { hyphens: auto; -webkit-hyphens: auto; min-width: 0; }
+@media (max-width: 480px) {
+  .quad-card { padding: 12px 8px; }
+  .quad { grid-template-columns: 34px repeat(3, minmax(0, 1fr)); }
+  .quad .cap.x { padding-left: 34px; }
+  .quad .yt { padding-right: 4px; }
+  .quad .yt .long { display: none; }
+  .qcell { padding: 5px 3px; }
+  .qdot { font-size: 11.5px; gap: 3px; }
+  .qdot i { width: 8px; height: 8px; margin-top: 3px; }
+}
+.quad .yt .short { display: none; }
+@media (max-width: 480px) { .quad .yt .short { display: inline; } }
+.qdot i { flex: none; width: 10px; height: 10px; margin-top: 2px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
+.demand { list-style: none; margin: 0; padding: 0; }
+.demand.card { padding: 8px 16px; }
+.demand li { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) 5.5em; gap: 10px; align-items: center; padding: 5px 0; }
+.demand .sk { font-size: 13.5px; overflow-wrap: anywhere; }
+.demand .bar-track { height: 12px; }
+.demand .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--bar-req); border-radius: 0 4px 4px 0; }
+.demand .you { text-align: right; }
+@media (max-width: 480px) {
+  .demand li { grid-template-columns: minmax(0, 1fr) 5.5em; }
+  .demand .bar-wrap { grid-column: 1 / -1; grid-row: 2; }
+}
+.sig { font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; padding-left: 18px; }
+.sig li { overflow-wrap: anywhere; }
+.trend-list li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+/* radar: hero, actions, forecast */
+.hero { display: flex; flex-wrap: wrap; gap: 10px; }
+.pick { flex: 1 1 240px; min-width: 0; border-radius: var(--radius); padding: 10px 14px; border: 1px solid var(--line); background: var(--surface-2); }
+.pick.now { background: var(--accent-wash); border-color: transparent; }
+.pick .pl { font-size: 12px; color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+.pick .pt { font-size: 18px; font-weight: 650; line-height: 1.3; margin-top: 2px; overflow-wrap: anywhere; }
+.ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.acts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .acts { grid-template-columns: minmax(0, 1fr); } }
+.act { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.act .ak { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 8px 2px 6px; border-radius: 999px; align-self: flex-start; }
+.act .at { font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; flex: 1; }
+.act a.btn { text-decoration: none; }
+.lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+.lane { min-width: 0; padding: 0 10px 0 0; }
+.lane + .lane { padding-left: 10px; border-left: 1px solid var(--line); }
+.lane-h { position: relative; font-size: 12px; color: var(--muted); padding: 0 0 10px; margin-bottom: 10px; border-bottom: 1px solid var(--line-strong); }
+.lane-h::after { content: ""; position: absolute; left: 0; bottom: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); box-shadow: 0 0 0 2px var(--surface); }
+.lane .stack > * + * { margin-top: 8px; }
+.fc { border: 1px solid var(--line); border-left: 3px solid var(--s1); border-radius: 6px; padding: 8px 10px; background: var(--surface); }
+.fc.shift { border-left-color: var(--s2); }
+.fc .fk2 { font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+.fc .ft { font-size: 13.5px; line-height: 1.35; margin-top: 2px; overflow-wrap: anywhere; }
+.fc .fn { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+.fc details { margin-top: 4px; }
+.fc details > summary { font-size: 12px; font-weight: 400; color: var(--muted); }
+.lane-empty { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 760px) {
+  .lanes { grid-template-columns: minmax(0, 1fr); }
+  .lane, .lane + .lane { padding: 0 0 0 14px; border-left: 2px solid var(--line); }
+  .lane + .lane { margin-top: 4px; }
+  .lane-h { border-bottom: 0; padding-bottom: 6px; margin-bottom: 4px; font-weight: 600; color: var(--ink-2); }
+  .lane-h::after { left: -20px; bottom: auto; top: 4px; }
+  .lane { padding-bottom: 12px; }
+}
+.conf { display: inline-flex; gap: 2px; vertical-align: middle; }
+.conf i { width: 6px; height: 6px; border-radius: 50%; background: var(--mark-muted); }
+.conf i.on { background: var(--accent); }
+.risk { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; font-size: 12.5px; color: var(--ink-2); }
+.risk .tag { background: var(--bad-wash); color: var(--ink); }
+.lang { list-style: none; margin: 0; padding: 4px 16px; }
+.lang li { display: grid; grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.lang li:last-child { border-bottom: 0; }
+.lang .yt2 { color: var(--ink-2); overflow-wrap: anywhere; }
+.lang .ar { color: var(--muted); text-align: center; }
+.lang .mt { font-weight: 600; overflow-wrap: anywhere; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sec-head h2, .sec-head h3 { margin-bottom: 6px; }
+/* runs chart */
+.runs-chart { padding: 12px 14px 10px; }
+.rc-plot { position: relative; height: 120px; display: flex; align-items: stretch; gap: 2px; border-bottom: 1px solid var(--line-strong); margin-top: 18px; }
+.rc-grid { position: absolute; left: 0; right: 0; top: 0; border-top: 1px solid var(--line); }
+.rc-max { position: absolute; right: 0; top: -16px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rc-g { flex: 1 1 0; min-width: 0; display: flex; align-items: flex-end; justify-content: center; gap: 1px; position: relative; outline-offset: 0; }
+.rc-g:hover, .rc-g:focus-visible { background: var(--neutral-wash); }
+.rc-g span { display: block; width: 30%; max-width: 8px; border-radius: 2px 2px 0 0; }
+.rc-g .e { position: absolute; top: 2px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--mark-bad); box-shadow: 0 0 0 2px var(--surface); }
+.rc-x { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+.c-s1 { background: var(--s1); }
+.c-s2 { background: var(--s2); }
+.c-s3 { background: var(--s3); }
+/* learned */
+.prop-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kind { display: inline-flex; align-items: center; gap: 5px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tip {
+  position: fixed; z-index: 40; pointer-events: none; background: var(--ink); color: var(--surface);
+  font-size: 12.5px; padding: 6px 9px; border-radius: 6px; max-width: 260px; box-shadow: var(--shadow);
+}
+.tip strong { font-size: 13.5px; }
+.tip[hidden] { display: none; }
+details { margin-top: 16px; }
+details > summary { cursor: pointer; color: var(--ink-2); font-weight: 600; font-size: 14px; }
+.lesson { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.lesson .txt { flex: 1 1 260px; min-width: 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.errors { margin: 0; padding-left: 16px; color: var(--bad-ink); font-size: 13px; }
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 50;
+  background: var(--ink); color: var(--surface); border-radius: 8px; padding: 10px 14px; box-shadow: var(--shadow);
+  font-size: 14px; max-width: calc(100vw - 32px); width: max-content;
+}
+.toast[hidden] { display: none; }
+.toast code { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12px; opacity: 0.85; overflow-wrap: anywhere; user-select: all; }
+footer.foot { border-top: 1px solid var(--line); padding: 16px 0 28px; color: var(--muted); font-size: 13px; }
+footer.foot p { margin: 2px 0; overflow-wrap: anywhere; }
+footer.foot code { font-family: var(--mono); font-size: 12.5px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  aside.panel:not([hidden]) { animation: slidein 160ms ease-out; }
+  @keyframes slidein { from { transform: translateX(24px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Job search</h1>
+    <p id="subtitle">Loading</p>
+    <nav class="tabs" role="tablist" aria-label="Dashboard views" id="tabs"></nav>
+  </header>
+  <main id="main">
+    <noscript><div class="empty"><strong>This dashboard needs JavaScript.</strong>Turn it on for this file, then reload.</div></noscript>
+  </main>
+  <footer class="foot" id="footer"></footer>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden></aside>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script type="application/json" id="dashboard-data">__DASHBOARD_DATA_JSON__</script>
+<script>
+(function () {
+  "use strict";
+
+  // ---------- data ----------
+  var DATA;
+  try {
+    DATA = JSON.parse(document.getElementById("dashboard-data").textContent || "{}");
+  } catch (e) {
+    DATA = { jobs: [], error: String(e) };
+  }
+  var JOBS = Array.isArray(DATA.jobs) ? DATA.jobs : [];
+  var BY_ID = {};
+  JOBS.forEach(function (j) { BY_ID[j.id] = j; });
+
+  var STATUS_ORDER = ["found", "scored", "skipped", "prepared", "needs_approval", "applied", "replied",
+    "interview", "rejected", "offer", "dismissed", "closed"];
+  var STATUS_LABEL = {
+    found: "Found", scored: "Scored", skipped: "Skipped", prepared: "Prepared", needs_approval: "Needs approval",
+    applied: "Applied", replied: "Replied", interview: "Interview", rejected: "Rejected", offer: "Offer",
+    dismissed: "Not interested", closed: "Closed"
+  };
+  var STATUS_CLASS = {
+    found: "", scored: "b-blue", skipped: "", prepared: "b-blue", needs_approval: "b-amber",
+    applied: "b-violet", replied: "b-violet", interview: "b-green", offer: "b-green",
+    rejected: "b-red", dismissed: "", closed: ""
+  };
+  var CMD = "/job-search:feedback";
+
+  // ---------- tiny DOM helpers (data goes in as text nodes only) ----------
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        var v = attrs[k];
+        if (v === null || v === undefined || v === false) return;
+        if (k === "class") el.className = v;
+        else if (k === "text") el.textContent = String(v);
+        else if (k.slice(0, 2) === "on" && typeof v === "function") el.addEventListener(k.slice(2), v);
+        else if (k === "hidden") el.hidden = !!v;
+        else el.setAttribute(k, v === true ? "" : String(v));
+      });
+    }
+    for (var i = 2; i < arguments.length; i++) append(el, arguments[i]);
+    return el;
+  }
+  function append(el, child) {
+    if (child === null || child === undefined || child === false) return;
+    if (Array.isArray(child)) { child.forEach(function (c) { append(el, c); }); return; }
+    if (typeof child === "string" || typeof child === "number") el.appendChild(document.createTextNode(String(child)));
+    else el.appendChild(child);
+  }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function svg(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.keys(attrs || {}).forEach(function (k) { el.setAttribute(k, String(attrs[k])); });
+    return el;
+  }
+
+  // only http(s) links leave the page; local files must be relative paths
+  function safeHref(u) {
+    if (!u || typeof u !== "string") return null;
+    var s = u.trim();
+    if (/^https?:\/\//i.test(s)) return s;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(s) || s.indexOf("//") === 0) return null;
+    return s;
+  }
+  function link(label, href, aria) {
+    var u = safeHref(href);
+    if (!u) return null;
+    var external = /^https?:/i.test(u);
+    return h("a", { href: u, target: "_blank", rel: external ? "noopener noreferrer" : "noopener", "aria-label": aria || null }, label);
+  }
+
+  // ---------- formatting ----------
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function parseDate(s) {
+    if (!s || typeof s !== "string") return null;
+    var d = new Date(s.length === 10 ? s + "T00:00:00Z" : s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function fmtDate(s) {
+    var d = parseDate(s);
+    if (!d) return "";
+    var str = MONTHS[d.getUTCMonth()] + " " + d.getUTCDate();
+    if (d.getUTCFullYear() !== new Date().getUTCFullYear()) str += ", " + d.getUTCFullYear();
+    return str;
+  }
+  function fmtDateTime(s) {
+    var d = parseDate(s);
+    if (!d) return s || "";
+    var hh = String(d.getHours()).padStart(2, "0"), mm = String(d.getMinutes()).padStart(2, "0");
+    return MONTHS[d.getMonth()] + " " + d.getDate() + ", " + hh + ":" + mm;
+  }
+  function daysAgo(s) {
+    var d = parseDate(s), t = parseDate(DATA.generated_at) || new Date();
+    if (!d) return Infinity;
+    return (t.getTime() - d.getTime()) / 86400000;
+  }
+  function fmtScore(v) { return (typeof v === "number") ? v.toFixed(1) : ""; }
+  function pct(v) { return Math.round((v || 0) * 100) + "%"; }
+  function plural(n, one, many) { return n + " " + (n === 1 ? one : (many || one + "s")); }
+  function statusBadge(s) {
+    return h("span", { class: "badge " + (STATUS_CLASS[s] || "") }, STATUS_LABEL[s] || s || "Unknown");
+  }
+  function historyHas(job, names) {
+    return (job.status_history || []).some(function (x) { return names.indexOf(x.status) >= 0; }) ||
+      names.indexOf(job.status) >= 0;
+  }
+  function isPending(job) {
+    return job.approval === "pending" || (job.changes && job.changes.approval === "pending") || job.status === "needs_approval";
+  }
+  function arr(v) { return Array.isArray(v) ? v : []; }
+
+  // ---------- small visuals (every one carries a text equivalent) ----------
+  var PREFS = DATA.prefs || {};
+  var MIN_SCORE = typeof PREFS.min_score === "number" ? PREFS.min_score : 3.5;
+  var MAJOR_RATIO = typeof PREFS.major_rewrite_ratio === "number" ? PREFS.major_rewrite_ratio : 0.3;
+  function scoreLevel(v) { return v >= 4.5 ? "hi" : v >= MIN_SCORE ? "ok" : "lo"; }
+  function scorePos(v) { return Math.max(0, Math.min(100, (v - 1) / 4 * 100)); }  // scores run 1 to 5
+  function scoreMeter(v) {
+    if (typeof v !== "number") return null;
+    var fil = h("span", { class: "fil lv-" + scoreLevel(v) });
+    fil.style.width = scorePos(v).toFixed(1) + "%";
+    return h("span", { class: "smeter", title: v < MIN_SCORE ? "Below your minimum of " + fmtScore(MIN_SCORE) : null },
+      h("span", { class: "trk", "aria-hidden": "true" }, fil), fmtScore(v));
+  }
+  function fitMeter(v) {
+    if (typeof v !== "number") return null;
+    var fil = h("div", { class: "fil lv-" + scoreLevel(v) });
+    fil.style.width = scorePos(v).toFixed(1) + "%";
+    var mk = h("div", { class: "mk" });
+    mk.style.left = scorePos(MIN_SCORE).toFixed(1) + "%";
+    function lab(text, style) { var s = h("span", null, text); s.setAttribute("style", style); return s; }
+    return h("div", { class: "meter-wrap", role: "img",
+      "aria-label": "Score " + fmtScore(v) + " of 5. Your minimum is " + fmtScore(MIN_SCORE) + "." },
+      h("div", { class: "meter" }, fil, mk),
+      h("div", { class: "meter-scale", "aria-hidden": "true" }, lab("1", "left:0"),
+        lab("min " + fmtScore(MIN_SCORE), "left:" + scorePos(MIN_SCORE).toFixed(1) + "%;transform:translateX(-50%)"),
+        lab("5", "right:0")));
+  }
+  function rewriteBar(r) {
+    if (typeof r !== "number") return null;
+    var fil = h("span", { class: "fil " + (r >= MAJOR_RATIO ? "k-warn" : "lv-ok") });
+    fil.style.width = (Math.max(0, Math.min(1, r)) * 100).toFixed(1) + "%";
+    var mk = h("span", { class: "mk" });
+    mk.style.left = (Math.max(0, Math.min(1, MAJOR_RATIO)) * 100).toFixed(1) + "%";
+    return h("span", { class: "rw", title: "Marker: " + pct(MAJOR_RATIO) + ". Above it a change is major." },
+      h("span", { class: "trk", "aria-hidden": "true" }, fil, mk), h("span", { class: "muted" }, pct(r) + " rewritten"));
+  }
+  var CONF_N = { high: 3, medium: 2, low: 1 };
+  function confDots(c) {
+    var n = CONF_N[c] || 1, label = (CONF_N[c] ? c : "low") + " confidence";
+    var el = h("span", { class: "conf", role: "img", "aria-label": label, title: label });
+    for (var i = 0; i < 3; i++) el.appendChild(h("i", { class: i < n ? "on" : null }));
+    return el;
+  }
+  // 16px line icons, drawn as SVG paths (no text, no external files)
+  var ICONS = {
+    apply: "M4 12L12 4M6.5 4H12v5.5",
+    build: "M2.5 8.5h5v5h-5zM8.5 8.5h5v5h-5zM5.5 2.5h5v5h-5z",
+    learn: "M8 4.5C6.5 3.3 4.5 3 2.5 3.5v9c2-.5 4-.2 5.5 1 1.5-1.2 3.5-1.5 5.5-1v-9c-2-.5-4-.2-5.5 1zM8 4.5v9",
+    other: "M3 8.5l3 3 7-7",
+    now: "M8 2.5a5.5 5.5 0 1 0 0 11a5.5 5.5 0 1 0 0-11zM8 5.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z",
+    bet: "M2.5 11.5l4-4 2.5 2.5 4.5-5M10 5h3.5v3.5",
+    preference: "M2.5 5h3M8.5 5h5M2.5 11h7M12.5 11h1M5.5 3.5v3M9.5 9.5v3",
+    source: "M8 2.5a5.5 5.5 0 1 0 0 11a5.5 5.5 0 1 0 0-11zM2.5 8h11M8 2.5c-2 2-2 9 0 11M8 2.5c2 2 2 9 0 11",
+    fact_bank: "M4 2.5h5l3 3v8H4zM9 2.5v3h3M6 9h4M6 11.5h4",
+    cap: "M2.5 11a5.5 5.5 0 0 1 11 0M8 11l2.5-3.5",
+    maintainer: "M4 13.5V2.5M4 3h8l-2 3 2 3H4"
+  };
+  function icon(name) {
+    var s = svg("svg", { class: "ico", viewBox: "0 0 16 16", "aria-hidden": "true", focusable: "false" });
+    s.appendChild(svg("path", { d: ICONS[name] || ICONS.other }));
+    return s;
+  }
+
+  // ---------- storage (optional) ----------
+  function store(key, val) {
+    try {
+      if (val === undefined) return window.localStorage.getItem(key);
+      window.localStorage.setItem(key, val);
+    } catch (e) { /* private mode or blocked storage: fine */ }
+    return null;
+  }
+
+  // ---------- copy + toast ----------
+  var toastTimer = null;
+  function toast(msg, cmd) {
+    var t = document.getElementById("toast");
+    clear(t);
+    append(t, msg);
+    if (cmd) append(t, h("code", null, cmd));
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, cmd ? 4200 : 2600);
+  }
+  function fallbackCopy(text) {
+    var ta = h("textarea", { "aria-hidden": "true", readonly: true });
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyCommand(text) {
+    function done(ok) {
+      if (ok) toast("Copied. Paste into Claude.", text);
+      else toast("Could not copy. Select this command and copy it:", text);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallbackCopy(text)); });
+    } else {
+      done(fallbackCopy(text));
+    }
+  }
+  function copyBtn(label, cmd, opts) {
+    opts = opts || {};
+    return h("button", {
+      type: "button", class: "btn" + (opts.cls ? " " + opts.cls : ""),
+      "aria-label": opts.aria || (label + ": copy command"),
+      onclick: function (ev) { ev.stopPropagation(); copyCommand(cmd); }
+    }, label);
+  }
+  // A button that opens an inline input, then copies the command built from what was typed.
+  function askBtn(label, question, placeholder, build, opts) {
+    opts = opts || {};
+    var holder = h("div", { class: "ask-holder", hidden: true });
+    var btn = h("button", {
+      type: "button", class: "btn" + (opts.cls ? " " + opts.cls : ""), "aria-expanded": "false",
+      onclick: function (ev) {
+        ev.stopPropagation();
+        var open = holder.hidden;
+        holder.hidden = !open;
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        if (open) { var i = holder.querySelector("input"); if (i) i.focus(); }
+      }
+    }, label);
+    var id = "ask-" + Math.random().toString(36).slice(2, 9);
+    var input = h("input", { type: "text", id: id, placeholder: placeholder, autocomplete: "off" });
+    var form = h("form", {
+      class: "ask", novalidate: true,
+      onsubmit: function (ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        var v = input.value.replace(/\s+/g, " ").trim();
+        if (!v) { input.focus(); input.setAttribute("aria-invalid", "true"); return; }
+        input.removeAttribute("aria-invalid");
+        copyCommand(build(v));
+      }
+    },
+      h("label", { for: id }, question),
+      input,
+      h("button", { type: "submit", class: "btn primary small" }, "Copy command"),
+      h("button", {
+        type: "button", class: "btn small",
+        onclick: function () { holder.hidden = true; btn.setAttribute("aria-expanded", "false"); btn.focus(); }
+      }, "Cancel")
+    );
+    holder.appendChild(form);
+    holder.addEventListener("click", function (ev) { ev.stopPropagation(); });
+    return { button: btn, panel: holder };
+  }
+
+  // ---------- tooltip ----------
+  var tipEl = document.getElementById("tip");
+  function bindTip(el, build) {
+    function show(ev) {
+      clear(tipEl);
+      append(tipEl, build());
+      tipEl.hidden = false;
+      var r = el.getBoundingClientRect();
+      var x = ev && ev.clientX !== undefined && ev.type !== "focus" ? ev.clientX : r.left + r.width / 2;
+      var y = ev && ev.clientY !== undefined && ev.type !== "focus" ? ev.clientY : r.top;
+      var tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+      var left = Math.min(Math.max(8, x - tw / 2), window.innerWidth - tw - 8);
+      var top = y - th - 12; if (top < 8) top = (r.bottom + 8);
+      tipEl.style.left = left + "px"; tipEl.style.top = top + "px";
+    }
+    function hide() { tipEl.hidden = true; }
+    el.addEventListener("pointermove", show);
+    el.addEventListener("pointerleave", hide);
+    el.addEventListener("focus", show);
+    el.addEventListener("blur", hide);
+  }
+
+  // ---------- empty state ----------
+  function empty(title, body) {
+    var parts = String(body || "").split(/(\/job-search:[a-z-]+)/);
+    var p = h("div", null);
+    parts.forEach(function (s) { if (/^\/job-search:/.test(s)) p.appendChild(h("code", null, s)); else append(p, s); });
+    return h("div", { class: "empty" }, h("strong", null, title), p);
+  }
+
+  // ---------- tabs ----------
+  var TABS = [
+    { id: "pipeline", label: "Pipeline", render: renderPipeline },
+    { id: "approvals", label: "Approvals", render: renderApprovals, count: function () { return JOBS.filter(isPending).length; } },
+    { id: "gaps", label: "Skills gaps", render: renderGaps },
+    { id: "radar", label: "Career radar", render: renderRadar },
+    { id: "learned", label: "What I've learned", render: renderLearned,
+      count: function () { return (DATA.proposals || []).filter(function (p) { return p.status === "pending"; }).length; } },
+    { id: "runs", label: "Runs", render: renderRuns }
+  ];
+  var TAB_KEY = "jobsearch.dashboard.tab";
+  var panels = {};
+
+  function setupTabs() {
+    var nav = document.getElementById("tabs");
+    var main = document.getElementById("main");
+    clear(main);
+    TABS.forEach(function (t) {
+      var count = t.count ? t.count() : 0;
+      var b = h("button", {
+        type: "button", role: "tab", id: "tab-" + t.id, "aria-controls": "panel-" + t.id,
+        "aria-selected": "false", tabindex: "-1",
+        onclick: function () { selectTab(t.id, true); },
+        onkeydown: function (ev) {
+          var i = TABS.indexOf(t), n = null;
+          if (ev.key === "ArrowRight") n = TABS[(i + 1) % TABS.length];
+          if (ev.key === "ArrowLeft") n = TABS[(i - 1 + TABS.length) % TABS.length];
+          if (ev.key === "Home") n = TABS[0];
+          if (ev.key === "End") n = TABS[TABS.length - 1];
+          if (n) { ev.preventDefault(); selectTab(n.id, true); document.getElementById("tab-" + n.id).focus(); }
+        }
+      }, t.label, count ? h("span", { class: "count", "aria-label": count + " waiting" }, String(count)) : null);
+      nav.appendChild(b);
+      var p = h("section", { role: "tabpanel", id: "panel-" + t.id, "aria-labelledby": "tab-" + t.id, tabindex: "0", hidden: true });
+      main.appendChild(p);
+      panels[t.id] = { def: t, el: p, rendered: false };
+    });
+    var saved = store(TAB_KEY);
+    selectTab(panels[saved] ? saved : "pipeline", false);
+  }
+  function selectTab(id, remember) {
+    Object.keys(panels).forEach(function (k) {
+      var on = k === id;
+      var b = document.getElementById("tab-" + k);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+      b.setAttribute("tabindex", on ? "0" : "-1");
+      panels[k].el.hidden = !on;
+      if (on && !panels[k].rendered) { panels[k].def.render(panels[k].el); panels[k].rendered = true; }
+    });
+    if (remember) store(TAB_KEY, id);
+  }
+
+  // ---------- pipeline ----------
+  var pipeState = { q: "", status: "all", sort: "found_at", dir: -1 };
+  var COLS = [
+    { key: "company", label: "Company" },
+    { key: "title", label: "Role" },
+    { key: "source", label: "Source" },
+    { key: "found_at", label: "Found" },
+    { key: "score", label: "Score", num: true },
+    { key: "status", label: "Status" },
+    { key: "applied_at", label: "Applied" },
+    { key: "resume", label: "Resume", nosort: true },
+    { key: "links", label: "Links", nosort: true }
+  ];
+
+  // Funnel steps. Each one is also a table filter ("g:" ids), next to the plain status chips.
+  var LATER_THAN_APPLIED = ["applied", "replied", "interview", "rejected", "offer"];
+  var FUNNEL = [
+    { id: "g:found", label: "Found", test: function () { return true; } },
+    { id: "g:scored", label: "Scored", test: function (j) { return typeof j.score === "number" || historyHas(j, ["scored"]); } },
+    { id: "g:prepared", label: "Prepared", test: function (j) { return j.status === "prepared"; } },
+    { id: "g:approval", label: "Needs approval", test: isPending, hot: true },
+    { id: "g:applied", label: "Applied", test: function (j) { return !!j.applied_at || historyHas(j, LATER_THAN_APPLIED); } },
+    { id: "g:replies", label: "Replies", test: function (j) { return historyHas(j, ["replied", "interview", "offer"]); } },
+    { id: "g:interviews", label: "Interviews", test: function (j) { return historyHas(j, ["interview", "offer"]); } }
+  ];
+  function funnelStep(id) { return FUNNEL.filter(function (f) { return f.id === id; })[0] || null; }
+
+  function renderFunnel(onPick) {
+    var total = JOBS.length;
+    var weeks = DATA.weeks || [];
+    var weekFound = JOBS.filter(function (j) { return daysAgo(j.found_at) <= 7; }).length;
+    var box = h("div", { class: "funnel", role: "group", "aria-label": "Pipeline. Pick a step to filter the table." });
+    FUNNEL.forEach(function (f, i) {
+      var n = JOBS.filter(f.test).length;
+      var fill = h("span", { class: "ffill" });
+      fill.style.width = (total ? n / total * 100 : 0).toFixed(1) + "%";
+      var label = f.label, aria = f.label + ": " + n;
+      var top = h("span", { class: "ftop" }, h("span", { class: "fv" }, String(n)));
+      if (i === 0) {
+        var sp = sparkline(weeks, DATA.found_weekly || {}, 64, 22);
+        top.appendChild(h("span", { class: "fspark", title: "Jobs found per week: " + sp.vals.join(", ") }, sp.el));
+        label = "Found, " + weekFound + " this week";
+        aria = "Found: " + n + ", " + weekFound + " this week. Per week, last " + weeks.length + " weeks: " + sp.vals.join(", ");
+      }
+      box.appendChild(h("button", {
+        type: "button", class: "fstep" + (f.hot && n ? " hot" : ""), "data-f": f.id, "aria-pressed": pipeState.status === f.id ? "true" : "false",
+        "aria-label": aria + ". Filter the table.", disabled: total ? null : true,
+        onclick: function () { onPick(f.id); }
+      }, top, h("span", { class: "fk" }, label), h("span", { class: "ftrack", "aria-hidden": "true" }, fill)));
+    });
+    return box;
+  }
+
+  function renderPipeline(root) {
+    clear(root);
+    var funnel = renderFunnel(function (id) { setFilter(pipeState.status === id ? "all" : id); });
+    root.appendChild(funnel);
+
+    if (!JOBS.length) {
+      root.appendChild(h("div", { style: "margin-top:18px" },
+        empty("No jobs yet.", "Run /job-search:run in Claude to find and score jobs. Then run /job-search:dashboard to refresh this page.")));
+      return;
+    }
+
+    var counts = {};
+    JOBS.forEach(function (j) { counts[j.status] = (counts[j.status] || 0) + 1; });
+    var search = h("input", {
+      type: "search", placeholder: "Search company, role, location", "aria-label": "Search jobs",
+      value: pipeState.q,
+      oninput: function () { pipeState.q = search.value; drawTable(); }
+    });
+    var chips = h("div", { class: "chips", role: "group", "aria-label": "Filter by status" });
+    function setFilter(id) {
+      pipeState.status = id;
+      Array.prototype.forEach.call(chips.children, function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-f") === id ? "true" : "false"); });
+      Array.prototype.forEach.call(funnel.children, function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-f") === id ? "true" : "false"); });
+      drawTable();
+    }
+    function chip(id, label, n) {
+      return h("button", {
+        type: "button", class: "chip", "data-f": id, "aria-pressed": pipeState.status === id ? "true" : "false",
+        onclick: function () { setFilter(id); }
+      }, label, h("span", { class: "n" }, String(n)));
+    }
+    chips.appendChild(chip("all", "All", JOBS.length));
+    // The funnel above covers the main path; chips cover the side exits only.
+    var IN_FUNNEL = { found: 1, scored: 1, prepared: 1, needs_approval: 1, applied: 1, replied: 1, interview: 1 };
+    STATUS_ORDER.forEach(function (s) { if (counts[s] && !IN_FUNNEL[s]) chips.appendChild(chip(s, STATUS_LABEL[s], counts[s])); });
+    root.appendChild(h("div", { class: "toolbar" }, search, chips));
+
+    var live = h("p", { class: "sr-only", "aria-live": "polite" });
+    var wrap = h("div", { class: "table-scroll" });
+    root.appendChild(live);
+    root.appendChild(wrap);
+
+    function sortVal(j, k) {
+      if (k === "score") return typeof j.score === "number" ? j.score : -1;
+      if (k === "status") return STATUS_ORDER.indexOf(j.status);
+      return String(j[k] || "").toLowerCase();
+    }
+    function drawTable() {
+      var q = pipeState.q.trim().toLowerCase();
+      var group = funnelStep(pipeState.status);
+      var rows = JOBS.filter(function (j) {
+        if (group) { if (!group.test(j)) return false; }
+        else if (pipeState.status !== "all" && j.status !== pipeState.status) return false;
+        if (!q) return true;
+        return [j.company, j.title, j.location, j.source, STATUS_LABEL[j.status]].join(" ").toLowerCase().indexOf(q) >= 0;
+      });
+      rows.sort(function (a, b) {
+        var x = sortVal(a, pipeState.sort), y = sortVal(b, pipeState.sort);
+        if (x < y) return -1 * pipeState.dir;
+        if (x > y) return 1 * pipeState.dir;
+        return String(a.id).localeCompare(String(b.id));
+      });
+      clear(wrap);
+      live.textContent = plural(rows.length, "job") + " shown";
+      if (!rows.length) {
+        wrap.appendChild(h("div", { style: "padding:16px", class: "muted" }, "No jobs match this filter."));
+        return;
+      }
+      var thead = h("tr", null, COLS.map(function (c) {
+        var sorted = pipeState.sort === c.key;
+        var th = h("th", {
+          scope: "col", class: c.num ? "num" : null,
+          "aria-sort": c.nosort ? null : (sorted ? (pipeState.dir > 0 ? "ascending" : "descending") : "none")
+        });
+        if (c.nosort) th.textContent = c.label;
+        else th.appendChild(h("button", {
+          type: "button",
+          onclick: function () {
+            if (pipeState.sort === c.key) pipeState.dir = -pipeState.dir;
+            else { pipeState.sort = c.key; pipeState.dir = (c.key === "company" || c.key === "title" || c.key === "source") ? 1 : -1; }
+            drawTable();
+          }
+        }, c.label));
+        return th;
+      }));
+      var tbody = h("tbody");
+      rows.forEach(function (j) {
+        var ch = j.changes;
+        var resume = null;
+        if (ch && ch.classification) {
+          resume = h("span", { class: "badge " + (ch.classification === "major" ? "b-amber" : "b-blue"), title: "Resume changes: " + ch.classification },
+            ch.classification === "major" ? "Major" : "Minor");
+        }
+        var tr = h("tr", {
+          class: "clickable", "data-id": j.id,
+          onclick: function (ev) {
+            if (ev.target.closest("a,button")) return;
+            openDetail(j.id);
+          }
+        },
+          h("td", { class: "nowrap" }, j.company || ""),
+          h("td", null, h("button", { type: "button", class: "role-btn", onclick: function () { openDetail(j.id); },
+            "aria-label": "Open details: " + (j.title || "") + " at " + (j.company || "") }, j.title || "(untitled)"),
+            j.location ? h("div", { class: "small muted" }, j.location) : null),
+          h("td", { class: "nowrap" }, j.source || ""),
+          h("td", { class: "nowrap" }, fmtDate(j.found_at)),
+          h("td", { class: "num score" }, scoreMeter(j.score)),
+          h("td", null, statusBadge(j.status)),
+          h("td", { class: "nowrap" }, fmtDate(j.applied_at)),
+          h("td", null, resume),
+          h("td", null, h("div", { class: "links" },
+            link("Posting", j.url, "Job posting for " + (j.title || "")),
+            j.apply_url && j.apply_url !== j.url ? link("Open & apply", j.apply_url) : (j.apply_url ? link("Apply", j.apply_url, "Open and apply") : null),
+            j.files && j.files.resume_html ? link("Resume", j.files.resume_html, "Tailored resume for " + (j.company || "")) : null))
+        );
+        tbody.appendChild(tr);
+      });
+      wrap.appendChild(h("table", { class: "jobs", "aria-label": "Jobs" }, h("thead", null, thead), tbody));
+    }
+    drawTable();
+  }
+
+  // ---------- job detail ----------
+  // Matched vs missing as one split bar, then compact chips. Ids and categories live in tooltips.
+  function fitSplit(sd) {
+    var matched = arr(sd.matched), missing = arr(sd.missing);
+    var req = missing.filter(function (m) { return m && m.required; });
+    var nice = missing.filter(function (m) { return m && !m.required; });
+    if (!matched.length && !missing.length) return null;
+    var summary = matched.length + " matched, " + missing.length + " missing" + (missing.length ? " (" + req.length + " required)" : "");
+    var bar = h("div", { class: "split", role: "img", "aria-label": summary });
+    [[matched.length, "k-good"], [req.length, "k-bad"], [nice.length, "k-none"]].forEach(function (seg) {
+      if (!seg[0]) return;
+      var s = h("span", { class: seg[1] });
+      s.style.flex = seg[0] + " 1 0";
+      bar.appendChild(s);
+    });
+    var anyPartial = matched.some(function (m) { return m && m.strength === "partial"; });
+    var key = h("div", { class: "keyline", "aria-hidden": "true" },
+      matched.length ? h("span", null, h("i", { class: "k-good" }), matched.length + " matched") : null,
+      req.length ? h("span", null, h("i", { class: "k-bad" }), req.length + " required missing") : null,
+      nice.length ? h("span", null, h("i", { class: "k-none" }), nice.length + " nice to have missing") : null,
+      anyPartial ? h("span", null, h("i", { class: "ring" }), "outline: partial") : null);
+    var out = [bar, key];
+    if (matched.length) out.push(h("div", { class: "tags", role: "list", "aria-label": "Matched" }, matched.map(function (m) {
+      m = m || {};
+      var ev = arr(m.evidence);
+      var tip = (m.strength === "partial" ? "Partial match" : "Strong match") + (ev.length ? ". Evidence: " + ev.join(", ") : "");
+      return h("span", { class: "tag ok" + (m.strength === "partial" ? " partial" : ""), role: "listitem", title: tip, "aria-label": (m.requirement || "") + ". " + tip }, m.requirement || "");
+    })));
+    if (missing.length) out.push(h("div", { class: "tags", role: "list", "aria-label": "Missing" }, req.concat(nice).map(function (m) {
+      var tip = (m.required ? "Required" : "Nice to have") + (m.category ? ", " + m.category.replace(/_/g, " ") : "");
+      return h("span", { class: "tag " + (m.required ? "req" : "opt"), role: "listitem", title: tip, "aria-label": (m.item || "") + ". " + tip }, m.item || "");
+    })));
+    return out;
+  }
+  function changeDiff(c) {
+    return h("li", null,
+      h("div", { class: "small" }, h("strong", null, (c.type || "change").replace(/_/g, " ")),
+        c.target ? h("span", { class: "muted mono" }, "  " + c.target) : null,
+        (c.source_ids && c.source_ids.length) ? h("span", { class: "ids" }, c.source_ids.map(function (e) { return h("span", { class: "id" }, e); })) : null),
+      h("div", { class: "diff" },
+        c.before ? h("div", { class: "del" }, h("span", { class: "lbl" }, "Before"), c.before) : null,
+        c.after ? h("div", { class: "ins" }, h("span", { class: "lbl" }, "After"), c.after) : h("div", { class: "del muted" }, h("span", { class: "lbl" }, "After"), "(removed)")));
+  }
+  var lastFocus = null;
+  function openDetail(id) {
+    var j = BY_ID[id];
+    if (!j) return;
+    lastFocus = document.activeElement;
+    var panel = document.getElementById("panel");
+    clear(panel);
+    var closeBtn = h("button", { type: "button", class: "close", "aria-label": "Close details", onclick: closeDetail }, "×");
+    panel.appendChild(h("div", { class: "panel-head" },
+      h("div", { class: "t" },
+        h("h2", { id: "panel-title" }, j.title || "(untitled)"),
+        h("p", null, [j.company, j.location, j.source].filter(Boolean).join(" · "))),
+      closeBtn));
+    var body = h("div", { class: "panel-body" });
+    panel.appendChild(body);
+
+    // status + quick facts
+    var facts = h("div", { class: "row small", style: "margin-top:12px" }, statusBadge(j.status),
+      j.found_at ? h("span", { class: "muted" }, "Found " + fmtDate(j.found_at)) : null,
+      j.posted_at ? h("span", { class: "muted" }, "Posted " + fmtDate(j.posted_at)) : null,
+      j.applied_at ? h("span", { class: "muted" }, "Applied " + fmtDate(j.applied_at)) : null,
+      j.salary ? h("span", { class: "muted" }, j.salary) : null);
+    body.appendChild(facts);
+    if (j.dismissed_reason) body.appendChild(h("p", { class: "small muted" }, "Not interested: " + j.dismissed_reason));
+
+    // links
+    var files = j.files || {};
+    var links = h("div", { class: "links", style: "margin-top:10px" },
+      link("Posting", j.url), link("Open & apply", j.apply_url || j.url),
+      files.resume_html ? link("Resume (HTML)", files.resume_html) : null,
+      files.resume_pdf ? link("Resume (PDF)", files.resume_pdf) : null,
+      files.answers_md ? link("Answers", files.answers_md) : null);
+    body.appendChild(links);
+
+    // actions
+    body.appendChild(h("h3", null, "Actions"));
+    var notInt = askBtn("Not interested", "Why not? A few words help the next search.", "e.g. too junior",
+      function (v) { return CMD + " dismiss " + j.id + " " + v; });
+    var wrong = askBtn("Something's wrong", "What is wrong?", "e.g. score too high, I have no Go experience",
+      function (v) { return CMD + " wrong " + j.id + " " + v; });
+    body.appendChild(h("div", { class: "btns" },
+      copyBtn("Mark applied", CMD + " applied " + j.id, { cls: "primary" }),
+      notInt.button, wrong.button));
+    body.appendChild(notInt.panel);
+    body.appendChild(wrong.panel);
+    body.appendChild(h("div", { class: "row small", style: "margin-top:10px" },
+      h("span", { class: "muted" }, "Log an outcome:"),
+      h("div", { class: "btns" }, ["replied", "interview", "rejected", "offer"].map(function (o) {
+        return copyBtn(o.charAt(0).toUpperCase() + o.slice(1), CMD + " outcome " + j.id + " " + o, { cls: "small", aria: "Log outcome " + o + ": copy command" });
+      }))));
+
+    // score
+    var sd = j.score_detail;
+    body.appendChild(h("h3", null, "Fit"));
+    if (sd) {
+      var rec = sd.recommendation;
+      body.appendChild(h("div", { class: "row", style: "align-items:flex-start" },
+        h("div", { class: "bigscore" }, fmtScore(sd.score), h("span", null, " / 5")),
+        fitMeter(sd.score),
+        rec ? h("span", { class: "badge " + (rec === "apply" ? "b-green" : rec === "maybe" ? "b-amber" : "") }, rec.charAt(0).toUpperCase() + rec.slice(1)) : null));
+      if (sd.summary) body.appendChild(h("p", { class: "small" }, sd.summary));
+      if (sd.deal_breakers_hit && sd.deal_breakers_hit.length)
+        body.appendChild(h("p", { class: "small", style: "color:var(--bad-ink)" }, "Deal breakers hit: " + sd.deal_breakers_hit.join(", ")));
+      append(body, fitSplit(sd));
+    } else {
+      body.appendChild(h("p", { class: "muted" }, "Not scored yet."));
+    }
+
+    // resume changes
+    var ch = j.changes;
+    body.appendChild(h("h3", null, "Resume changes"));
+    if (ch) {
+      var appr = ch.approval || "none";
+      var types = {};
+      ch.changes.forEach(function (c) { var t = (c.type || "change").replace(/_/g, " "); types[t] = (types[t] || 0) + 1; });
+      body.appendChild(h("div", { class: "row small" },
+        h("span", { class: "badge " + (ch.classification === "major" ? "b-amber" : "b-blue") }, ch.classification === "major" ? "Major" : ch.classification === "minor" ? "Minor" : "Unclassified"),
+        h("span", { class: "badge " + (appr === "pending" ? "b-amber" : appr === "rejected" ? "b-red" : appr === "approved" ? "b-green" : ""), title: "Approval" },
+          appr === "none" ? "No approval" : appr.charAt(0).toUpperCase() + appr.slice(1)),
+        rewriteBar(ch.rewrite_ratio),
+        ch.decided_at ? h("span", { class: "muted" }, "Decided " + fmtDate(ch.decided_at)) : null));
+      if (Object.keys(types).length) {
+        body.appendChild(h("div", { class: "tags", "aria-label": "Changes by type" }, Object.keys(types).map(function (t) {
+          return h("span", { class: "tag" }, h("strong", null, String(types[t])), t);
+        })));
+      }
+      if (ch.reasons && ch.reasons.length) body.appendChild(h("p", { class: "small muted", style: "margin:8px 0 0" }, "Why: " + ch.reasons.join("; ")));
+      if (ch.verify) {
+        var issues = ch.verify.issues || [];
+        if (ch.verify.passed === false || issues.length) {
+          body.appendChild(h("div", { class: "small", style: "margin:8px 0" },
+            h("strong", { style: "color:var(--bad-ink)" }, ch.verify.passed === false ? "Verify failed" : "Verify warnings"),
+            h("ul", { class: "issues", style: "margin:4px 0 0;padding-left:18px" }, issues.map(function (i) {
+              return h("li", null, h("strong", null, i.severity === "block" ? "Must fix" : "Check"),
+                " · " + (i.path ? friendlyPath(i.path) + ": " : "") + (i.message || ""));
+            }))));
+        } else if (ch.verify.passed) {
+          body.appendChild(h("p", { class: "small", style: "color:var(--good);margin:8px 0 0", title: "Every line traces to your fact bank." }, "✓ Verify passed"));
+        }
+      }
+      if (appr === "pending") {
+        var rej = askBtn("Reject changes", "What should change instead?", "e.g. keep my original headline",
+          function (v) { return CMD + " reject " + j.id + " " + v; }, { cls: "danger" });
+        var blocked = ch.verify && ch.verify.passed === false;
+        if (blocked) {
+          body.appendChild(h("p", { class: "small", style: "color:var(--bad-ink)" }, "Can't approve: some lines aren't backed by your fact bank. Re-tailor, or add the missing fact."));
+          body.appendChild(h("div", { class: "btns", style: "margin:8px 0" }, copyBtn("Re-tailor", CMD + " reject " + j.id + " verify failed, re-tailor from the fact bank", { cls: "primary" }), rej.button));
+        } else {
+          body.appendChild(h("div", { class: "btns", style: "margin:8px 0" }, copyBtn("Approve changes", CMD + " approve " + j.id, { cls: "primary" }), rej.button));
+        }
+        body.appendChild(rej.panel);
+      }
+      if (ch.changes.length) {
+        var diffs = ch.changes.map(changeDiff);
+        var shown = ch.changes.length > 3 ? 2 : ch.changes.length;
+        body.appendChild(h("ul", { class: "plain", style: "margin-top:6px" }, diffs.slice(0, shown)));
+        if (diffs.length > shown) {
+          body.appendChild(h("details", { class: "more" }, h("summary", null, "Show " + plural(diffs.length - shown, "more change")),
+            h("ul", { class: "plain" }, diffs.slice(shown))));
+        }
+      }
+    } else {
+      body.appendChild(h("p", { class: "muted" }, "No tailored resume for this job yet."));
+    }
+
+    // history
+    body.appendChild(h("h3", null, "Status history"));
+    var hist = (j.status_history || []).slice();
+    if (hist.length) {
+      body.appendChild(h("ol", { class: "htl", "aria-label": "Status history" }, hist.map(function (x) {
+        return h("li", { title: x.note || null },
+          h("span", { class: "st" }, STATUS_LABEL[x.status] || x.status || "Unknown"),
+          h("span", { class: "dt" }, fmtDate(x.at) || ""),
+          x.note ? h("span", { class: "sr-only" }, ". " + x.note) : null);
+      })));
+    } else body.appendChild(h("p", { class: "muted" }, "No history."));
+    body.appendChild(h("p", { class: "small muted", style: "margin-top:18px" }, "Job id: ", h("span", { class: "mono" }, j.id)));
+
+    document.getElementById("scrim").hidden = false;
+    panel.hidden = false;
+    panel.scrollTop = 0;
+    document.querySelectorAll("tr.selected").forEach(function (r) { r.classList.remove("selected"); });
+    document.querySelectorAll("tr[data-id]").forEach(function (r) { if (r.getAttribute("data-id") === id) r.classList.add("selected"); });
+    closeBtn.focus();
+  }
+  function closeDetail() {
+    document.getElementById("panel").hidden = true;
+    document.getElementById("scrim").hidden = true;
+    if (lastFocus && lastFocus.focus && document.contains(lastFocus)) lastFocus.focus();
+  }
+  document.getElementById("scrim").addEventListener("click", closeDetail);
+  document.addEventListener("keydown", function (ev) {
+    var panel = document.getElementById("panel");
+    if (panel.hidden) return;
+    if (ev.key === "Escape") { closeDetail(); return; }
+    if (ev.key === "Tab") { // keep focus inside the open panel
+      var f = panel.querySelectorAll("a[href],button:not([disabled]),input,[tabindex]:not([tabindex='-1'])");
+      var vis = Array.prototype.filter.call(f, function (e) { return e.offsetParent !== null; });
+      if (!vis.length) return;
+      var first = vis[0], last = vis[vis.length - 1];
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+    }
+  });
+
+  // ---------- approvals ----------
+  function renderApprovals(root) {
+    clear(root);
+    var list = JOBS.filter(isPending).sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
+    root.appendChild(h("h2", null, "Waiting on you"));
+    root.appendChild(h("p", { class: "muted small" }, "Major resume changes need your OK. Buttons copy a command for Claude."));
+    if (!list.length) {
+      root.appendChild(empty("Nothing waiting for approval.", "Major resume changes show up here after /job-search:run tailors a resume."));
+      return;
+    }
+    var wrap = h("div", { class: "stack" });
+    list.forEach(function (j) {
+      var ch = j.changes || {};
+      var issues = (ch.verify && ch.verify.issues) || [];
+      var rej = askBtn("Reject", "What should change instead?", "e.g. keep my original headline",
+        function (v) { return CMD + " reject " + j.id + " " + v; }, { cls: "danger" });
+      wrap.appendChild(h("article", { class: "card", "aria-label": (j.title || "") + " at " + (j.company || "") },
+        h("div", { class: "row", style: "justify-content:space-between" },
+          h("div", { style: "min-width:0" }, h("strong", null, j.title || "(untitled)"), h("div", { class: "small muted" }, (j.company || "") + (j.score != null ? " · score " + fmtScore(j.score) : ""))),
+          h("button", { type: "button", class: "btn small", onclick: function () { openDetail(j.id); } }, "View changes")),
+        (ch.reasons && ch.reasons.length) ? h("ul", { class: "small", style: "margin:8px 0 0;padding-left:18px" }, ch.reasons.map(function (r) { return h("li", null, r); })) : null,
+        h("div", { class: "meta" },
+          h("span", null, plural((ch.changes || []).length, "change")),
+          rewriteBar(ch.rewrite_ratio),
+          (ch.verify && ch.verify.passed === false) ? h("span", { style: "color:var(--bad-ink)" }, "verify failed: " + plural(issues.length, "issue")) : issues.length ? h("span", null, "verify passed, " + plural(issues.length, "warning")) : h("span", null, "verify passed")),
+        h("div", { class: "btns", style: "margin-top:10px" },
+          (ch.verify && ch.verify.passed === false)
+            ? copyBtn("Re-tailor", CMD + " reject " + j.id + " verify failed, re-tailor from the fact bank", { cls: "primary", aria: "Re-tailor resume for " + (j.company || "") + ": copy command" })
+            : copyBtn("Approve", CMD + " approve " + j.id, { cls: "primary", aria: "Approve changes for " + (j.company || "") + ": copy command" }),
+          rej.button),
+        rej.panel));
+    });
+    root.appendChild(wrap);
+  }
+
+  // ---------- skills gaps ----------
+  function sparkline(weeks, weekly, width, height) {
+    var W = width || 96, H = height || 26, P = 4;
+    var vals = weeks.map(function (w) { return (weekly && weekly[w]) || 0; });
+    var max = Math.max.apply(null, vals.concat([1]));
+    var s = svg("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H, class: "spark", "aria-hidden": "true", focusable: "false" });
+    var step = (W - 2 * P) / Math.max(1, vals.length - 1);
+    var pts = vals.map(function (v, i) { return [P + i * step, H - P - (v / max) * (H - 2 * P)]; });
+    s.appendChild(svg("line", { x1: P, y1: H - P, x2: W - P, y2: H - P, stroke: "var(--line-strong)", "stroke-width": 1 }));
+    s.appendChild(svg("polyline", {
+      points: pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" "),
+      fill: "none", stroke: "var(--spark)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round"
+    }));
+    var last = pts[pts.length - 1];
+    s.appendChild(svg("circle", { cx: last[0], cy: last[1], r: 4, fill: "var(--spark)", stroke: "var(--surface)", "stroke-width": 2 }));
+    return { el: s, vals: vals };
+  }
+
+  var NOTE_LABEL = { learning: "Learning", ignore: "Ignored", done: "Done" };
+  function gapActions(key, current) {
+    return h("div", { class: "btns" }, ["learning", "ignore", "done"].map(function (st) {
+      var label = st === "learning" ? "I'm learning this" : st === "ignore" ? "Ignore" : "Done";
+      return copyBtn(label, CMD + " gap " + key + " " + st, {
+        cls: "small" + (current === st ? " primary" : ""), aria: label + " (" + key + "): copy command"
+      });
+    }));
+  }
+
+  function renderGaps(root) {
+    clear(root);
+    var g = DATA.gaps;
+    var notes = DATA.gap_notes || {};
+    root.appendChild(h("h2", null, "Skills gaps"));
+    if (!g || !g.items || !Object.keys(g.items).length) {
+      root.appendChild(empty("No skills gaps yet.", "Gaps come from scored jobs. Run /job-search:run, then /job-search:gaps for a ranked list and a weekly nudge."));
+      return;
+    }
+    var total = g.total_jds || 0;
+    var ranking = (g.ranking || []).filter(function (r) { return g.items[r.key]; }).slice(0, 15);
+    root.appendChild(h("p", { class: "muted small", style: "margin:0",
+      title: "Ranked by how often each item shows up, how often it is required, how recent it is, and whether it fits your target roles." },
+      "From " + plural(total, "scored job") + ". Updated " + fmtDate(g.updated_at) + "."));
+    root.appendChild(h("div", { class: "legend", "aria-hidden": "true" },
+      h("span", null, h("i", { style: "background:var(--bar-req)" }), "Required"),
+      h("span", null, h("i", { style: "background:var(--bar-opt)" }), "Nice to have"),
+      h("span", { title: "Jobs per week, last " + (DATA.weeks || []).length + " weeks" }, h("i", { style: "background:none;height:2px;border-radius:1px;vertical-align:3px;border-top:2px solid var(--spark)" }), "Per week")));
+
+    if (!ranking.length) {
+      root.appendChild(empty("Nothing ranked.", "Every gap is marked ignore or done."));
+    } else {
+      var maxShare = Math.max.apply(null, ranking.map(function (r) { return r.share || 0; }).concat([0.01]));
+      var scaleMax = Math.min(1, Math.ceil(maxShare * 10) / 10);
+      var ul = h("ol", { class: "gap-list", "aria-label": "Ranked skills gaps" });
+      ranking.forEach(function (r, i) {
+        var it = g.items[r.key];
+        var count = it.count || 0, reqN = it.required_count || 0, optN = Math.max(0, count - reqN);
+        var shareW = (r.share || 0) / scaleMax * 100;
+        var reqW = count ? shareW * reqN / count : 0, optW = shareW - reqW;
+        var note = notes[r.key] || null;
+        var bar = h("div", { class: "bar" });
+        bar.style.width = shareW.toFixed(2) + "%";
+        if (reqN) { var s1 = h("span", { class: "req" }); s1.style.width = (reqW / shareW * 100).toFixed(2) + "%"; bar.appendChild(s1); }
+        if (optN) { var s2 = h("span", { class: "opt" }); s2.style.width = (optW / shareW * 100).toFixed(2) + "%"; bar.appendChild(s2); }
+        var track = h("div", { class: "bar-track", tabindex: "0", role: "img",
+          "aria-label": it.name + ": in " + count + " of " + total + " jobs (" + pct(r.share) + "), required in " + reqN });
+        track.appendChild(bar);
+        bindTip(track, function () {
+          return [h("strong", null, pct(r.share) + " of jobs"), h("div", null, it.name),
+            h("div", null, reqN + " required, " + optN + " nice to have"),
+            h("div", null, "Seen " + fmtDate(it.first_seen) + " to " + fmtDate(it.last_seen))];
+        });
+        var sp = sparkline(DATA.weeks || [], it.weekly || {});
+        var spWrap = h("div", { class: "spark-cell", tabindex: "0", role: "img",
+          "aria-label": "Weekly counts for " + it.name + ": " + sp.vals.join(", ") }, sp.el,
+          h("div", null, "this wk " + sp.vals[sp.vals.length - 1]));
+        bindTip(spWrap, function () {
+          return [h("strong", null, it.name), h("div", null, (DATA.weeks || []).map(function (w, k) { return w.slice(5) + ": " + sp.vals[k]; }).join("  "))];
+        });
+        ul.appendChild(h("li", { class: "gap" },
+          h("div", { class: "rank" }, String(i + 1)),
+          h("div", null, h("div", { class: "name" }, it.name),
+            h("div", { class: "sub" }, (it.category || "other").replace(/_/g, " "),
+              r.related ? h("span", { class: "badge b-blue" }, "fits your goals") : null,
+              it.rising ? h("span", { class: "badge b-violet", title: "Career radar: " + (it.rising_why || "rising") + " (" + (it.rising_confidence || "low") + " confidence)" },
+                "rising") : null,
+              note && note.status ? h("span", { class: "badge " + (note.status === "learning" ? "b-green" : "") }, NOTE_LABEL[note.status] || note.status) : null)),
+          h("div", { class: "bar-wrap" }, track, h("span", { class: "bar-val" }, pct(r.share) + " · " + reqN + "/" + count + " req")),
+          sp ? spWrap : null,
+          h("div", { class: "gap-actions" },
+            note && note.note ? h("span", { class: "gap-note" }, note.note) : null,
+            gapActions(r.key, note && note.status))));
+      });
+      root.appendChild(ul);
+    }
+
+    var trending = Array.isArray(g.radar_only_rising) ? g.radar_only_rising : [];
+    if (trending.length) {
+      root.appendChild(h("h3", null, "Trending but not in your JDs yet"));
+      root.appendChild(h("p", { class: "muted small", title: "None of your scored jobs asked for these yet, and your fact bank does not list them." }, "Rising on your career radar."));
+      root.appendChild(h("ul", { class: "plain card trend-list" }, trending.map(function (t) {
+        return h("li", null, h("strong", null, t.skill || ""),
+          h("span", { class: "badge" }, (t.confidence || "low") + " confidence"),
+          t.url ? link("Evidence", t.url, "Evidence for " + (t.skill || "")) : null);
+      })));
+    }
+
+    var skipped = Object.keys(g.items).filter(function (k) {
+      var st = (notes[k] && notes[k].status) || g.items[k].note_status;
+      return st === "ignore" || st === "done";
+    });
+    if (skipped.length) {
+      root.appendChild(h("details", null, h("summary", null, "Not ranked: marked ignore or done (" + skipped.length + ")"),
+        h("ul", { class: "plain", style: "margin-top:8px" }, skipped.map(function (k) {
+          var it = g.items[k], st = (notes[k] && notes[k].status) || it.note_status;
+          return h("li", null, h("div", { class: "row", style: "justify-content:space-between" },
+            h("div", null, h("strong", null, it.name), h("span", { class: "small muted" }, "  " + NOTE_LABEL[st] + " · in " + plural(it.count, "job")),
+              notes[k] && notes[k].note ? h("div", { class: "small muted" }, notes[k].note) : null),
+            copyBtn("Track again", CMD + " gap " + k + " learning", { cls: "small" })));
+        }))));
+    }
+  }
+
+  // ---------- career radar ----------
+  var LEVELS = ["low", "medium", "high"];
+  var LEVEL_LABEL = { high: "High", medium: "Medium", low: "Low" };
+  var YOU_LABEL = { have: "Have", partial: "Partial", gap: "Gap" };
+  var YOU_CLASS = { have: "b-green", partial: "b-amber", gap: "b-red" };
+  function lvl(v) { return LEVELS.indexOf(v) >= 0 ? v : "low"; }
+  function signalList(sigs) {
+    sigs = Array.isArray(sigs) ? sigs : [];
+    if (!sigs.length) return null;
+    return h("ul", { class: "sig" }, sigs.map(function (s) {
+      s = s || {};
+      var a = link(s.text || s.url || "Source", s.url);
+      return h("li", null, a || (s.text || ""));
+    }));
+  }
+
+  function quadrant(titles) {
+    var box = h("div", { class: "quad", role: "group", "aria-label": "Titles by your fit and market momentum" });
+    box.appendChild(h("div", { class: "cap" }, "Market momentum (up) by your fit (right)"));
+    var cells = {};
+    ["high", "medium", "low"].forEach(function (mo, r) {
+      box.appendChild(h("div", { class: "yt" }, h("span", { class: "long" }, LEVEL_LABEL[mo]),
+        h("span", { class: "short", "aria-hidden": "true" }, mo === "medium" ? "Med" : LEVEL_LABEL[mo])));
+      LEVELS.forEach(function (fi, c) {
+        var cls = "qcell c" + c + " r" + r + (mo === "high" && fi === "high" ? " best" : "");
+        var cell = h("div", { class: cls });
+        if (mo === "high" && fi === "high") cell.appendChild(h("div", { class: "ql" }, "Go after these"));
+        if (mo === "low" && fi === "high") cell.appendChild(h("div", { class: "ql" }, "Good fit, slower market"));
+        if (mo === "high" && fi === "low") cell.appendChild(h("div", { class: "ql" }, "Growing, needs work"));
+        cells[mo + "|" + fi] = cell;
+        box.appendChild(cell);
+      });
+    });
+    box.appendChild(h("div"));
+    LEVELS.forEach(function (fi) { box.appendChild(h("div", { class: "xt" }, LEVEL_LABEL[fi])); });
+    box.appendChild(h("div", { class: "cap x" }, "Your fit"));
+    titles.forEach(function (t) {
+      var cell = cells[lvl(t.momentum) + "|" + lvl(t.fit)];
+      var dot = h("button", { type: "button", class: "qdot",
+        "aria-label": (t.title || "") + ": fit " + lvl(t.fit) + ", momentum " + lvl(t.momentum) + (t.why ? ". " + t.why : "") },
+        h("i", { "aria-hidden": "true" }), h("span", null, t.title || ""));
+      bindTip(dot, function () {
+        return [h("strong", null, t.title || ""), h("div", null, "Fit " + lvl(t.fit) + ", momentum " + lvl(t.momentum)),
+          t.why ? h("div", null, t.why) : null, t.comp ? h("div", null, "Pay: " + t.comp) : null];
+      });
+      cell.appendChild(dot);
+    });
+    return box;
+  }
+
+  // "roles[0].bullets[1]" -> "Role 1, bullet 2" for people who never saw the JSON
+  function friendlyPath(p) {
+    return String(p)
+      .replace(/roles\[(\d+)\]\.bullets\[(\d+)\]/g, function (_, r, b) { return "Role " + (+r + 1) + ", bullet " + (+b + 1); })
+      .replace(/roles\[(\d+)\]\.(\w+)/g, function (_, r, f) { return "Role " + (+r + 1) + " " + f; })
+      .replace(/roles\[(\d+)\]/g, function (_, r) { return "Role " + (+r + 1); })
+      .replace(/skills\[(\d+)\]/g, function (_, k) { return "Skill " + (+k + 1); })
+      .replace(/projects\[(\d+)\]/g, function (_, k) { return "Project " + (+k + 1); })
+      .replace(/^summary$/, "Summary").replace(/^headline$/, "Headline");
+  }
+
+  // ---------- markdown (radar report) ----------
+  // Small, safe renderer: every piece of text becomes a text node; links pass safeHref.
+  function mdInline(text) {
+    var out = [];
+    var re = /(`[^`]+`)|\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|\*([^*\s][^*]*)\*|(https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/g;
+    var last = 0, m;
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) out.push(text.slice(last, m.index));
+      if (m[1]) out.push(h("code", null, m[1].slice(1, -1)));
+      else if (m[2]) out.push(link(mdInline(m[2]), m[3]) || h("span", null, mdInline(m[2])));
+      else if (m[4] || m[5]) out.push(h("strong", null, mdInline(m[4] || m[5])));
+      else if (m[6]) out.push(h("em", null, mdInline(m[6])));
+      else if (m[7]) out.push(link(m[7], m[7]) || m[7]);
+      last = re.lastIndex;
+    }
+    if (last < text.length) out.push(text.slice(last));
+    return out;
+  }
+  function mdSplitRow(line) {
+    var t = line.trim();
+    if (t.charAt(0) === "|") t = t.slice(1);
+    if (t.charAt(t.length - 1) === "|") t = t.slice(0, -1);
+    return t.split("|").map(function (c) { return c.trim(); });
+  }
+  var MD_LIST = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/;
+  var MD_TABLE_SEP = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+  function mdBlocks(lines) {
+    var nodes = [], i = 0, para = [];
+    function flush() { if (para.length) { nodes.push(h("p", null, mdInline(para.join(" ")))); para = []; } }
+    while (i < lines.length) {
+      var line = lines[i], m;
+      if (/^\s*```/.test(line)) {
+        flush(); var code = []; i++;
+        while (i < lines.length && !/^\s*```/.test(lines[i])) { code.push(lines[i]); i++; }
+        nodes.push(h("pre", null, h("code", null, code.join("\n")))); i++; continue;
+      }
+      if (!line.trim()) { flush(); i++; continue; }
+      if ((m = /^(#{3,6})\s+(.*)$/.exec(line))) { flush(); nodes.push(h(m[1].length === 3 ? "h3" : "h4", null, mdInline(m[2]))); i++; continue; }
+      if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) { flush(); nodes.push(h("hr")); i++; continue; }
+      if (/^\s*\|/.test(line) && i + 1 < lines.length && MD_TABLE_SEP.test(lines[i + 1])) {
+        flush();
+        var head = mdSplitRow(line), rows = []; i += 2;
+        while (i < lines.length && /^\s*\|/.test(lines[i])) { rows.push(mdSplitRow(lines[i])); i++; }
+        nodes.push(h("div", { class: "md-table" }, h("table", null,
+          h("thead", null, h("tr", null, head.map(function (c) { return h("th", { scope: "col" }, mdInline(c)); }))),
+          h("tbody", null, rows.map(function (r) { return h("tr", null, head.map(function (_, k) { return h("td", null, mdInline(r[k] || "")); })); })))));
+        continue;
+      }
+      if (/^\s*>/.test(line)) {
+        flush(); var q = [];
+        while (i < lines.length && /^\s*>/.test(lines[i])) { q.push(lines[i].replace(/^\s*>\s?/, "")); i++; }
+        nodes.push(h("blockquote", null, mdBlocks(q))); continue;
+      }
+      if (MD_LIST.test(line)) {
+        flush();
+        var root = null, stack = [];
+        while (i < lines.length) {
+          var lm = MD_LIST.exec(lines[i]);
+          if (!lm) {
+            if (lines[i].trim() && /^\s{2,}/.test(lines[i]) && stack.length) {  // wrapped line of the last item
+              append(stack[stack.length - 1].lastLi, [" ", mdInline(lines[i].trim())]); i++; continue;
+            }
+            break;
+          }
+          var indent = lm[1].replace(/\t/g, "  ").length, ordered = /\d/.test(lm[2]);
+          while (stack.length && indent < stack[stack.length - 1].indent) stack.pop();
+          var top = stack[stack.length - 1];
+          if (!top || indent > top.indent) {
+            var listEl = h(ordered ? "ol" : "ul");
+            if (!top) root = listEl; else top.lastLi.appendChild(listEl);
+            top = { indent: indent, el: listEl, lastLi: null };
+            stack.push(top);
+          }
+          var body = lm[3], task = /^\[( |x|X)\]\s+(.*)$/.exec(body), li;
+          if (task) {
+            li = h("li", { class: "task" }, h("input", { type: "checkbox", disabled: true, checked: task[1] !== " ", "aria-label": "to do" }), h("span", null, mdInline(task[2])));
+          } else {
+            li = h("li", null, mdInline(body));
+          }
+          top.el.appendChild(li); top.lastLi = li.lastChild && li.classList.contains("task") ? li.lastChild : li;
+          i++;
+        }
+        nodes.push(root); continue;
+      }
+      para.push(line.trim()); i++;
+    }
+    flush();
+    return nodes;
+  }
+  function mdSlug(t, used) {
+    var base = "r-" + (t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section"), id = base, n = 2;
+    while (used[id]) id = base + "-" + (n++);
+    used[id] = true; return id;
+  }
+  // Split the report on "## " headings; each section becomes a themed card, collapsed by default.
+  function renderReport(md, noHead) {
+    var lines = String(md || "").replace(/\r\n?/g, "\n").split("\n");
+    var head = [], sections = [], cur = null;
+    lines.forEach(function (ln) {
+      var m = /^##\s+(.*)$/.exec(ln);
+      if (m && !/^###/.test(ln)) { cur = { title: m[1].trim(), lines: [] }; sections.push(cur); }
+      else if (cur) cur.lines.push(ln);
+      else head.push(ln);
+    });
+    var wrap = h("div", { class: "md-report" }), used = {};
+    var title = null, rest = [];
+    head.forEach(function (ln) { var m = /^#\s+(.*)$/.exec(ln); if (m && !title) title = m[1]; else rest.push(ln); });
+    if (!noHead && (title || rest.join("").trim())) {
+      wrap.appendChild(h("div", { class: "card md-head" }, title ? h("h1", null, mdInline(title)) : null,
+        rest.join("").trim() ? h("div", { class: "md-body", style: "padding:0" }, mdBlocks(rest)) : null));
+    }
+    sections.forEach(function (sec, idx) {
+      var lead = idx === 0 || /action plan/i.test(sec.title);
+      var d = h("details", { class: "card md-sec" + (lead ? " lead" : ""), id: sec.id || mdSlug(sec.title, used) },
+        h("summary", null, h("h2", null, mdInline(sec.title))),
+        h("div", { class: "md-body" }, mdBlocks(sec.lines)));
+      wrap.appendChild(d);
+    });
+    return wrap;
+  }
+
+  // Best fit now: a high-fit title with the most momentum. Top bet: the first high-fit emerging title.
+  // Either one falls back to the matching phrase in the verdict.
+  var LEVEL_RANK = { high: 3, medium: 2, low: 1 };
+  function radarPicks(R) {
+    var best = null, bet = null;
+    arr(R.titles_now).forEach(function (t) {
+      if (t && t.title && t.fit === "high" && (!best || (LEVEL_RANK[t.momentum] || 0) > (LEVEL_RANK[best.momentum] || 0))) best = t;
+    });
+    arr(R.emerging_titles).forEach(function (e) { if (!bet && e && e.title && e.fit === "high") bet = e; });
+    var v = String(R.verdict || "");
+    var mBest = /best fit now(?:\s+is)?\s*:?\s*([^.]+)/i.exec(v), mBet = /top bet(?:\s+is)?\s*:?\s*([^.]+)/i.exec(v);
+    return {
+      best: best ? best.title : (mBest ? mBest[1].trim() : null),
+      bet: bet ? bet.title : (mBet ? mBet[1].trim() : null)
+    };
+  }
+
+  var ACTION_KIND = {
+    apply: { label: "Apply", cls: "b-blue" },
+    build: { label: "Build", cls: "b-violet" },
+    learn: { label: "Learn", cls: "b-green" },
+    other: { label: "Do", cls: "" }
+  };
+  function actionCard(a) {
+    a = a || {};
+    var text = String(a.text || a.url || "");
+    var m = /^\s*(apply|build|learn)\s*:\s*/i.exec(text);
+    var kind = m ? m[1].toLowerCase() : "other", meta = ACTION_KIND[kind];
+    var open = link("Open", a.url, "Open: " + text);
+    if (open) open.className = "btn small";
+    return h("article", { class: "card act" },
+      h("div", { class: "row", style: "justify-content:space-between;gap:8px" },
+        h("span", { class: "ak badge " + meta.cls }, icon(kind), meta.label), open),
+      h("div", { class: "at" }, m ? text.charAt(m[0].length).toUpperCase() + text.slice(m[0].length + 1) : text),
+      null);
+  }
+
+  var LANES = [["0 to 12 months", 12], ["12 to 24 months", 24], ["24 to 36 months", Infinity]];
+  function laneOf(months) {
+    var n = Number(months);
+    if (!isFinite(n) || n <= 0) return 0;
+    for (var i = 0; i < LANES.length; i++) if (n <= LANES[i][1]) return i;
+    return LANES.length - 1;
+  }
+  function forecast(R) {
+    var items = [];
+    arr(R.emerging_titles).forEach(function (e) {
+      if (e && e.title) items.push({ kind: "title", text: e.title, conf: e.confidence, months: e.horizon_months, fit: e.fit,
+        note: e.fit_note, watch: e.watch_for, signals: e.signals });
+    });
+    arr(R.jd_shifts).forEach(function (x) {
+      if (x && x.change) items.push({ kind: "shift", text: x.change, conf: x.confidence, months: x.horizon_months, signals: x.signals });
+    });
+    var risk = arr(R.titles_at_risk).filter(function (x) { return x && x.title; });
+    if (!items.length && !risk.length) return null;
+    var lanes = LANES.map(function (l) { return { label: l[0], items: [] }; });
+    items.forEach(function (it) { lanes[laneOf(it.months)].items.push(it); });
+    var box = h("div", { class: "card" });
+    box.appendChild(h("div", { class: "keyline", style: "margin-bottom:12px", "aria-hidden": "true" },
+      h("span", null, h("i", { style: "background:var(--s1)" }), "New title"),
+      h("span", null, h("i", { style: "background:var(--s2)" }), "Job description change"),
+      h("span", null, h("span", { style: "margin-right:5px" }, confDots("high")), "Confidence")));
+    box.appendChild(h("div", { class: "lanes" }, lanes.map(function (l) {
+      return h("section", { class: "lane", "aria-label": l.label },
+        h("div", { class: "lane-h" }, l.label),
+        l.items.length ? h("div", { class: "stack" }, l.items.map(function (it) {
+          var sigs = arr(it.signals);
+          return h("article", { class: "fc" + (it.kind === "shift" ? " shift" : ""), title: it.watch ? "Watch for: " + it.watch : null },
+            h("div", { class: "fk2" }, h("span", null, it.kind === "shift" ? "JD change" : "New title" + (it.fit ? ", your fit " + lvl(it.fit) : "")), confDots(it.conf)),
+            h("div", { class: "ft" }, it.text),
+            it.note ? h("div", { class: "fn" }, it.note) : null,
+            sigs.length ? h("details", null, h("summary", null, plural(sigs.length, "source")), signalList(sigs)) : null);
+        })) : h("div", { class: "lane-empty" }, "Nothing here yet."));
+    })));
+    if (risk.length) {
+      box.appendChild(h("div", { class: "risk" }, h("span", null, "Losing ground:"), risk.map(function (x) {
+        var url = (arr(x.signals)[0] || {}).url;
+        var el = link(x.title, url, x.title + (x.why ? ". " + x.why : "")) || h("span", { "aria-label": x.title + (x.why ? ". " + x.why : "") }, x.title);
+        el.className = "tag";
+        if (x.why) el.setAttribute("title", x.why);
+        return el;
+      })));
+    }
+    return box;
+  }
+
+  function renderRadar(root) {
+    clear(root);
+    var R = DATA.radar;
+    root.appendChild(h("h2", null, "Career radar"));
+    if (!R || typeof R !== "object") {
+      root.appendChild(empty("No career radar yet.",
+        "Run /job-search:radar in Claude. It takes about 5 to 10 minutes of research and shows which titles fit you now, which skills are rising, and how job descriptions are changing."));
+      return;
+    }
+    var every = typeof R.every_days === "number" ? R.every_days : 30;
+    var age = typeof R.age_days === "number" ? R.age_days : null;
+
+    // hero: the two picks, then the date
+    var picks = radarPicks(R);
+    var top = h("div", { class: "card", title: R.verdict || null });
+    if (picks.best || picks.bet) {
+      top.appendChild(h("div", { class: "hero" },
+        picks.best ? h("div", { class: "pick now" }, h("div", { class: "pl" }, icon("now"), "Best fit now"), h("div", { class: "pt" }, picks.best)) : null,
+        picks.bet ? h("div", { class: "pick" }, h("div", { class: "pl" }, icon("bet"), "Top bet"), h("div", { class: "pt" }, picks.bet)) : null));
+    } else {
+      top.appendChild(h("div", { class: "verdict" }, R.verdict || ""));
+    }
+    top.appendChild(h("div", { class: "radar-meta" },
+      h("span", null, (fmtDate(R.as_of) || R.as_of || "Unknown date") + (age !== null ? ", " + (age === 0 ? "today" : plural(age, "day") + " old") : ""))));
+    if (R.stale) {
+      top.appendChild(h("div", { class: "hint" }, "Older than " + plural(every, "day") + ". Run ", h("code", null, "/job-search:radar"), " to refresh, or ",
+        copyBtn("Copy command", CMD + " radar", { cls: "small", aria: "Run the career radar now: copy command" })));
+    }
+    root.appendChild(top);
+
+    // this month
+    var actions = arr(R.actions).filter(function (a) { return a && (a.text || a.url); });
+    if (actions.length) {
+      root.appendChild(h("h3", null, "This month"));
+      root.appendChild(h("div", { class: "acts" }, actions.map(actionCard)));
+    }
+
+    // fit vs momentum, and what postings ask for
+    var grid = h("div", { class: "grid2" });
+    var titles = arr(R.titles_now).filter(function (t) { return t && t.title; });
+    var left = h("div", null, h("h3", { title: "Top right is where to apply first: you fit and demand is growing." }, "Titles to target now"));
+    if (titles.length) {
+      left.appendChild(h("div", { class: "card quad-card" }, quadrant(titles)));
+      left.appendChild(h("details", { class: "more" }, h("summary", null, "Titles as a table"),
+        h("div", { class: "table-scroll", style: "margin-top:8px" }, h("table", { "aria-label": "Titles to target now" },
+          h("thead", null, h("tr", null, ["Title", "Fit", "Momentum", "Why", "Pay"].map(function (c) { return h("th", { scope: "col" }, c); }))),
+          h("tbody", null, titles.map(function (t) {
+            return h("tr", null, h("td", null, t.title, (Array.isArray(t.postings) && t.postings.length) ? h("div", { class: "links small" },
+              t.postings.slice(0, 3).map(function (u, i) { return link("Posting " + (i + 1), u, "Example posting " + (i + 1) + " for " + t.title); })) : null),
+              h("td", null, lvl(t.fit)), h("td", null, lvl(t.momentum)), h("td", null, t.why || ""), h("td", { class: "nowrap" }, t.comp || ""));
+          }))))));
+    } else left.appendChild(h("p", { class: "muted small" }, "No titles in this radar."));
+    grid.appendChild(left);
+
+    var demand = arr(R.skill_demand).filter(function (d) { return d && d.skill; });
+    var right = h("div", null, h("h3", { title: "Bars count postings in the radar's sample that ask for each skill. The badge says where you stand." }, "What job descriptions ask for"));
+    if (demand.length) {
+      var maxSample = Math.max.apply(null, demand.map(function (d) { return Number(d.sample) || Number(d.count) || 1; }).concat([1]));
+      var demandRows = demand.map(function (d) {
+        var cnt = Number(d.count) || 0, smp = Number(d.sample) || maxSample;
+        var fill = h("div", { class: "fill" });
+        fill.style.width = Math.min(100, cnt / maxSample * 100).toFixed(1) + "%";
+        var track = h("div", { class: "bar-track", tabindex: "0", role: "img",
+          "aria-label": d.skill + ": in " + cnt + " of " + smp + " postings, required in " + (d.required || 0) + ". " + (YOU_LABEL[d.you] || "") }, fill);
+        bindTip(track, function () {
+          return [h("strong", null, d.skill), h("div", null, cnt + " of " + smp + " postings"), h("div", null, "Required in " + (d.required || 0)),
+            h("div", null, YOU_LABEL[d.you] || "Unknown")];
+        });
+        return h("li", null, h("span", { class: "sk" }, d.skill),
+          h("div", { class: "bar-wrap" }, track, h("span", { class: "bar-val" }, cnt + "/" + smp)),
+          h("span", { class: "you" }, h("span", { class: "badge " + (YOU_CLASS[d.you] || "") }, YOU_LABEL[d.you] || "Unknown")));
+      });
+      var DEMAND_SHOWN = 8;
+      right.appendChild(h("ul", { class: "demand card", "aria-label": "Skill demand across sampled postings" }, demandRows.slice(0, DEMAND_SHOWN)));
+      if (demandRows.length > DEMAND_SHOWN) {
+        right.appendChild(h("details", { class: "more" }, h("summary", null, "Show " + (demandRows.length - DEMAND_SHOWN) + " more skills"),
+          h("ul", { class: "demand card", style: "margin-top:8px", "aria-label": "More skills" }, demandRows.slice(DEMAND_SHOWN))));
+      }
+    } else right.appendChild(h("p", { class: "muted small" }, "No skill counts in this radar."));
+    grid.appendChild(right);
+    root.appendChild(grid);
+
+    // the next three years
+    var fc = forecast(R);
+    root.appendChild(h("h3", null, "Next 3 years"));
+    root.appendChild(fc || h("p", { class: "muted small" }, "No forecast with enough evidence yet."));
+
+    // rising skills and resume language
+    var rising = arr(R.rising_skills).filter(function (r) { return r && r.skill; });
+    var lang = arr(R.resume_language).filter(function (l) { return l && (l.market_term || l.your_term); });
+    if (rising.length || lang.length) {
+      var g2 = h("div");
+      if (rising.length) {
+        g2.appendChild(h("div", null, h("h3", null, "Rising skills"),
+          h("div", { class: "tags", role: "list", "aria-label": "Rising skills" }, rising.map(function (r) {
+            var sigs = arr(r.signals), url = (sigs[0] || {}).url;
+            var tip = sigs.map(function (x) { return (x && x.text) || ""; }).filter(Boolean).join("\n");
+            var el = link(r.skill, url, r.skill + ", " + (r.confidence || "low") + " confidence. Open evidence") || h("span", null, r.skill);
+            el.className = "tag";
+            el.setAttribute("role", "listitem");
+            if (tip) el.setAttribute("title", tip);
+            el.appendChild(confDots(r.confidence));
+            return el;
+          }))));
+      }
+      if (lang.length) {
+        g2.appendChild(h("div", null, h("h3", { title: "Words the market uses for work you already did. Tailoring uses a term only in a line that cites one of these facts, and only when the job description uses it." }, "Resume language"),
+          h("ul", { class: "lang card", style: "max-width:760px", "aria-label": "Your words and the market term for each" },
+            h("li", { class: "small muted", "aria-hidden": "true" }, h("span", null, "Your words"), h("span"), h("span", null, "Market term")),
+            lang.map(function (l) {
+              var ids = arr(l.fact_ids);
+              return h("li", { title: ids.length ? "Facts: " + ids.join(", ") : null },
+                h("span", { class: "yt2" }, l.your_term || ""), h("span", { class: "ar", "aria-label": "becomes" }, "→"),
+                h("span", { class: "mt" }, l.market_term || ""));
+            }))));
+      }
+      root.appendChild(g2);
+    }
+
+    // full report, collapsed
+    if (R.report_md) {
+      root.appendChild(h("div", { class: "sec-head", style: "margin-top:28px" }, h("h2", { style: "margin:0" }, "Full report"),
+        R.report_href ? h("span", { class: "small" }, link("Open the report file", R.report_href)) : null));
+      root.appendChild(renderReport(R.report_md, true));
+    } else {
+      if (R.report_href) root.appendChild(h("p", { class: "small", style: "margin-top:20px" }, link("Read the full report", R.report_href)));
+      var assumptions = arr(R.assumptions);
+      if (assumptions.length) {
+        root.appendChild(h("details", null, h("summary", null, "Assumptions (" + assumptions.length + ")"),
+          h("ul", { class: "small", style: "margin:8px 0 0;padding-left:18px" }, assumptions.map(function (a) { return h("li", null, String(a)); }))));
+      }
+      var sources = arr(R.sources);
+      if (sources.length) {
+        root.appendChild(h("details", null, h("summary", null, "Sources (" + sources.length + ")"),
+          h("ul", { class: "plain", style: "margin-top:8px" }, sources.map(function (src) {
+            src = src || {};
+            return h("li", { class: "small" }, link(src.title || src.url || "Source", src.url) || (src.title || ""),
+              h("span", { class: "muted" }, [src.publisher, src.date].filter(Boolean).length ? "  " + [src.publisher, src.date].filter(Boolean).join(", ") : ""));
+          }))));
+      }
+    }
+    root.appendChild(h("p", { class: "small muted", style: "margin-top:16px", title: "Title and job board ideas from the radar wait for your answer in What I've learned." },
+      "The radar never edits your resume or fact bank."));
+  }
+
+  // ---------- learned ----------
+  var PROPOSAL_KIND = {
+    preference: { label: "Preference", cls: "b-blue" },
+    source: { label: "Job source", cls: "b-violet" },
+    fact_bank: { label: "Fact bank", cls: "b-green" },
+    cap: { label: "Daily cap", cls: "b-amber" },
+    maintainer: { label: "For the maintainer", cls: "" }
+  };
+  function renderLearned(root) {
+    clear(root);
+    var lessons = DATA.lessons || [];
+    var active = lessons.filter(function (l) { return l.status !== "retired"; });
+    var retired = lessons.filter(function (l) { return l.status === "retired"; });
+    var props = DATA.proposals || [];
+    var pending = props.filter(function (p) { return p.status === "pending"; });
+    var decided = props.filter(function (p) { return p.status !== "pending"; });
+
+    root.appendChild(h("h2", null, "Suggestions waiting for your answer"));
+    if (!pending.length) root.appendChild(empty("No pending suggestions.", "The weekly retro proposes changes here when it spots a pattern."));
+    else root.appendChild(h("div", { class: "stack" }, pending.map(function (p) {
+      var patch = null;
+      if (p.patch && p.patch.file) {
+        // "sources.dice.enabled" -> "dice enabled"; values shown plainly, file name kept in the tooltip
+        var key = function (k) { return String(k).replace(/^sources\./, "").replace(/[._]/g, " "); };
+        var val = function (v) {
+          if (v === true) return "on"; if (v === false) return "off";
+          return Array.isArray(v) ? v.join(", ") : (typeof v === "object" && v ? JSON.stringify(v) : String(v));
+        };
+        var parts = [];
+        Object.keys(p.patch.set || {}).forEach(function (k) { parts.push(key(k) + " \u2192 " + val(p.patch.set[k])); });
+        Object.keys(p.patch.append || {}).forEach(function (k) { parts.push(key(k) + " + " + val(p.patch.append[k])); });
+        patch = parts.length ? "Change: " + parts.join("; ") : null;
+      }
+      var kind = PROPOSAL_KIND[p.kind] || { label: p.kind ? String(p.kind).replace(/_/g, " ") : "Other", cls: "" };
+      return h("article", { class: "card" },
+        h("div", { class: "prop-head" },
+          h("span", { class: "badge kind " + kind.cls }, icon(PROPOSAL_KIND[p.kind] ? p.kind : "other"), kind.label),
+          h("span", { class: "small muted", title: p.id }, p.created ? fmtDate(p.created) : p.id)),
+        h("div", { style: "margin-top:6px" }, p.text || ""),
+        patch ? h("div", { class: "small muted", style: "margin-top:4px;overflow-wrap:anywhere", title: "Accepting edits " + p.patch.file }, patch) : null,
+        h("div", { class: "btns", style: "margin-top:10px" },
+          copyBtn("Accept", CMD + " proposal " + p.id + " accept", { cls: "primary", aria: "Accept " + p.id + ": copy command" }),
+          copyBtn("Decline", CMD + " proposal " + p.id + " decline", { aria: "Decline " + p.id + ": copy command" })));
+    })));
+
+    root.appendChild(h("h2", { title: "Every skill reads these before it runs. Lessons never override the truthfulness rules or the approval gate." }, "Active lessons"));
+    if (!active.length) root.appendChild(empty("No lessons yet.", "When you correct something twice, or once with frustration, it becomes a lesson here. Use /job-search:feedback to tell Claude directly."));
+    else root.appendChild(h("ul", { class: "plain card" }, active.map(function (l) {
+      var ev = (l.evidence || []).length;
+      var meta = [l.id, l.created ? "since " + fmtDate(l.created) : null, l.last_applied ? "last used " + fmtDate(l.last_applied) : null].filter(Boolean).join(", ");
+      return h("li", { class: "lesson" },
+        h("div", { class: "txt" }, h("div", { title: meta }, l.text || ""),
+          h("div", { class: "pills" },
+            h("span", { class: "badge b-blue", title: "Scope: the skills this lesson applies to" }, l.scope || "all"),
+            h("span", { class: "badge", title: plural(ev, "piece") + " of evidence" }, plural(ev, "signal")),
+            l.kind ? h("span", { class: "badge" + (l.kind === "auto" ? "" : " b-green") }, l.kind === "auto" ? "auto" : "you approved") : null)),
+        copyBtn("Retire", CMD + " lesson " + l.id + " retire", { cls: "small", aria: "Retire lesson " + l.id + ": copy command" }));
+    })));
+
+    if (retired.length) {
+      root.appendChild(h("details", null, h("summary", null, "Retired lessons (" + retired.length + ")"),
+        h("ul", { class: "plain", style: "margin-top:8px" }, retired.map(function (l) {
+          return h("li", null, h("div", { class: "muted" }, l.text || ""), h("div", { class: "meta" }, h("span", null, l.id), h("span", null, "Scope: " + (l.scope || "all"))));
+        }))));
+    }
+    if (decided.length) {
+      root.appendChild(h("details", null, h("summary", null, "Answered suggestions (" + decided.length + ")"),
+        h("ul", { class: "plain", style: "margin-top:8px" }, decided.map(function (p) {
+          return h("li", null, h("div", null, p.text || ""), h("div", { class: "meta" }, h("span", null, p.id), h("span", null, p.status || "")));
+        }))));
+    }
+
+    var sc = DATA.signal_counts || {};
+    var keys = Object.keys(sc);
+    root.appendChild(h("h2", null, "Signals recorded"));
+    if (!keys.length) root.appendChild(h("p", { class: "muted small" }, "No signals yet. Edits, rejections and dismissals are logged as you use the plugin."));
+    else root.appendChild(h("div", { class: "chips", "aria-label": "Signal counts by type" }, keys.map(function (k) {
+      return h("span", { class: "badge" }, k.replace(/_/g, " ") + ": " + sc[k]);
+    })));
+  }
+
+  // ---------- runs ----------
+  var RUN_SERIES = [["new", "New", "c-s1"], ["scored", "Scored", "c-s2"], ["prepared", "Prepared", "c-s3"]];
+  function runErrors(r) { return Array.isArray(r.errors) ? r.errors : (r.errors ? [String(r.errors)] : []); }
+  // Grouped columns for the last runs, oldest on the left. A red dot marks a run with errors.
+  function runsChart(runs) {
+    var list = runs.slice(0, 21).reverse();
+    var max = 1;
+    list.forEach(function (r) { RUN_SERIES.forEach(function (s) { max = Math.max(max, Number(r[s[0]]) || 0); }); });
+    var plot = h("div", { class: "rc-plot", role: "group", "aria-label": "Last " + plural(list.length, "run") + ": new, scored and prepared jobs per run" },
+      h("div", { class: "rc-grid", "aria-hidden": "true" }, h("span", { class: "rc-max" }, String(max))));
+    list.forEach(function (r) {
+      var errs = runErrors(r);
+      var text = fmtDateTime(r.ts) + ": " + RUN_SERIES.map(function (s) { return (Number(r[s[0]]) || 0) + " " + s[1].toLowerCase(); }).join(", ") +
+        (errs.length ? ", " + plural(errs.length, "error") : "");
+      var g = h("div", { class: "rc-g", tabindex: "0", role: "img", "aria-label": text });
+      RUN_SERIES.forEach(function (s) {
+        var v = Number(r[s[0]]) || 0;
+        var bar = h("span", { class: s[2] });
+        bar.style.height = (v / max * 100).toFixed(1) + "%";
+        if (v) bar.style.minHeight = "2px";
+        g.appendChild(bar);
+      });
+      if (errs.length) g.appendChild(h("i", { class: "e", "aria-hidden": "true" }));
+      bindTip(g, function () {
+        return [h("strong", null, fmtDateTime(r.ts)), h("div", null, (r.kind || "run")),
+          RUN_SERIES.map(function (s) { return h("div", null, (Number(r[s[0]]) || 0) + " " + s[1].toLowerCase()); }),
+          errs.length ? h("div", null, plural(errs.length, "error") + ": " + errs.join("; ")) : null];
+      });
+      plot.appendChild(g);
+    });
+    return h("div", { class: "card runs-chart" },
+      h("div", { class: "keyline", "aria-hidden": "true" },
+        RUN_SERIES.map(function (s) { return h("span", null, h("i", { class: s[2] }), s[1]); }),
+        h("span", null, h("i", { class: "k-bad", style: "border-radius:50%" }), "Errors")),
+      plot,
+      h("div", { class: "rc-x", "aria-hidden": "true" }, h("span", null, fmtDate(list[0].ts)), h("span", null, fmtDate(list[list.length - 1].ts))));
+  }
+  function renderRuns(root) {
+    clear(root);
+    var runs = DATA.runs || [];
+    root.appendChild(h("h2", null, "Runs"));
+    if (!runs.length) {
+      root.appendChild(empty("No runs yet.", "Each /job-search:run adds a row here. Set up a daily scheduled task to keep it fresh."));
+      return;
+    }
+    var withErr = runs.filter(function (r) { return runErrors(r).length && daysAgo(r.ts) <= 7; }).length;
+    root.appendChild(h("p", { class: "muted small", style: "margin:0 0 10px" }, "Last run " + fmtDateTime(runs[0].ts) + ". " +
+      (withErr ? plural(withErr, "run") + " with errors this week." : "No errors this week.")));
+    root.appendChild(runsChart(runs));
+    var cols = ["Time", "Kind", "Found", "New", "Scored", "Prepared", "Needs approval", "Errors"];
+    var tbody = h("tbody", null, runs.map(function (r) {
+      var errs = runErrors(r);
+      return h("tr", null,
+        h("td", { class: "nowrap" }, fmtDateTime(r.ts)),
+        h("td", null, h("span", { class: "badge " + (r.kind === "weekly" ? "b-violet" : "") }, r.kind || "")),
+        ["found", "new", "scored", "prepared", "needs_approval"].map(function (k) { return h("td", { class: "num" }, r[k] == null ? "" : String(r[k])); }),
+        h("td", null, errs.length ? h("ul", { class: "errors" }, errs.map(function (e) { return h("li", null, String(e)); })) : h("span", { class: "muted" }, "None"),
+          r.notes ? h("div", { class: "small muted" }, r.notes) : null));
+    }));
+    var wide = false;
+    try { wide = window.matchMedia("(min-width: 900px)").matches; } catch (e) { wide = false; }
+    root.appendChild(h("details", { open: wide }, h("summary", null, "All runs (" + runs.length + ")"),
+      h("div", { class: "table-scroll", style: "margin-top:8px" }, h("table", { class: "jobs", "aria-label": "Run log" },
+        h("thead", null, h("tr", null, cols.map(function (c, i) { return h("th", { scope: "col", class: i >= 2 && i <= 6 ? "num" : null }, c); }))), tbody))));
+  }
+
+  // ---------- header + footer ----------
+  function renderChrome() {
+    var sub = document.getElementById("subtitle");
+    var n = JOBS.length;
+    sub.textContent = n ? plural(n, "job") + " tracked. Updated " + fmtDateTime(DATA.generated_at) + "." : "Updated " + fmtDateTime(DATA.generated_at) + ".";
+    var f = document.getElementById("footer");
+    clear(f);
+    f.appendChild(h("p", null, "Generated " + fmtDateTime(DATA.generated_at) + " (" + (DATA.generated_at || "") + ")"));
+    f.appendChild(h("p", null, "Data folder: ", h("code", null, DATA.home || "")));
+    f.appendChild(h("p", null, "This page is a snapshot. To refresh it, run ", h("code", null, "/job-search:dashboard"), " in Claude, then reload."));
+    if (DATA.error) f.appendChild(h("p", { style: "color:var(--bad-ink)" }, "Could not read dashboard data: " + DATA.error));
+  }
+
+  renderChrome();
+  setupTabs();
+})();
+</script>
+</body>
+</html>

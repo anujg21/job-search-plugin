@@ -1,0 +1,11 @@
+{
+  "name": "job-search",
+  "version": "0.1.0",
+  "description": "Finds jobs, scores fit, tailors your resume without inventing facts, tracks skill gaps, and learns from your feedback.",
+  "author": {
+    "name": "anujg21"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/anujg21/job-search-plugin",
+  "repository": "https://github.com/anujg21/job-search-plugin"
+}

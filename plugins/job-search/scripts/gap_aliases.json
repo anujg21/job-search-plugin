@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "_comment": "Maps a normalized gap key (jslib.norm_key) to its canonical key. Keep it small and obvious.",
+  "aliases": {
+    "k8s": "kubernetes",
+    "kube": "kubernetes",
+    "gcp": "google-cloud",
+    "google-cloud-platform": "google-cloud",
+    "terraform-iac": "terraform",
+    "hashicorp-terraform": "terraform",
+    "llms": "llm",
+    "large-language-models": "llm",
+    "large-language-model": "llm",
+    "golang": "go",
+    "go-golang": "go",
+    "apache-kafka": "kafka",
+    "amazon-web-services": "aws",
+    "microsoft-azure": "azure",
+    "azure-cloud": "azure",
+    "js": "javascript",
+    "ts": "typescript",
+    "postgres": "postgresql",
+    "ci-cd": "cicd",
+    "ci-cd-pipelines": "cicd",
+    "infrastructure-as-code": "iac",
+    "ml": "machine-learning",
+    "mlops-pipelines": "mlops",
+    "cka": "cka-certification",
+    "certified-kubernetes-administrator": "cka-certification",
+    "certified-kubernetes-administrator-cka": "cka-certification"
+  }
+}

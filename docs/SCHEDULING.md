@@ -1,0 +1,122 @@
+# Scheduling the job search
+
+The plugin does its work in two runs:
+
+| Run | Prompt | When | What it does |
+|---|---|---|---|
+| Daily | `/job-search:run daily` | Every day | Scan sources, score new jobs, tailor the top few, update gaps, rebuild the dashboard |
+| Weekly | `/job-search:run weekly` | Sunday | The daily steps, plus the skills gap nudge and the retro that turns feedback into lessons |
+
+Both runs are unattended. They never ask questions and never submit anything. Anything that
+needs you (a major resume change, a login wall) waits on the dashboard.
+
+The quickest way to set this up is `/job-search:schedule`. This page is the long version.
+
+## Claude Desktop (recommended)
+
+Cowork scheduled tasks usually run in the cloud, so they run even when your Mac is asleep.
+A task that needs local files runs only on your computer instead
+([Anthropic help article](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork)).
+This plugin keeps your data in a folder on your Mac, so its tasks run on your Mac. That is
+what lets them read your data folder and use your signed-in Chrome. It also means the Mac
+should be awake, with Claude Desktop open, at the scheduled time.
+
+1. Open Claude Desktop and switch to Cowork.
+2. Click **Scheduled** in the left sidebar.
+3. Click **New task** in the upper right, then **Set up manually**.
+4. In **Create scheduled task**, fill in:
+
+   | Field | Value |
+   |---|---|
+   | Task name | `Job search daily` |
+   | Prompt | `/job-search:run daily` |
+   | Approval mode | The option that runs without stopping to ask you. Nobody is there to answer, and the run never submits anything. |
+   | Frequency | Daily, at a time your Mac is usually awake (for example 8:00 AM) |
+   | Model | Leave the default |
+   | Folder | Your data folder, for example `/Users/you/JobSearch` |
+
+5. Click **Save**.
+6. Make a second task the same way:
+
+   | Field | Value |
+   |---|---|
+   | Task name | `Job search weekly` |
+   | Prompt | `/job-search:run weekly` |
+   | Frequency | Weekly, Sunday, same time |
+   | Folder | Same data folder |
+
+You can also pick **Create with Claude** instead of **Set up manually**, answer its
+questions with the values above, review what it proposes, and click **Schedule**.
+
+On Sunday both tasks run. That is fine: the second run finds nothing new and finishes fast.
+
+The Scheduled page lists upcoming and past runs. Click a task to edit its prompt or
+frequency, pause or resume it, run it on demand, or delete it.
+
+### Why the working folder matters
+
+Scripts look for the data folder in this order: a `--home` argument, the `JOBSEARCH_HOME`
+environment variable, the current working folder if it has a `jobsearch.json` file, then
+`~/JobSearch`. Setting the task's working folder to your data folder makes the run find it
+even if you keep it somewhere other than `~/JobSearch`.
+
+### Test it
+
+Open the new task on the **Scheduled** page and run it on demand. When it finishes:
+- `runs/run-log.jsonl` in your data folder has a new line.
+- `dashboard.html` shows today's date in the run log.
+- The task output ends with a five line summary.
+
+## Claude Code CLI
+
+If your Claude Code has a scheduling tool, `/job-search:schedule` offers to create the two
+tasks for you. Check where the tool runs the task:
+- **On your computer**: works the same as Claude Desktop.
+- **In the cloud**: will not work. A cloud task cannot see your data folder or your Chrome.
+
+You can also use your operating system's scheduler to start Claude Code headless. On macOS
+with cron, for example:
+
+```
+0 8 * * *  cd ~/JobSearch && claude -p "/job-search:run daily"
+0 9 * * 0  cd ~/JobSearch && claude -p "/job-search:run weekly"
+```
+
+This needs the plugin installed in Claude Code and the `claude` command on cron's `PATH`.
+
+## Troubleshooting
+
+**The task says "No job-search home".**
+The working folder is wrong, or onboarding has not run. Set the task's working folder to
+your data folder, or run `/job-search:onboard`.
+
+**The task says the skill or command is unknown.**
+The plugin is not installed where the task runs. In Claude Desktop, add it in the Cowork
+plugins panel. In Claude Code, run `/plugin install job-search@job-search-tools`.
+
+**The run did not happen.**
+The task uses a folder on your Mac, so it runs on your Mac. If the Mac was asleep or Claude
+Desktop was closed, the run could not start. Pick a time the Mac is usually on and keep Claude
+Desktop running.
+
+**The run stopped halfway, waiting for approval.**
+The task's approval mode asks before each step. Edit the task and pick the approval mode that
+runs without asking. The run never submits applications or sends messages, whatever the mode.
+
+**Dice or LinkedIn show "not signed in" in the run log.**
+Open Chrome, sign in to the site, and make sure the Claude in Chrome extension is connected.
+If you do not want that source, turn it off with `/job-search:onboard`.
+
+**No PDF resumes, only HTML.**
+Google Chrome is not installed in a standard place. Install it, or set `CHROME_PATH` to its
+binary. `jobctl.py doctor` shows what it found.
+
+**Runs take too long.**
+Lower `daily_cap` in `profile/preferences.json`, or watch fewer companies. Scoring is capped
+at three times the daily cap per run.
+
+**Check everything at once.**
+```
+python3 "<plugin folder>/scripts/jobctl.py" doctor
+```
+It checks the data folder, profile files, fact bank, sources, Python and Chrome.
