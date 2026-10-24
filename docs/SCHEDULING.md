@@ -19,8 +19,9 @@ your connected Mac
 ([Anthropic help article](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork)).
 So the Mac should be awake, with Claude Desktop open, at the scheduled time. The sandbox only
 reaches the web domains your account allows, so add the job board domains first (see
-"network blocked" under Troubleshooting). It has no Chrome, so Indeed runs through web
-search, and Dice and LinkedIn are skipped.
+"network blocked" under Troubleshooting). Connectors are not affected by the allowlist, so
+connect the Indeed connector for the best Indeed results. The sandbox has no Chrome, so
+LinkedIn is skipped, and the run prints resume PDFs on your Mac instead.
 
 1. Open Claude Desktop and switch to Cowork.
 2. Click **Scheduled** in the left sidebar.
@@ -100,11 +101,12 @@ A Cowork scheduled task runs in Claude's cloud sandbox and reaches your data fol
 your connected Mac. If the Mac was asleep or Claude Desktop was closed, it cannot reach the
 folder. Pick a time the Mac is usually on and keep Claude Desktop running.
 
-**Every Greenhouse, Lever and Ashby board failed with "network blocked" or HTTP 403.**
+**Every board failed with "network blocked" or HTTP 403.**
 The cloud sandbox only reaches allowed domains. On claude.ai open Settings, then
-Capabilities, and under Domain allowlist add `boards-api.greenhouse.io`, `api.lever.co` and
-`api.ashbyhq.com`. Your company list is fine; the next run picks the boards up. Indeed still
-runs in the meantime through web search. Commands the cloud session runs on your Mac go
+Capabilities, and under Domain allowlist add `boards-api.greenhouse.io`, `api.lever.co`,
+`api.ashbyhq.com` and `mcp.dice.com`. Your company list is fine; the next run picks the
+boards up. Indeed still runs in the meantime through its connector or web search, and Dice
+through its connector if you turned it on. Commands the cloud session runs on your Mac go
 through the same allowlist, so they fail too. Running `/job-search:run daily` from Claude
 Code in your own terminal is not affected.
 
@@ -112,9 +114,14 @@ Code in your own terminal is not affected.
 The task's approval mode asks before each step. Edit the task and pick the approval mode that
 runs without asking. The run never submits applications or sends messages, whatever the mode.
 
-**Dice or LinkedIn show "not signed in" in the run log.**
-Open Chrome, sign in to the site, and make sure the Claude in Chrome extension is connected.
-If you do not want that source, turn it off with `/job-search:onboard`.
+**LinkedIn shows "not signed in" or "no browser" in the run log.**
+A scheduled cloud run has no Chrome, so it always skips LinkedIn. To include LinkedIn, run
+`/job-search:scan linkedin` in a chat while Chrome is open and you are signed in. If you do
+not want LinkedIn, turn it off with `/job-search:onboard`.
+
+**Indeed shows "connector not connected".**
+Connect it once: Customize, then Connectors, find Indeed and click Connect, then sign in to
+Indeed. Until then Indeed uses web search.
 
 **No PDF resumes, only HTML.**
 Google Chrome is not installed in a standard place. Install it, or set `CHROME_PATH` to its

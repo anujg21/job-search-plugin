@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jslib  # noqa: E402
 
 API_SOURCES = ("greenhouse", "lever", "ashby")
-BROWSER_SOURCES = ("indeed", "dice", "linkedin")
+BROWSER_SOURCES = ("indeed", "linkedin")
 GAP_NOTE_STATUSES = ("learning", "ignore", "done")
 RUN_KINDS = ("daily", "weekly", "manual")
 
@@ -67,7 +67,7 @@ def template_sources() -> dict:
             "lever": {"enabled": True, "has_access": True, "companies": []},
             "ashby": {"enabled": True, "has_access": True, "companies": []},
             "indeed": {"enabled": False, "has_access": False, "queries": [], "max_per_run": 20},
-            "dice": {"enabled": False, "has_access": False, "queries": [], "max_per_run": 20},
+            "dice": {"enabled": False, "has_access": True, "queries": [], "max_per_run": 20},
             "linkedin": {"enabled": False, "has_access": False, "saved_search_urls": [], "max_per_run": 15},
         },
     }
@@ -316,17 +316,20 @@ def run_doctor(home: Path, quick: bool = False) -> List[dict]:
             add("At least one source enabled", "fail", "turn on a source in /job-search:onboard")
         usable = [k for k in enabled
                   if (sources[k].get("companies") if k in API_SOURCES
+                      else bool(sources[k].get("queries")) if k == "dice"
                       else (k == "indeed" or sources[k].get("has_access")))]
         if enabled and not usable:
             add("A source that can find jobs", "fail",
-                "no companies listed and Indeed, Dice, LinkedIn are off; add companies or turn on "
-                "Indeed with /job-search:onboard (Job sources)")
+                "no companies listed and Dice, Indeed, LinkedIn are off; add companies or turn on "
+                "Dice or Indeed with /job-search:onboard (Job sources)")
         for k in enabled:
             v = sources[k]
             if k in API_SOURCES and not v.get("companies"):
                 add("Source %s" % k, "warn", "enabled but no companies listed")
+            if k == "dice" and not v.get("queries"):
+                add("Source dice", "warn", "enabled but no searches; run /job-search:onboard (Job sources)")
             if k == "indeed" and not v.get("has_access"):
-                add("Source indeed", "warn", "Chrome not checked, using web search instead")
+                add("Source indeed", "warn", "uses the Indeed connector if connected, else web search")
             elif k in BROWSER_SOURCES and not v.get("has_access"):
                 add("Source %s" % k, "warn", "enabled but Chrome access not confirmed (see sources/check-access.md)")
 

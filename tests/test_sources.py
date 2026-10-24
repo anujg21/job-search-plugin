@@ -349,14 +349,15 @@ class TestScan(HomeCase):
 
     def test_browser_next_always_keeps_indeed(self):
         cfg = {"sources": {"indeed": {"enabled": True, "has_access": False},
-                           "dice": {"enabled": True, "has_access": False},
-                           "linkedin": {"enabled": True, "has_access": True},
-                           "greenhouse": {"enabled": True, "companies": ["stripe"]}}}
-        todo = {b["source"]: b["do"] for b in scan.browser_next(cfg)}
-        self.assertEqual(set(todo), {"indeed", "dice", "linkedin"})
+                           "dice": {"enabled": True, "queries": [{"q": "x", "l": "Remote"}]},
+                           "linkedin": {"enabled": True, "has_access": False}}}
+        todo = {b["source"]: b["do"] for b in scan.browser_next(cfg, "ok")}
+        self.assertEqual(set(todo), {"indeed", "linkedin"})  # dice was fetched by the script
+        self.assertIn("connector", todo["indeed"])
         self.assertIn("Fallback without Chrome", todo["indeed"])
-        self.assertTrue(todo["dice"].startswith("skip"))
-        self.assertIn("Chrome", todo["linkedin"])
+        self.assertTrue(todo["linkedin"].startswith("skip"))
+        todo = {b["source"]: b["do"] for b in scan.browser_next(cfg, "blocked")}
+        self.assertIn("Dice connector", todo["dice"])
         cfg["sources"]["indeed"]["enabled"] = False
         self.assertNotIn("indeed", {b["source"] for b in scan.browser_next(cfg)})
 
@@ -369,6 +370,94 @@ class TestScan(HomeCase):
         data = json.loads(out.getvalue())
         for k in ("fetched", "matched", "new", "known", "new_ids", "errors"):
             self.assertIn(k, data)
+
+
+def dice_job(guid, title, company="Acme", types=("Remote",)):
+    return {"guid": guid, "id": "x" + guid, "title": title, "summary": "short summary",
+            "postedDate": "2026-10-21T23:10:12Z", "jobLocation": {"displayName": "Remote"},
+            "detailsPageUrl": "https://www.dice.com/job-detail/%s?utm_source=x&utm_medium=mcp" % guid,
+            "salary": "Depends on Experience", "companyName": company,
+            "employmentType": "Full-time", "workplaceTypes": list(types), "isRemote": "Remote" in types}
+
+
+class FakeMcp:
+    """Answers like Dice's server: JSON-RPC over HTTP, results as server-sent events."""
+
+    def __init__(self, jobs, blocked=False):
+        self.jobs, self.blocked, self.calls = jobs, blocked, []
+
+    def __call__(self, req, timeout=None):
+        if self.blocked:
+            raise urllib.error.URLError(OSError("Tunnel connection failed: 403 Forbidden"))
+        body = json.loads(req.data.decode("utf-8"))
+        method = body.get("method")
+        if method == "initialize":
+            result = {"protocolVersion": "2025-06-18", "capabilities": {}}
+        elif method == "tools/call":
+            name, args = body["params"]["name"], body["params"]["arguments"]
+            self.calls.append((name, args))
+            if name == "search_jobs":
+                data = {"data": self.jobs, "metadata": {"total": len(self.jobs)}}
+            else:
+                data = {"description": "<p>Build the <b>Kubernetes</b> platform.</p>",
+                        "skills": [{"name": "Kubernetes"}]}
+            result = {"content": [{"type": "text", "text": json.dumps(data)}], "isError": False}
+        else:
+            resp = FakeResp(b"")
+            resp.headers = {}
+            return resp
+        out = "event: message\ndata: " + json.dumps({"jsonrpc": "2.0", "id": body.get("id"), "result": result})
+        resp = FakeResp(out.encode("utf-8"))
+        resp.headers = {"Mcp-Session-Id": "s1"}
+        return resp
+
+
+class TestDice(HomeCase):
+    def setUp(self):
+        super().setUp()
+        sl._MCP_SESSIONS.clear()
+        cfg = jslib.load_sources(self.home)
+        cfg["sources"] = {"dice": {"enabled": True, "has_access": True, "max_per_run": 20,
+                                   "queries": [{"q": "Platform Architect", "l": "Remote"}]}}
+        jslib.write_json(self.home / "profile" / "sources.json", cfg)
+
+    def test_parse_dice(self):
+        items = scan.parse_dice({"data": [dice_job("g1", "Platform Architect", types=("Hybrid",))]})
+        it = items[0]
+        self.assertEqual(it["source_job_id"], "g1")
+        self.assertEqual(it["url"], "https://www.dice.com/job-detail/g1")
+        self.assertEqual(it["remote"], "hybrid")
+        self.assertEqual(it["salary"], "")
+
+    def test_scan_fetches_details_only_for_matches(self):
+        fake = FakeMcp([dice_job("g1", "Principal Platform Architect"),
+                        dice_job("g2", "Pastry Chef"),
+                        dice_job("g1", "Principal Platform Architect")])
+        with mock.patch("urllib.request.urlopen", fake):
+            res = scan.run_scan(self.home)
+        self.assertEqual(res["dice"], "ok")
+        self.assertEqual(res["new"], 1)
+        details = [a for n, a in fake.calls if n == "get_job_details"]
+        self.assertEqual(details, [{"job_id": "g1"}])
+        search = [a for n, a in fake.calls if n == "search_jobs"][0]
+        self.assertEqual(search["workplace_types"], ["Remote"])
+        jd = (self.home / "jobs" / res["new_ids"][0] / "jd.md").read_text(encoding="utf-8")
+        self.assertIn("Kubernetes", jd)
+        self.assertNotIn("dice", {b["source"] for b in res["browser_next"]})
+        # a second scan knows the job and asks for no details
+        fake.calls.clear()
+        with mock.patch("urllib.request.urlopen", fake):
+            res = scan.run_scan(self.home)
+        self.assertEqual(res["known"], 1)
+        self.assertFalse([n for n, _ in fake.calls if n == "get_job_details"])
+
+    def test_blocked_dice_points_to_connector(self):
+        with mock.patch("urllib.request.urlopen", FakeMcp([], blocked=True)):
+            res = scan.run_scan(self.home)
+        self.assertEqual(res["dice"], "blocked")
+        self.assertTrue(res["network_blocked"])
+        self.assertIn("mcp.dice.com", res["errors"][0])
+        self.assertIn("dice", {b["source"] for b in res["browser_next"]})
 
 
 class TestVerify(HomeCase):

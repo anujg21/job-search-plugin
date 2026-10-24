@@ -22,13 +22,15 @@ import jslib  # noqa: E402
 import sources_lib as sl  # noqa: E402
 
 API_SOURCES = ("greenhouse", "lever", "ashby")
-BROWSER_SOURCES = ("indeed", "dice", "linkedin")
 VERIFY_STATUSES = ("found", "scored", "prepared", "needs_approval")
 
 GREENHOUSE_URL = "https://boards-api.greenhouse.io/v1/boards/{token}/jobs?content=true"
 GREENHOUSE_LIST_URL = "https://boards-api.greenhouse.io/v1/boards/{token}/jobs"
 LEVER_URL = "https://api.lever.co/v0/postings/{token}?mode=json"
 ASHBY_URL = "https://api.ashbyhq.com/posting-api/job-board/{token}?includeCompensation=true"
+# Dice's public MCP server (the same one behind its Claude connector). No sign-in.
+DICE_MCP_URL = "https://mcp.dice.com/mcp"
+REMOTE_WORDS = ("remote", "anywhere", "")
 
 
 def _company_entry(entry) -> Tuple[str, str]:
@@ -158,6 +160,87 @@ def parse_ashby(payload: dict, token: str, name: str) -> List[dict]:
     return out
 
 
+def _dice_remote(j: dict) -> str:
+    types = [t.lower() for t in j.get("workplaceTypes") or []]
+    if j.get("isRemote") or "remote" in types:
+        return "remote"
+    if "hybrid" in types:
+        return "hybrid"
+    if "on-site" in types or "onsite" in types:
+        return "onsite"
+    return "unknown"
+
+
+def parse_dice(payload: dict) -> List[dict]:
+    out = []
+    for j in (payload or {}).get("data", []) or []:
+        guid = str(j.get("guid") or "").strip()
+        if not guid:
+            continue
+        url = re.sub(r"\?.*$", "", j.get("detailsPageUrl") or "") or \
+            "https://www.dice.com/job-detail/%s" % guid
+        loc = ((j.get("jobLocation") or {}).get("displayName") or "").strip()
+        out.append({
+            "source": "dice",
+            "source_job_id": guid,
+            "company": (j.get("companyName") or "").strip() or "Unknown",
+            "title": (j.get("title") or "").strip(),
+            "location": loc,
+            "remote": _dice_remote(j),
+            "url": url,
+            "apply_url": url,
+            "salary": "" if (j.get("salary") or "").lower() in ("", "depends on experience")
+                      else j.get("salary"),
+            "posted_at": sl.norm_date(j.get("postedDate")),
+            "description": sl._tidy(j.get("summary") or ""),
+            "employment": j.get("employmentType") or "",
+        })
+    return out
+
+
+def _dice_args(query: dict) -> dict:
+    args = {"keyword": query.get("q", ""), "posted_date": "SEVEN", "sort": "datePosted",
+            "jobs_per_page": 20}
+    loc = (query.get("l") or "").strip()
+    if loc.lower() in REMOTE_WORDS:
+        args["workplace_types"] = ["Remote"]
+    else:
+        args["location"] = loc
+    return args
+
+
+def fetch_dice(home, conf: dict, prefs: dict) -> List[dict]:
+    """Search Dice for each saved query. Only postings that pass the prefilter and are not
+    tracked yet get the full description (one extra call each), up to max_per_run."""
+    cap = int(conf.get("max_per_run") or 20)
+    seen, keep = set(), []
+    for q in conf.get("queries") or []:
+        if not q.get("q"):
+            continue
+        for it in parse_dice(sl.mcp_tool(DICE_MCP_URL, "search_jobs", _dice_args(q))):
+            if it["source_job_id"] in seen:
+                continue
+            seen.add(it["source_job_id"])
+            if not sl.prefilter(it, prefs)[0]:
+                keep.append(it)  # ingest counts it as filtered
+                continue
+            job_id = jslib.make_job_id("dice", it["company"], it["source_job_id"])
+            if jslib.load_job(home, job_id) is not None or cap <= 0:
+                keep.append(it)
+                continue
+            try:
+                d = sl.mcp_tool(DICE_MCP_URL, "get_job_details", {"job_id": it["source_job_id"]})
+                text = sl.html_to_text(d.get("description") or "")
+                skills = ", ".join(s.get("name", "") for s in d.get("skills") or [] if s.get("name"))
+                if text:
+                    it["description"] = text + ("\n\nSkills: " + skills if skills else "")
+            except sl.FetchError:
+                pass  # keep the summary; scoring still works on a shorter text
+            cap -= 1
+            keep.append(it)
+    return keep
+
+
 PARSERS: Dict[str, Tuple[str, Callable]] = {
     "greenhouse": (GREENHOUSE_URL, parse_greenhouse),
     "lever": (LEVER_URL, parse_lever),
@@ -205,25 +288,28 @@ def selected_sources(cfg: dict, wanted: Optional[List[str]]) -> List[str]:
 
 # ---------- scan ----------
 
-def browser_next(cfg: dict) -> List[dict]:
-    """What the agent still has to do for the browser sources after this script.
-    Indeed never needs a sign-in, so it always has a web search route."""
+def browser_next(cfg: dict, dice_status: str = "") -> List[dict]:
+    """What the agent still has to do after this script, per source. Indeed never needs a
+    sign-in, so it always has a route. Dice is fetched here; it only shows up when that failed."""
     srcs = cfg.get("sources", {}) or {}
     out = []
-    for s in BROWSER_SOURCES:
-        conf = srcs.get(s) or {}
-        if not conf.get("enabled"):
-            continue
-        guide = "sources/%s.md" % s
-        if s == "indeed":
-            do = ("Chrome if its tools are connected, else the 'Fallback without Chrome' section "
-                  "(WebSearch). Run it even when unattended") if conf.get("has_access") \
-                else "the 'Fallback without Chrome' section (WebSearch). Run it even when unattended"
-        elif conf.get("has_access"):
-            do = "Chrome if its tools are connected, else skip and note '%s: no browser'" % s
-        else:
-            do = "skip and note '%s: not signed in, see sources/check-access.md'" % s
-        out.append({"source": s, "guide": guide, "do": do})
+    indeed = srcs.get("indeed") or {}
+    if indeed.get("enabled"):
+        out.append({"source": "indeed", "guide": "sources/indeed.md",
+                    "do": "the Indeed connector's search_jobs tool if it is loaded, else Chrome if "
+                          "connected, else the 'Fallback without Chrome' section (WebSearch). "
+                          "Run it even when unattended"})
+    dice = srcs.get("dice") or {}
+    if dice.get("enabled") and dice_status in ("blocked", "failed"):
+        out.append({"source": "dice", "guide": "sources/dice.md",
+                    "do": "scan.py could not reach Dice; use the Dice connector's search_jobs "
+                          "tool if it is loaded, else skip and note 'dice: %s'" % dice_status})
+    linkedin = srcs.get("linkedin") or {}
+    if linkedin.get("enabled"):
+        out.append({"source": "linkedin", "guide": "sources/linkedin.md",
+                    "do": ("Chrome if its tools are connected, else skip and note 'linkedin: no browser'"
+                           if linkedin.get("has_access") else
+                           "skip and note 'linkedin: not signed in, see sources/check-access.md'")})
     return out
 
 
@@ -251,15 +337,26 @@ def run_scan(home, wanted: Optional[List[str]] = None, dry_run: bool = False,
                 continue
             sl.ingest(home, items, prefs, result, use_filter=True, dry_run=dry_run,
                       limit_per_company=limit_per_company)
+    dice = (cfg.get("sources", {}) or {}).get("dice") or {}
+    if (("dice" in wanted) if wanted else dice.get("enabled")) and dice.get("queries"):
+        tried += 1
+        try:
+            sl.ingest(home, fetch_dice(home, dice, prefs), prefs, result, use_filter=True,
+                      dry_run=dry_run, limit_per_company=limit_per_company)
+            result["dice"] = "ok"
+        except sl.FetchError as e:
+            blocked += 1 if e.blocked else 0
+            result["dice"] = "blocked" if e.blocked else "failed"
+            _record_error(home, result, "dice", "search", str(e), dry_run)
     if tried and blocked == tried:
         # every board refused the same way: the network, not the tokens
         result["network_blocked"] = True
         result["errors"].insert(0, "network blocked: " + sl.BLOCKED_HINT)
     if not wanted:
-        result["browser_next"] = browser_next(cfg)
+        result["browser_next"] = browser_next(cfg, result.get("dice", ""))
     if wanted:
         for w in wanted:
-            if w not in API_SOURCES:
+            if w not in API_SOURCES and w != "dice":
                 result["errors"].append("%s: not an API source; follow sources/%s.md instead" % (w, w))
     return result
 

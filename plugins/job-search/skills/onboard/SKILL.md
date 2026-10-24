@@ -199,9 +199,9 @@ Ask everything in one short message with the options below, not one source at a 
 | Greenhouse | No | Public API. Watches the companies you name. |
 | Lever | No | Public API. Watches the companies you name. |
 | Ashby | No | Public API. Watches the companies you name. |
-| Indeed | No | Search results read in your Chrome. |
-| Dice | Yes, in Chrome | Read in your Chrome while you are signed in. |
-| LinkedIn | Yes, in Chrome | Read-only and low volume. Never applies or messages anyone. |
+| Dice | No | Dice's public connector. Searches your titles. On by default. |
+| Indeed | One-time Indeed sign-in to connect it | The Indeed connector; falls back to your Chrome or web search. |
+| LinkedIn | Yes, in Chrome | No connector exists. Read-only in your Chrome, low volume. Never applies or messages anyone. |
 
 **Companies are optional.** Ask "Any companies you would like me to watch? (optional, you can
 skip)". Then:
@@ -220,10 +220,9 @@ skip)". Then:
   "<company> careers greenhouse" (or lever, ashby) and read the token from the careers URL.
   Put the company in the list for the board that answered. Tell the user which you found
   and which you could not, and move on.
-- No companies at all is fine. Indeed, Dice and LinkedIn still search by title, and the
-  weekly radar suggests boards later. But at least one source must be able to find jobs:
-  if no company was added and Dice and LinkedIn end up off, turn Indeed on (it works without
-  Chrome through web search). Never finish setup with nothing that can find jobs.
+- No companies at all is fine. Dice, Indeed and LinkedIn still search by title, and the
+  weekly radar suggests boards later. Turn Dice and Indeed on by default (neither needs
+  Chrome). Never finish setup with nothing that can find jobs.
 
 **Searches are built for the user.** Do not ask for search terms or saved search URLs. For
 Indeed and Dice, make one query per target title (up to 3) with the first location, or
@@ -232,10 +231,11 @@ Indeed and Dice, make one query per target title (up to 3) with the first locati
 (URL-encoded; add `&f_WT=2` for remote only). The user can paste their own saved searches
 later.
 
-**Check Chrome access yourself.** Do not ask "are you signed in?". Follow
-`${CLAUDE_PLUGIN_ROOT}/sources/check-access.md`. It opens each site in the user's Chrome,
-sees whether they are signed in, and sets `enabled` and `has_access`. If Chrome is not
-connected it explains how to connect it, and setup goes on with the API sources.
+**Check access yourself.** Do not ask "are you signed in?". Follow
+`${CLAUDE_PLUGIN_ROOT}/sources/check-access.md`. It checks the Indeed connector (and helps
+the user connect it), checks LinkedIn in the user's Chrome, and sets `enabled` and
+`has_access`. Dice needs no check. If Chrome is not connected it says how to connect it, and
+setup goes on.
 
 Write `<home>/profile/sources.json` with all six sources present:
 
@@ -244,8 +244,8 @@ Write `<home>/profile/sources.json` with all six sources present:
   "greenhouse": {"enabled": true, "has_access": true, "companies": []},
   "lever": {"enabled": true, "has_access": true, "companies": []},
   "ashby": {"enabled": true, "has_access": true, "companies": []},
-  "indeed": {"enabled": false, "has_access": false, "queries": [{"q": "", "l": ""}], "max_per_run": 20},
-  "dice": {"enabled": false, "has_access": false, "queries": [{"q": "", "l": ""}], "max_per_run": 20},
+  "indeed": {"enabled": true, "has_access": false, "queries": [{"q": "", "l": ""}], "max_per_run": 20},
+  "dice": {"enabled": true, "has_access": true, "queries": [{"q": "", "l": ""}], "max_per_run": 20},
   "linkedin": {"enabled": false, "has_access": false, "saved_search_urls": [], "max_per_run": 15}
 }}
 ```

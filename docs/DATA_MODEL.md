@@ -113,14 +113,16 @@ Jobs whose location names only other countries are skipped before scoring.
     "lever":      {"enabled": false, "has_access": true, "companies": []},
     "ashby":      {"enabled": false, "has_access": true, "companies": []},
     "indeed":     {"enabled": false, "has_access": false, "queries": [{"q": "platform architect", "l": "Remote"}], "max_per_run": 20},
-    "dice":       {"enabled": false, "has_access": false, "queries": [{"q": "platform architect", "l": "Remote"}], "max_per_run": 20},
+    "dice":       {"enabled": true, "has_access": true, "queries": [{"q": "platform architect", "l": "Remote"}], "max_per_run": 20},
     "linkedin":   {"enabled": false, "has_access": false, "saved_search_urls": [], "max_per_run": 15}
   }
 }
 ```
 
-`has_access` is the user's onboarding confirmation that they are signed in / have an account.
-API sources (greenhouse, lever, ashby) need no login, so `has_access` is always true.
+`has_access` records what the access check saw (`sources/check-access.md`). Script sources
+(greenhouse, lever, ashby, dice) need no login, so it is always true for them. For Indeed it
+means Chrome can read Indeed; the Indeed connector is used whenever it is connected. For
+LinkedIn it means the user is signed in in Chrome.
 
 ## jobs/<job_id>/job.json
 

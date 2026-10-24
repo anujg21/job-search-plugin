@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "dice": {
+      "type": "http",
+      "url": "https://mcp.dice.com/mcp"
+    },
+    "indeed": {
+      "type": "http",
+      "url": "https://mcp.indeed.com/claude/mcp"
+    }
+  }
+}

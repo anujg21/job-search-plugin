@@ -111,11 +111,20 @@ short command; the user pastes it into Claude. The page never changes data by it
 
 - **Greenhouse, Lever, Ashby:** public company job boards. They need a list of companies, which
   is optional; the radar suggests some.
-- **Indeed, Dice, LinkedIn:** read in the user's own Chrome through the Claude in Chrome
-  extension, while they are signed in. The plugin checks access itself
-  (`sources/check-access.md`). LinkedIn is read only and low volume.
-- "A source found nothing": sign in to that site in Chrome, keep Chrome open at run time,
-  and check the Runs tab for the error.
+- **Dice:** Dice's public connector server, searched by `scan.py` with the user's titles. No
+  account or Chrome needed.
+- **Indeed:** the Indeed connector, bundled with the plugin. The user connects it once
+  (Customize, Connectors, Indeed, Connect, then sign in to Indeed; in Claude Code, `/mcp`).
+  Without it, Indeed is read in Chrome or found through web search.
+- **LinkedIn:** no job search connector exists. Read only, low volume, in the user's own
+  Chrome through the Claude in Chrome extension while they are signed in. Scheduled cloud
+  runs have no Chrome, so they skip it.
+- The plugin checks access itself (`sources/check-access.md`).
+- **Cloud runs** (scheduled tasks, claude.ai): the domain allowlist must include
+  `boards-api.greenhouse.io`, `api.lever.co`, `api.ashbyhq.com` and `mcp.dice.com`
+  (Settings, Capabilities). Connectors are not affected by it.
+- "A source found nothing": check the Runs tab for the error. For LinkedIn, sign in in
+  Chrome and keep Chrome open at run time.
 
 ## Scheduled runs
 

@@ -10,9 +10,8 @@ You need:
 - Claude Desktop for scheduled runs. Claude Code in the terminal also works for everything except
   the Desktop scheduler.
 - Python 3.9 or newer. macOS already has it. Check with `python3 --version`.
-- Google Chrome. It turns tailored resumes into PDFs and reads Indeed, Dice and LinkedIn with
-  your own sign-in. Without Chrome you still get HTML resumes and the Greenhouse, Lever and
-  Ashby job boards.
+- Google Chrome. It turns tailored resumes into PDFs and reads LinkedIn with your own
+  sign-in. Without Chrome you still get HTML resumes and every other source.
 - Your resume as a PDF, Word file, Markdown or plain text.
 
 The plugin lives at [github.com/anujg21/job-search-plugin](https://github.com/anujg21/job-search-plugin).
@@ -81,8 +80,9 @@ edits what is there instead of starting over.
    fit score. Say "skip" during the research to name titles yourself. The radar runs once
    here; later chats reuse it and ask before running it again.
 4. **Job sources.** Naming companies is optional. It offers the company job boards the radar
-   found, and checks any company you name on Greenhouse, Lever and Ashby. For Indeed, Dice and
-   LinkedIn it opens each site in your Chrome and checks whether you are signed in. If you are
+   found, and checks any company you name on Greenhouse, Lever and Ashby. Dice is on with no
+   account. For Indeed it asks you to connect the Indeed connector (one Indeed sign-in). For
+   LinkedIn it opens the site in your Chrome and checks whether you are signed in. If you are
    not, it leaves the site open so you can sign in, or you can skip it. It builds the searches
    from your titles and locations.
 5. **Health check.** It runs `jobctl.py doctor` and offers to set up the schedule and do a
@@ -146,6 +146,8 @@ Your data stays in `~/JobSearch` until you delete that folder yourself.
 | `/job-search:...` commands do not show up | Check the plugin is installed and enabled under Customize, Plugins. Start a new task or session after installing. |
 | "No job-search home" | Run `/job-search:onboard`, or pick your data folder as the task's working folder. |
 | A scheduled run cannot find your data | Set the task's folder to your data folder. See [SCHEDULING.md](SCHEDULING.md). |
-| No PDF next to a tailored resume | Chrome was not available where the run happened. Open `resume.html` and print it to PDF, or install Chrome. |
-| Indeed, Dice or LinkedIn found nothing | Sign in to that site in Chrome and make sure the Claude in Chrome extension is connected. Then run `/job-search:onboard`, pick Job sources, and it checks access again. A login wall or CAPTCHA is logged and skipped, never solved. |
+| No PDF next to a tailored resume | Chrome was not available where the run happened. A cloud run prints the PDF on your Mac when it can. Otherwise open `resume.html` and print it to PDF, or install Chrome. |
+| Indeed found little | Connect the Indeed connector: Customize, Connectors, Indeed, Connect (in Claude Code, `/mcp`). Without it, Indeed uses Chrome or web search. |
+| Dice found nothing in a cloud run | Add `mcp.dice.com` to the domain allowlist (Settings, Capabilities), or turn on the Dice connector under Customize, Connectors. |
+| LinkedIn found nothing | Sign in to LinkedIn in Chrome and make sure the Claude in Chrome extension is connected. Then run `/job-search:onboard`, pick Job sources, and it checks access again. A login wall or CAPTCHA is logged and skipped, never solved. Scheduled cloud runs have no Chrome and skip LinkedIn. |
 | Too many or too few jobs | Change target titles, title words to skip, or countries with `/job-search:onboard`. Jobs still waiting to be scored are re-filtered on the next run. |

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0 (2026-10-24)
+
+- Dice no longer needs Chrome or a Dice account. `scan.py` searches Dice through its public
+  connector server (`mcp.dice.com`) with your titles, and fetches full descriptions only for
+  jobs that pass your filters. When a cloud run blocks that domain, the run uses the Dice
+  connector instead.
+- The plugin bundles the Dice and Indeed connectors (`.mcp.json`). Indeed now tries its
+  connector first (one Indeed sign-in), then Chrome, then web search. Connectors work in
+  scheduled cloud runs, since the domain allowlist does not apply to them.
+- LinkedIn has no job search connector and stays Chrome only. Scheduled cloud runs skip it.
+- A cloud run with no Chrome prints the tailored resumes to PDF on your Mac.
+- Onboarding turns Dice and Indeed on by default and checks the Indeed connector instead of
+  asking. `jobctl.py doctor` counts Dice with searches as a source that can find jobs.
+- The "network blocked" message lists `mcp.dice.com` too, and no longer suggests running in
+  Claude Desktop.
+
 ## 0.2.6 (2026-10-24)
 
 - Indeed's web search fallback runs two searches per query and includes Greenhouse's

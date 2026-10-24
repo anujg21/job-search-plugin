@@ -57,8 +57,8 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    from those edits where the facts allow.
 2. **Scan.** Follow `skills/scan/SKILL.md`. It runs `scan.py` and the browser sources.
    Do every item in the `browser_next` list `scan.py` returns. Indeed is in it whenever it
-   is enabled, and with no Chrome it runs through WebSearch (the "Fallback without Chrome"
-   section of `sources/indeed.md`). A run with no Chrome still searches Indeed. Then
+   is enabled: the Indeed connector first, then Chrome, then WebSearch (see
+   `sources/indeed.md`). A run with no Chrome still searches Indeed. Then
    run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan.py" --verify` so dead postings are closed.
    Take `found` and `new` from its output. Each source error goes in `errors`.
 3. **Score.** Pick the jobs: `JOBCTL list --status found --rank --limit <daily_cap * 3> --json`
@@ -75,6 +75,12 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    If you are working on a copy of the data folder (a cloud run that staged it from the
    user's computer), add `--home-label "<the user's real data folder path>"` so the page
    shows their path, then copy every changed file back to the real folder.
+   No PDF because this sandbox has no Chrome, but you can run commands on the user's
+   computer: after copying back, print each resume tailored this run to PDF there, one
+   command per job (it needs no network):
+   `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --no-pdf-header-footer --print-to-pdf="<real home>/jobs/<id>/resume.pdf" "file://<real home>/jobs/<id>/resume.html"`
+   Write spaces in the `file://` path as `%20`. If Chrome is not at that path, skip it and
+   note `pdf: Chrome not found`.
 7. **Mark lessons used.** For each lesson that changed what you did in this run, run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/memory.py" lesson-touch <id>`. Unused lessons
    retire after 60 days, so this keeps the useful ones.

@@ -87,6 +87,7 @@ class TestJobctl(Base):
             self.assertEqual(src[k]["companies"], [])
         for k in ("indeed", "dice", "linkedin"):
             self.assertFalse(src[k]["enabled"])
+        for k in ("indeed", "linkedin"):
             self.assertFalse(src[k]["has_access"])
         self.assertEqual(jslib.read_json(h / "profile" / "gap-notes.json"), {})
         self.assertEqual(jslib.read_json(h / "profile" / "fact-bank.json")["roles"], [])

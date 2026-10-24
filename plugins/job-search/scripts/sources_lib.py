@@ -34,9 +34,8 @@ class FetchError(Exception):
 
 
 BLOCKED_HINT = ("the job board sites are blocked from where this runs. In a claude.ai cloud "
-                "session or scheduled task, add boards-api.greenhouse.io, api.lever.co and "
-                "api.ashbyhq.com under Settings > Capabilities > Domain allowlist, or run it in "
-                "Claude Desktop on your computer")
+                "session or scheduled task, add boards-api.greenhouse.io, api.lever.co, "
+                "api.ashbyhq.com and mcp.dice.com under Settings > Capabilities > Domain allowlist")
 
 
 def _looks_blocked(reason: Any) -> bool:
@@ -44,13 +43,13 @@ def _looks_blocked(reason: Any) -> bool:
     return "403" in text or "tunnel connection failed" in text or "proxy" in text
 
 
-def fetch_json(url: str, timeout: int = TIMEOUT) -> Any:
-    """GET a URL and parse JSON. Raises FetchError with a short readable message."""
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+def _request(req: urllib.request.Request, timeout: int) -> Tuple[str, Any]:
+    """Send a request. Returns (body text, response headers). Raises FetchError."""
     try:
         resp = urllib.request.urlopen(req, timeout=timeout)
         try:
             raw = resp.read()
+            headers = getattr(resp, "headers", None) or {}
         finally:
             close = getattr(resp, "close", None)
             if close:
@@ -66,12 +65,72 @@ def fetch_json(url: str, timeout: int = TIMEOUT) -> Any:
         raise FetchError("network error: %s" % reason, blocked=_looks_blocked(reason))
     except (TimeoutError, OSError) as e:  # socket.timeout is an OSError subclass
         raise FetchError("network error: %s" % e, blocked=_looks_blocked(e))
+    if isinstance(raw, bytes):
+        raw = raw.decode("utf-8", "replace")
+    return raw, headers
+
+
+def fetch_json(url: str, timeout: int = TIMEOUT) -> Any:
+    """GET a URL and parse JSON. Raises FetchError with a short readable message."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+    raw, _ = _request(req, timeout)
     try:
-        if isinstance(raw, bytes):
-            raw = raw.decode("utf-8", "replace")
         return json.loads(raw)
     except ValueError:
         raise FetchError("response was not valid JSON")
+
+
+# ---------- MCP over HTTP (public servers such as Dice) ----------
+
+_MCP_SESSIONS: Dict[str, Optional[str]] = {}
+
+
+def _mcp_post(url: str, body: dict, timeout: int) -> Any:
+    headers = {"User-Agent": USER_AGENT, "Content-Type": "application/json",
+               "Accept": "application/json, text/event-stream", "MCP-Protocol-Version": "2025-06-18"}
+    sid = _MCP_SESSIONS.get(url)
+    if sid:
+        headers["Mcp-Session-Id"] = sid
+    req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers)
+    raw, resp_headers = _request(req, timeout)
+    new_sid = resp_headers.get("Mcp-Session-Id") if hasattr(resp_headers, "get") else None
+    if new_sid:
+        _MCP_SESSIONS[url] = new_sid
+    # streamable HTTP may answer as server-sent events: take the last data line
+    for line in raw.splitlines():
+        if line.startswith("data:"):
+            raw = line[5:].strip()
+    if not raw.strip():
+        return None
+    try:
+        return json.loads(raw)
+    except ValueError:
+        raise FetchError("response was not valid JSON")
+
+
+def mcp_tool(url: str, tool: str, args: dict, timeout: int = TIMEOUT) -> Any:
+    """Call one tool on a public MCP server that needs no sign-in. Returns the tool's JSON
+    result (its first text block parsed). Raises FetchError."""
+    if url not in _MCP_SESSIONS:
+        _MCP_SESSIONS[url] = None
+        _mcp_post(url, {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "job-search-plugin", "version": jslib.PLUGIN_VERSION}}}, timeout)
+        _mcp_post(url, {"jsonrpc": "2.0", "method": "notifications/initialized"}, timeout)
+    msg = _mcp_post(url, {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                          "params": {"name": tool, "arguments": args}}, timeout) or {}
+    if msg.get("error"):
+        raise FetchError("%s: %s" % (tool, (msg["error"] or {}).get("message", "error")))
+    res = msg.get("result") or {}
+    if res.get("structuredContent") and not res.get("isError"):
+        return res["structuredContent"]
+    text = "".join(c.get("text", "") for c in res.get("content") or [] if c.get("type") == "text")
+    if res.get("isError"):
+        raise FetchError("%s: %s" % (tool, text[:200] or "error"))
+    try:
+        return json.loads(text, strict=False)
+    except ValueError:
+        raise FetchError("%s: result was not JSON" % tool)
 
 
 # ---------- HTML to text ----------

@@ -9,12 +9,13 @@ runs `scripts/scan.py` (API sources) or follows the matching guide here (browser
 | Greenhouse | `greenhouse.md` | `scan.py`, public Job Board API |
 | Lever | `lever.md` | `scan.py`, public Postings API |
 | Ashby | `ashby.md` | `scan.py`, public Job Board API |
-| Indeed | `indeed.md` | Claude in Chrome reads search results, then `add_job.py` |
-| Dice | `dice.md` | Claude in Chrome reads search results, then `add_job.py` |
+| Indeed | `indeed.md` | The Indeed connector, else Claude in Chrome, else web search, then `add_job.py` |
+| Dice | `dice.md` | `scan.py`, Dice's public connector server (the Dice connector if that is blocked) |
 | LinkedIn | `linkedin.md` | Claude in Chrome reads a few saved searches, then `add_job.py` |
 
-`check-access.md` checks, in the user's Chrome, whether Indeed, Dice and LinkedIn can be read
-(signed in, no block page). Onboarding uses it instead of asking the user.
+The plugin's `.mcp.json` bundles the Dice and Indeed connectors. LinkedIn has no job search
+connector. `check-access.md` checks the Indeed connector and, in the user's Chrome, whether
+Indeed and LinkedIn can be read. Onboarding uses it instead of asking the user.
 
 ## Adding a new source
 

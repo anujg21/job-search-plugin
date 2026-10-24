@@ -1,6 +1,6 @@
 ---
 name: scan
-description: Find new job postings from the enabled sources (Greenhouse, Lever, Ashby APIs and the Indeed, Dice, LinkedIn browser adapters), filter them against the user's preferences, and add new ones to the jobs folder. Use for "scan for jobs", "find new jobs", "check job boards", or as the first step of the daily run.
+description: Find new job postings from the enabled sources (Greenhouse, Lever, Ashby and Dice through scan.py, Indeed through its connector, Chrome or web search, LinkedIn through Chrome), filter them against the user's preferences, and add new ones to the jobs folder. Use for "scan for jobs", "find new jobs", "check job boards", or as the first step of the daily run.
 ---
 
 # Scan for jobs
@@ -29,12 +29,13 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
 1. Read `<home>/profile/sources.json`. Note which sources are enabled. If the user named
    sources, use only those.
 
-2. API sources (greenhouse, lever, ashby). If any are enabled, run:
+2. Script sources (greenhouse, lever, ashby, dice). If any are enabled, run:
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan.py" --home "<home>" --json`
    Add `--source <name>` for each named source, and `--dry-run` for a dry run.
    The JSON has `fetched`, `matched`, `new`, `known`, `new_ids`, `errors`, a `filtered`
-   breakdown and `browser_next`. Errors are already logged as `source_error` signals by the
-   script. `browser_next` lists what step 4 must do for each enabled browser source.
+   breakdown, `dice` (`ok`, `blocked` or `failed` when Dice ran) and `browser_next`. Errors
+   are already logged as `source_error` signals by the script. `browser_next` lists what
+   step 4 must do for Indeed, LinkedIn, and Dice when the script could not reach it.
    If it has `network_blocked: true`, every board was refused by the network where this
    runs (usually a claude.ai cloud sandbox), not by bad tokens. Put the first error line in
    the summary as is: it names the domains to allow. Do not tell the user their tokens are
@@ -52,22 +53,20 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    no longer pass, so a preference change (new title words to skip, a different country) also
    cleans up jobs found before the change.
 
-4. Browser sources (indeed, dice, linkedin). Do every item in `browser_next` from step 2
-   (or, if `scan.py` did not run, each enabled one). Read
+4. Connector and browser sources. Do every item in `browser_next` from step 2 (or, if
+   `scan.py` did not run, each enabled one of indeed, linkedin). Read
    `${CLAUDE_PLUGIN_ROOT}/sources/<name>.md` and follow it exactly.
-   An Indeed item is never skipped: with no Chrome it runs the guide's fallback section.
+   An Indeed item is never skipped: it uses the Indeed connector, else Chrome, else the
+   guide's web search section.
    Do them one at a time, LinkedIn last. Each guide ends by running `add_job.py`, which
    prints the same JSON counts. Add those to the totals.
-   - Enabled but `has_access` is false: for Indeed, use only the guide's fallback section
-     (web search, no Chrome). For Dice and LinkedIn, skip it and say in the summary that the
-     user can turn it on by signing in and running the access check
-     (`sources/check-access.md`).
+   - LinkedIn with `has_access` false: skip it and say in the summary that the user can
+     turn it on by signing in and running the access check (`sources/check-access.md`).
+   - Indeed connector not connected: say once in the summary "connect the Indeed connector
+     for better Indeed results" (Customize, Connectors).
    - A sign-in page during the scan: name the site in the summary's Problems line and say
      "sign in to <site> in Chrome".
-   - Chrome tools missing, or no browser connected (common in scheduled and cloud runs):
-     Indeed never needs a sign-in, so always run its fallback section (WebSearch and
-     WebFetch). Do not skip Indeed because the run is unattended. Dice and LinkedIn need the
-     user's signed-in Chrome, so skip them and say so.
+   - Chrome tools missing (common in scheduled and cloud runs): LinkedIn is skipped; say so.
    - Login wall or CAPTCHA: the guide says to stop that source and log a `source_error`.
    For a dry run, pass `--dry-run` to `add_job.py`.
 

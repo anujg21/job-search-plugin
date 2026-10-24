@@ -83,9 +83,11 @@ resume changes wait for your approval. The plugin never submits an application.
 | Source | How | Login |
 |---|---|---|
 | Greenhouse, Lever, Ashby | Public job board APIs, per company | None |
-| Indeed | Read in your Chrome | Optional |
-| Dice | Read in your Chrome | Your Dice account |
+| Dice | Dice's public connector, searched by your titles | None |
+| Indeed | The Indeed connector (bundled), else your Chrome or web search | Your Indeed account, once, to connect it |
 | LinkedIn | Read in your Chrome, a few saved searches only | Your LinkedIn account |
+
+The plugin bundles the Dice and Indeed connectors. LinkedIn has no job search connector.
 
 LinkedIn is read only and low volume on purpose. Its terms forbid scraping and bots, so the
 plugin reads a few of your saved searches and never applies or messages anyone.
@@ -94,7 +96,7 @@ plugin reads a few of your saved searches and never applies or messages anyone.
 
 - A paid Claude plan. Scheduled runs need Claude Desktop.
 - Python 3.9 or newer (macOS includes it).
-- Google Chrome, for PDF resumes and the Indeed, Dice and LinkedIn sources.
+- Google Chrome, for PDF resumes and the LinkedIn source.
 
 ## Privacy
 
