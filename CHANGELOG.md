@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.6 (2026-10-24)
+
+- Indeed's web search fallback runs two searches per query and includes Greenhouse's
+  `job-boards.greenhouse.io` pages, and retries a query without the location when it finds
+  nothing.
+- A blocked cloud run no longer suggests running in Claude Desktop instead. Desktop
+  scheduled tasks use the same cloud sandbox; the domain allowlist is the fix.
+
 ## 0.2.5 (2026-10-24)
 
 - `scan.py` now returns `browser_next`, a list of what to do for Indeed, Dice and LinkedIn.

@@ -38,9 +38,9 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    If it has `network_blocked: true`, every board was refused by the network where this
    runs (usually a claude.ai cloud sandbox), not by bad tokens. Put the first error line in
    the summary as is: it names the domains to allow. Do not tell the user their tokens are
-   wrong. Commands a cloud session runs on the user's Mac go through the same allowlist, so
-   do not suggest that as a workaround. Running the plugin from Claude Code on the Mac is
-   not affected. Still do step 4.
+   wrong. The fix is the allowlist. Do not suggest running on the Mac or in Claude Desktop
+   instead: Desktop scheduled tasks use the same cloud sandbox, and commands it runs on the
+   Mac go through the same allowlist. Still do step 4.
    The guides `sources/greenhouse.md`, `sources/lever.md` and `sources/ashby.md` explain how
    board tokens work, in case an error says a token is wrong.
 

@@ -51,8 +51,12 @@ Run this only when `sources.indeed.enabled` and `sources.indeed.has_access` are 
 
 ## Fallback without Chrome
 
-Use WebSearch for public postings, for example
-`"<q>" <l> site:indeed.com/viewjob` and `"<q>" (site:boards.greenhouse.io OR site:jobs.lever.co OR site:jobs.ashbyhq.com)`.
+Use WebSearch for public postings. For each query in `sources.indeed.queries` run both:
+- `"<q>" <l> site:indeed.com/viewjob`
+- `"<q>" <l> (site:job-boards.greenhouse.io OR site:boards.greenhouse.io OR site:jobs.lever.co OR site:jobs.ashbyhq.com)`
+
+Search engines index few Indeed pages, so most results come from the second search. If a
+query returns nothing, try once more without the location.
 Fetch each result with WebFetch. If a page will not load or shows a block page, skip it.
 Use `source: "indeed"` and the `jk` from the URL for Indeed pages. For ATS pages use the ATS
 name as the source and the posting id from the URL as `source_job_id`. Stay under
