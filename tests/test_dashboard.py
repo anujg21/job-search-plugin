@@ -268,6 +268,12 @@ class DashboardTest(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def test_home_label_shows_the_real_folder(self):
+        data = build_dashboard.gather(self.home, self.home / "dashboard.html", "/Users/x/job-hunt")
+        self.assertEqual(data["home"], "/Users/x/job-hunt")
+        self.assertEqual(build_dashboard.gather(self.home, self.home / "dashboard.html")["home"],
+                         str(self.home))
+
     def assert_no_external_loads(self, html: str):
         patterns = [
             r'<script[^>]+src\s*=',

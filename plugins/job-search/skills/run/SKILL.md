@@ -69,6 +69,9 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    `prepared`. Major changes end as `needs_approval` and wait for the user. Count both.
 5. **Gaps.** `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/gaps.py"`.
 6. **Dashboard.** `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/build_dashboard.py"`.
+   If you are working on a copy of the data folder (a cloud run that staged it from the
+   user's computer), add `--home-label "<the user's real data folder path>"` so the page
+   shows their path, then copy every changed file back to the real folder.
 7. **Mark lessons used.** For each lesson that changed what you did in this run, run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/memory.py" lesson-touch <id>`. Unused lessons
    retire after 60 days, so this keeps the useful ones.

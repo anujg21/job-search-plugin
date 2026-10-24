@@ -2,7 +2,7 @@
 """Build <home>/dashboard.html: one self-contained static page with the data inlined.
 
 Usage:
-  build_dashboard.py [--home H] [--out PATH] [--json]
+  build_dashboard.py [--home H] [--out PATH] [--home-label PATH] [--json]
 
 The page makes no network requests. Data goes into a
 <script type="application/json"> tag; the JS in templates/dashboard.html renders it.
@@ -132,7 +132,7 @@ def week_labels(today: str, n: int = TREND_WEEKS) -> list:
     return out
 
 
-def gather(home: Path, out_path: Path) -> dict:
+def gather(home: Path, out_path: Path, home_label: str = None) -> dict:
     home = Path(home)
     rel = os.path.relpath(str(home), str(out_path.parent)).replace(os.sep, "/")
     base = "" if rel == "." else rel.rstrip("/") + "/"
@@ -209,7 +209,7 @@ def gather(home: Path, out_path: Path) -> dict:
         "schema_version": jslib.SCHEMA_VERSION,
         "generated_at": jslib.now_iso(),
         "today": today,
-        "home": str(home),
+        "home": home_label or str(home),
         "weeks": week_labels(today),
         "found_weekly": dict(sorted(found_weekly.items())),
         "prefs": {
@@ -245,10 +245,10 @@ def render(data: dict, template_path: Path = TEMPLATE) -> str:
     return tpl.replace(PLACEHOLDER, to_script_json(data), 1)
 
 
-def build(home: Path, out: Path = None) -> Path:
+def build(home: Path, out: Path = None, home_label: str = None) -> Path:
     home = Path(home)
     out = Path(out).expanduser().resolve() if out else home / "dashboard.html"
-    data = gather(home, out)
+    data = gather(home, out, home_label)
     html = render(data)
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_name("." + out.name + ".tmp")
@@ -261,10 +261,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Build the static dashboard.html for the job-search home.")
     ap.add_argument("--home")
     ap.add_argument("--out", help="output path (default <home>/dashboard.html)")
+    ap.add_argument("--home-label", help="data folder path to show on the page, when building from "
+                    "a copy (a cloud run stages the folder elsewhere)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
     home = jslib.require_home(args.home)
-    out = build(home, Path(args.out) if args.out else None)
+    out = build(home, Path(args.out) if args.out else None, args.home_label)
     njobs = sum(1 for _ in jslib.iter_jobs(home))
     if args.json:
         print(json.dumps({"path": str(out), "jobs": njobs}))

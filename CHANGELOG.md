@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4 (2026-10-24)
+
+- The dashboard shows your real data folder when a cloud run built it from a staged copy
+  (`build_dashboard.py --home-label`). It showed a temporary sandbox path before.
+
 ## 0.2.3 (2026-10-24)
 
 - Scan says when the network blocks every job board (a claude.ai cloud sandbox) and names
