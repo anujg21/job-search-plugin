@@ -21,7 +21,8 @@ So the Mac should be awake, with Claude Desktop open, at the scheduled time. The
 reaches the web domains your account allows, so add the job board domains first (see
 "network blocked" under Troubleshooting). Connectors are not affected by the allowlist, so
 connect the Indeed connector for the best Indeed results. The sandbox has no Chrome, so
-LinkedIn is skipped, and the run prints resume PDFs on your Mac instead.
+LinkedIn is skipped and resumes come as HTML. `/job-search:apply` makes the PDF when you
+apply, or open `resume.html` and print it to PDF.
 
 1. Open Claude Desktop and switch to Cowork.
 2. Click **Scheduled** in the left sidebar.

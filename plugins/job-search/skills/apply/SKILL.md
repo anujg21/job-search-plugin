@@ -31,7 +31,11 @@ button that sends the application.**
    - `applied` or later: tell them it is already marked applied and when.
    - `found` or `scored` with no resume: offer to tailor it now by following
      `${CLAUDE_PLUGIN_ROOT}/skills/tailor/SKILL.md`.
-2. Show, in a short list:
+2. No `resume.pdf` yet (runs in the cloud cannot make one): run
+   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_resume.py" <job_id>`. It makes the PDF where
+   Chrome is installed. If it still says no PDF, tell the user in one line: open
+   `resume.html` in their browser, press Cmd+P (Ctrl+P on Windows) and pick "Save as PDF".
+3. Show, in a short list:
    - Company, title, location, score.
    - Resume: the full path `<home>/jobs/<job_id>/resume.pdf` if it exists, else
      `<home>/jobs/<job_id>/resume.html`. Always give full paths so the user can open or
@@ -39,9 +43,9 @@ button that sends the application.**
    - Answers: `<home>/jobs/<job_id>/answers.md` (cover note and screening answers). Show its
      contents so the user can copy from it.
    - Apply link: `apply_url`, or `url` if that is empty.
-3. Open the apply link. With Claude in Chrome, open it in a new tab. Without it, run
+4. Open the apply link. With Claude in Chrome, open it in a new tab. Without it, run
    `open "<url>"` on macOS (or print the link).
-4. Offer to prefill the form if the page is on Greenhouse (`boards.greenhouse.io`,
+5. Offer to prefill the form if the page is on Greenhouse (`boards.greenhouse.io`,
    `job-boards.greenhouse.io`), Lever (`jobs.lever.co`) or Ashby (`jobs.ashbyhq.com`) and Claude
    in Chrome is available. If they say yes:
    - Fill name, email, phone, location and links from `profile/fact-bank.json` `person`.
@@ -54,7 +58,7 @@ button that sends the application.**
      yourself."
    On other sites (Workday, iCIMS, LinkedIn Easy Apply), do not fill anything. Give the user
    the files and the link.
-5. Ask: "Did you submit it?"
+6. Ask: "Did you submit it?"
    - Yes: run
      `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" status <job_id> applied`
      and `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" signal apply --skill apply --job <job_id>`,

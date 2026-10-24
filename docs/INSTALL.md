@@ -146,7 +146,7 @@ Your data stays in `~/JobSearch` until you delete that folder yourself.
 | `/job-search:...` commands do not show up | Check the plugin is installed and enabled under Customize, Plugins. Start a new task or session after installing. |
 | "No job-search home" | Run `/job-search:onboard`, or pick your data folder as the task's working folder. |
 | A scheduled run cannot find your data | Set the task's folder to your data folder. See [SCHEDULING.md](SCHEDULING.md). |
-| No PDF next to a tailored resume | Chrome was not available where the run happened. A cloud run prints the PDF on your Mac when it can. Otherwise open `resume.html` and print it to PDF, or install Chrome. |
+| No PDF next to a tailored resume | Scheduled and claude.ai runs happen in a cloud sandbox without Chrome. `/job-search:apply <job_id>` makes the PDF on a computer with Chrome. Or open `resume.html` in your browser and print it to PDF. |
 | Indeed found little | Connect the Indeed connector: Customize, Connectors, Indeed, Connect (in Claude Code, `/mcp`). Without it, Indeed uses Chrome or web search. |
 | Dice found nothing in a cloud run | Add `mcp.dice.com` to the domain allowlist (Settings, Capabilities), or turn on the Dice connector under Customize, Connectors. |
 | LinkedIn found nothing | Sign in to LinkedIn in Chrome and make sure the Claude in Chrome extension is connected. Then run `/job-search:onboard`, pick Job sources, and it checks access again. A login wall or CAPTCHA is logged and skipped, never solved. Scheduled cloud runs have no Chrome and skip LinkedIn. |

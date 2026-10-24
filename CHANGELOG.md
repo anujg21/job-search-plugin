@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2 (2026-10-24)
+
+- Cloud runs no longer try to make PDFs. Commands they send to your computer run in a
+  sandbox with only the data folder mounted, so there is no Chrome there either.
+  `/job-search:apply` makes the PDF when you apply, or you can print `resume.html`.
+- Cloud runs no longer write archive files into the data folder. They save changed files
+  back one by one, since files written there cannot be deleted by the run.
+
 ## 0.3.1 (2026-10-24)
 
 - Cloud runs print tailored resumes to PDF on your computer as a separate step, and no

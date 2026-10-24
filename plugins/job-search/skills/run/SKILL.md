@@ -75,19 +75,15 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    If you are working on a copy of the data folder (a cloud run that staged it from the
    user's computer), add `--home-label "<the user's real data folder path>"` so the page
    shows their path, then copy every changed file back to the real folder.
-   Staging rule: any archive or temp file you make to move the folder (a `.tgz`, a list of
-   files) goes in the computer's temp folder (`/tmp`), never inside the data folder, and you
-   delete it when done.
-7. **PDFs on the user's computer (cloud runs only).** Do this whenever tailoring said "no
-   PDF" because this sandbox has no Chrome. The user's own computer usually has Chrome, and
-   printing needs no network. With your tool that runs commands on the user's computer, for
-   each job with a `resume.html` and no `resume.pdf`, run:
-   `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --no-pdf-header-footer --user-data-dir="$(mktemp -d)" --print-to-pdf="<real home>/jobs/<id>/resume.pdf" "file://<real home>/jobs/<id>/resume.html"`
-   Write spaces in the `file://` path as `%20`. Check the PDF exists afterwards, then put an
-   empty file at `jobs/<id>/resume.pdf` in your staged copy too, so the dashboard rebuilt in
-   step 9 links the PDF (do not copy that empty file back). Only if Chrome is not at that
-   path, note `pdf: Chrome not found on your computer`. Never tell the user Chrome is missing
-   because this sandbox lacks it.
+   Staging rule: never write an archive or temp file (a `.tgz`, a file list) into the data
+   folder. A cloud run cannot delete or overwrite files there with shell commands, so
+   anything it writes stays. Read the folder into your copy, and save back only the files
+   that changed, one by one, with the tool that saves files to the user's computer.
+7. **PDFs in a cloud run.** A cloud run cannot make PDFs: neither the sandbox nor the
+   command tool for the user's computer (which also runs in a sandbox, with only the data
+   folder mounted) has Chrome. Do not try. Leave `resume.html`, and in the summary say once:
+   "PDF: made when you run /job-search:apply, or open resume.html and print to PDF".
+   Do not report it as an error.
 8. **Mark lessons used.** For each lesson that changed what you did in this run, run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/memory.py" lesson-touch <id>`. Unused lessons
    retire after 60 days, so this keeps the useful ones.
