@@ -55,7 +55,10 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    since the last run are logged as signals. It also re-renders each edited resume, so its
    HTML and PDF match the edit. When tailoring later in this run, reuse the user's own wording
    from those edits where the facts allow.
-2. **Scan.** Follow `skills/scan/SKILL.md`. It runs `scan.py` and the browser sources. Then
+2. **Scan.** Follow `skills/scan/SKILL.md`. It runs `scan.py` and the browser sources.
+   Do every item in the `browser_next` list `scan.py` returns. Indeed is in it whenever it
+   is enabled, and with no Chrome it runs through WebSearch (the "Fallback without Chrome"
+   section of `sources/indeed.md`). A run with no Chrome still searches Indeed. Then
    run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan.py" --verify` so dead postings are closed.
    Take `found` and `new` from its output. Each source error goes in `errors`.
 3. **Score.** Pick the jobs: `JOBCTL list --status found --rank --limit <daily_cap * 3> --json`

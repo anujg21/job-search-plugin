@@ -347,6 +347,19 @@ class TestScan(HomeCase):
         self.assertFalse(res.get("network_blocked"))
         self.assertTrue(any("403" in e for e in res["errors"]))
 
+    def test_browser_next_always_keeps_indeed(self):
+        cfg = {"sources": {"indeed": {"enabled": True, "has_access": False},
+                           "dice": {"enabled": True, "has_access": False},
+                           "linkedin": {"enabled": True, "has_access": True},
+                           "greenhouse": {"enabled": True, "companies": ["stripe"]}}}
+        todo = {b["source"]: b["do"] for b in scan.browser_next(cfg)}
+        self.assertEqual(set(todo), {"indeed", "dice", "linkedin"})
+        self.assertIn("Fallback without Chrome", todo["indeed"])
+        self.assertTrue(todo["dice"].startswith("skip"))
+        self.assertIn("Chrome", todo["linkedin"])
+        cfg["sources"]["indeed"]["enabled"] = False
+        self.assertNotIn("indeed", {b["source"] for b in scan.browser_next(cfg)})
+
     def test_cli_json(self):
         out = io.StringIO()
         with mock.patch("urllib.request.urlopen", fake_urlopen_factory(self.routes)), \

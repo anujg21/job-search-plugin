@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.5 (2026-10-24)
+
+- `scan.py` now returns `browser_next`, a list of what to do for Indeed, Dice and LinkedIn.
+  The run follows it, so Indeed is searched through web search when there is no Chrome. A
+  scheduled cloud run skipped Indeed before.
+- A cloud run no longer suggests running the scan on your Mac to get around the blocked
+  boards. Commands it runs on your Mac go through the same domain allowlist.
+- SCHEDULING.md: corrected where scheduled tasks run and what the cloud sandbox can reach.
+
 ## 0.2.4 (2026-10-24)
 
 - The dashboard shows your real data folder when a cloud run built it from a staged copy

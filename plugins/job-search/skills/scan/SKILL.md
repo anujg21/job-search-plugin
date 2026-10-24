@@ -32,12 +32,15 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
 2. API sources (greenhouse, lever, ashby). If any are enabled, run:
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan.py" --home "<home>" --json`
    Add `--source <name>` for each named source, and `--dry-run` for a dry run.
-   The JSON has `fetched`, `matched`, `new`, `known`, `new_ids`, `errors` and a `filtered`
-   breakdown. Errors are already logged as `source_error` signals by the script.
+   The JSON has `fetched`, `matched`, `new`, `known`, `new_ids`, `errors`, a `filtered`
+   breakdown and `browser_next`. Errors are already logged as `source_error` signals by the
+   script. `browser_next` lists what step 4 must do for each enabled browser source.
    If it has `network_blocked: true`, every board was refused by the network where this
    runs (usually a claude.ai cloud sandbox), not by bad tokens. Put the first error line in
    the summary as is: it names the domains to allow. Do not tell the user their tokens are
-   wrong, and do not claim their own computer is blocked too. Still do step 4.
+   wrong. Commands a cloud session runs on the user's Mac go through the same allowlist, so
+   do not suggest that as a workaround. Running the plugin from Claude Code on the Mac is
+   not affected. Still do step 4.
    The guides `sources/greenhouse.md`, `sources/lever.md` and `sources/ashby.md` explain how
    board tokens work, in case an error says a token is wrong.
 
@@ -49,8 +52,10 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    no longer pass, so a preference change (new title words to skip, a different country) also
    cleans up jobs found before the change.
 
-4. Browser sources (indeed, dice, linkedin). For each one that is enabled, read
+4. Browser sources (indeed, dice, linkedin). Do every item in `browser_next` from step 2
+   (or, if `scan.py` did not run, each enabled one). Read
    `${CLAUDE_PLUGIN_ROOT}/sources/<name>.md` and follow it exactly.
+   An Indeed item is never skipped: with no Chrome it runs the guide's fallback section.
    Do them one at a time, LinkedIn last. Each guide ends by running `add_job.py`, which
    prints the same JSON counts. Add those to the totals.
    - Enabled but `has_access` is false: for Indeed, use only the guide's fallback section

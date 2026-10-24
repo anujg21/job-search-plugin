@@ -14,12 +14,13 @@ The quickest way to set this up is `/job-search:schedule`. This page is the long
 
 ## Claude Desktop (recommended)
 
-Cowork scheduled tasks usually run in the cloud, so they run even when your Mac is asleep.
-A task that needs local files runs only on your computer instead
+A Cowork scheduled task runs in Claude's cloud sandbox and reaches your data folder through
+your connected Mac
 ([Anthropic help article](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork)).
-This plugin keeps your data in a folder on your Mac, so its tasks run on your Mac. That is
-what lets them read your data folder and use your signed-in Chrome. It also means the Mac
-should be awake, with Claude Desktop open, at the scheduled time.
+So the Mac should be awake, with Claude Desktop open, at the scheduled time. The sandbox only
+reaches the web domains your account allows, so add the job board domains first (see
+"network blocked" under Troubleshooting). It has no Chrome, so Indeed runs through web
+search, and Dice and LinkedIn are skipped.
 
 1. Open Claude Desktop and switch to Cowork.
 2. Click **Scheduled** in the left sidebar.
@@ -103,7 +104,9 @@ folder. Pick a time the Mac is usually on and keep Claude Desktop running.
 The cloud sandbox only reaches allowed domains. On claude.ai open Settings, then
 Capabilities, and under Domain allowlist add `boards-api.greenhouse.io`, `api.lever.co` and
 `api.ashbyhq.com`. Your company list is fine; the next run picks the boards up. Indeed still
-runs in the meantime through web search.
+runs in the meantime through web search. Commands the cloud session runs on your Mac go
+through the same allowlist, so they fail too. Running `/job-search:run daily` from Claude
+Code in your own terminal is not affected.
 
 **The run stopped halfway, waiting for approval.**
 The task's approval mode asks before each step. Edit the task and pick the approval mode that

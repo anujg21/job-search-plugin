@@ -22,6 +22,7 @@ import jslib  # noqa: E402
 import sources_lib as sl  # noqa: E402
 
 API_SOURCES = ("greenhouse", "lever", "ashby")
+BROWSER_SOURCES = ("indeed", "dice", "linkedin")
 VERIFY_STATUSES = ("found", "scored", "prepared", "needs_approval")
 
 GREENHOUSE_URL = "https://boards-api.greenhouse.io/v1/boards/{token}/jobs?content=true"
@@ -204,6 +205,28 @@ def selected_sources(cfg: dict, wanted: Optional[List[str]]) -> List[str]:
 
 # ---------- scan ----------
 
+def browser_next(cfg: dict) -> List[dict]:
+    """What the agent still has to do for the browser sources after this script.
+    Indeed never needs a sign-in, so it always has a web search route."""
+    srcs = cfg.get("sources", {}) or {}
+    out = []
+    for s in BROWSER_SOURCES:
+        conf = srcs.get(s) or {}
+        if not conf.get("enabled"):
+            continue
+        guide = "sources/%s.md" % s
+        if s == "indeed":
+            do = ("Chrome if its tools are connected, else the 'Fallback without Chrome' section "
+                  "(WebSearch). Run it even when unattended") if conf.get("has_access") \
+                else "the 'Fallback without Chrome' section (WebSearch). Run it even when unattended"
+        elif conf.get("has_access"):
+            do = "Chrome if its tools are connected, else skip and note '%s: no browser'" % s
+        else:
+            do = "skip and note '%s: not signed in, see sources/check-access.md'" % s
+        out.append({"source": s, "guide": guide, "do": do})
+    return out
+
+
 def run_scan(home, wanted: Optional[List[str]] = None, dry_run: bool = False,
              limit_per_company: Optional[int] = None) -> dict:
     cfg = jslib.load_sources(home)
@@ -232,6 +255,8 @@ def run_scan(home, wanted: Optional[List[str]] = None, dry_run: bool = False,
         # every board refused the same way: the network, not the tokens
         result["network_blocked"] = True
         result["errors"].insert(0, "network blocked: " + sl.BLOCKED_HINT)
+    if not wanted:
+        result["browser_next"] = browser_next(cfg)
     if wanted:
         for w in wanted:
             if w not in API_SOURCES:
@@ -364,6 +389,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(json.dumps(res, indent=2))
     else:
         sl.print_summary(res, "scan" + (" (dry run)" if args.dry_run else ""))
+        for b in res.get("browser_next") or []:
+            print("next: %s: %s (%s)" % (b["source"], b["do"], b["guide"]))
     return 0
 
 
