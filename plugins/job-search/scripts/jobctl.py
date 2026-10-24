@@ -31,6 +31,9 @@ import jslib  # noqa: E402
 API_SOURCES = ("greenhouse", "lever", "ashby")
 BROWSER_SOURCES = ("indeed", "linkedin")
 GAP_NOTE_STATUSES = ("learning", "ignore", "done")
+CONNECTORS = ("dice", "indeed")
+CONNECT_HOWTO = ("connect it once: in Claude Desktop or claude.ai open Customize, Plugins, Job search, "
+                 "Connectors, then click Connect next to %s%s. In Claude Code run /mcp and pick %s")
 RUN_KINDS = ("daily", "weekly", "manual")
 
 
@@ -326,6 +329,10 @@ def run_doctor(home: Path, quick: bool = False) -> List[dict]:
             v = sources[k]
             if k in API_SOURCES and not v.get("companies"):
                 add("Source %s" % k, "warn", "enabled but no companies listed")
+            if k in CONNECTORS and v.get("connector") is not True:
+                add("Connector %s" % k, "warn", ("not confirmed; " if v.get("connector") is None
+                                                 else "not connected; ") + CONNECT_HOWTO % (
+                    k.title(), " and sign in to Indeed" if k == "indeed" else "", k))
             if k == "dice" and not v.get("queries"):
                 add("Source dice", "warn", "enabled but no searches; run /job-search:onboard (Job sources)")
             if k == "indeed" and not v.get("has_access"):
@@ -454,6 +461,19 @@ def cmd_runlog(args) -> int:
     return 0
 
 
+def cmd_connector(args) -> int:
+    """Record whether a connector worked, so doctor can tell the user how to connect it."""
+    home = jslib.require_home(args.home)
+    path = home / "profile" / "sources.json"
+    cfg = jslib.read_json(path, {}) or {}
+    src = cfg.setdefault("sources", {}).setdefault(args.name, {})
+    src["connector"] = args.state == "ok"
+    src["connector_checked"] = jslib.now_iso()
+    jslib.write_json(path, cfg)
+    print("%s connector: %s" % (args.name, "connected" if src["connector"] else "not connected"))
+    return 0
+
+
 def cmd_doctor(args) -> int:
     home = jslib.resolve_home(args.home)
     checks = run_doctor(home, quick=args.quick)
@@ -522,6 +542,11 @@ def build_parser() -> argparse.ArgumentParser:
                    help="one problem per flag; repeat the flag for more")
     s.add_argument("--notes", default="")
     s.set_defaults(fn=cmd_runlog)
+
+    s = sub.add_parser("connector", parents=[common], help="record whether a connector worked")
+    s.add_argument("name", choices=CONNECTORS)
+    s.add_argument("state", choices=("ok", "missing"))
+    s.set_defaults(fn=cmd_connector)
 
     s = sub.add_parser("doctor", parents=[common], help="check the setup")
     s.add_argument("--quick", action="store_true", help="skip the Chrome check")

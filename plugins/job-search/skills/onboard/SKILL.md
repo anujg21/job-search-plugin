@@ -231,6 +231,12 @@ Indeed and Dice, make one query per target title (up to 3) with the first locati
 (URL-encoded; add `&f_WT=2` for remote only). The user can paste their own saved searches
 later.
 
+**Connect Dice and Indeed.** These are connectors bundled with the plugin, and only the user
+can connect them. Always show the user the numbered steps from "Connectors first" in
+`sources/check-access.md` (Customize, Plugins, Job search, Connectors, Connect), then check
+them as that guide says. Say why in one line: they make scheduled runs find Dice and Indeed
+jobs without Chrome.
+
 **Check access yourself.** Do not ask "are you signed in?". Follow
 `${CLAUDE_PLUGIN_ROOT}/sources/check-access.md`. It checks the Indeed connector (and helps
 the user connect it), checks LinkedIn in the user's Chrome, and sets `enabled` and
@@ -253,7 +259,8 @@ Write `<home>/profile/sources.json` with all six sources present:
 ## Step 6: check the setup
 
 Run `JOBCTL doctor` and show the checklist. Fix every `[FAIL]` line with the user. Explain
-`[warn]` lines in one sentence each. A missing Chrome only means resumes stay HTML (no PDF).
+`[warn]` lines in one sentence each. A "Connector dice" or "Connector indeed" warning means
+the connector is not connected yet: show its steps again, as the warning says. A missing Chrome only means resumes stay HTML (no PDF).
 
 ## Step 7: what next
 

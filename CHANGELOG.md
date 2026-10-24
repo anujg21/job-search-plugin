@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 (2026-10-24)
+
+- Connecting Dice and Indeed is now a clear step. Onboarding always shows how (Customize,
+  Plugins, Job search, Connectors, Connect), and the README and INSTALL guide have it too.
+- New `jobctl.py connector <dice|indeed> <ok|missing>` records whether a connector worked.
+  The scan and the access check call it. `doctor` warns with the steps until it works.
+
 ## 0.3.2 (2026-10-24)
 
 - Cloud runs no longer try to make PDFs. Commands they send to your computer run in a

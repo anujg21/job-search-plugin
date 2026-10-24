@@ -231,6 +231,26 @@ class TestJobctl(Base):
         res = {c["check"]: c["status"] for c in json.loads(out)["checks"]}
         self.assertNotIn("A source that can find jobs", res)
 
+    def test_doctor_warns_until_connector_works(self):
+        p = self.home / "profile" / "sources.json"
+        src = jslib.read_json(p)
+        src["sources"]["indeed"]["enabled"] = True
+        jslib.write_json(p, src)
+        code, out = run(jobctl, "doctor", "--quick", "--json", *self.h)
+        checks = {c["check"]: c for c in json.loads(out)["checks"]}
+        self.assertEqual(checks["Connector indeed"]["status"], "warn")
+        self.assertIn("Customize, Plugins, Job search, Connectors", checks["Connector indeed"]["detail"])
+        code, out = run(jobctl, "connector", "indeed", "ok", *self.h)
+        self.assertEqual(code, 0, out)
+        self.assertTrue(jslib.read_json(p)["sources"]["indeed"]["connector"])
+        code, out = run(jobctl, "doctor", "--quick", "--json", *self.h)
+        self.assertNotIn("Connector indeed", {c["check"] for c in json.loads(out)["checks"]})
+        run(jobctl, "connector", "indeed", "missing", *self.h)
+        code, out = run(jobctl, "doctor", "--quick", "--json", *self.h)
+        checks = {c["check"]: c for c in json.loads(out)["checks"]}
+        self.assertTrue(checks["Connector indeed"]["detail"].startswith("not connected"))
+
+
 class TestLessons(Base):
     def test_add_render_touch_retire(self):
         code, out = run(memory, "lesson-add", *self.h, "--text", "Never use the word 'spearheaded'.",

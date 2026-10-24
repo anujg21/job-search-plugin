@@ -11,17 +11,27 @@ This guide checks those instead of asking the user. Use it during onboarding, or
 user says a source found nothing or asks to "check my job site sign-ins". It needs the user
 in the chat. Scheduled runs never use it.
 
-## Indeed connector first
+## Connectors first (Dice and Indeed)
 
-1. ToolSearch with `indeed search_jobs`. If a tool is found, call `search_jobs` once with
-   the first target title and "Remote".
-2. Results came back: say "Indeed: connected." and set `indeed` to `enabled: true`. Chrome is
-   not needed for Indeed; still check LinkedIn below if the user wants it.
-3. No tool, or the call asks for sign-in: tell the user in two lines how to connect it. In
-   Claude Desktop or claude.ai: Customize, then Connectors, find Indeed (it is listed under
-   this plugin too) and click Connect, then sign in to Indeed. In Claude Code: run `/mcp`,
-   pick `indeed` and sign in. Then say done or skip. Check once more after done.
-   Either way, go on: Indeed still works through Chrome or web search.
+The plugin bundles both connectors, but each one is connected once by the user. Claude
+cannot click Connect or sign in for them.
+
+1. For each of `dice` and `indeed`: ToolSearch with `<name> search_jobs`. If a tool is
+   found, call `search_jobs` once with the first target title and "Remote".
+2. Results came back: record it with `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector <name> ok`.
+3. No tool, or the call asks for sign-in: record `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector <name> missing`,
+   and show the user these steps once, for all missing connectors together:
+
+   > To connect Dice and Indeed (one time):
+   > 1. In Claude Desktop or claude.ai, open **Customize**, then **Plugins**, then **Job search**.
+   > 2. Open the **Connectors** tab.
+   > 3. Click **Connect** next to Dice. It needs no account.
+   > 4. Click **Connect** next to Indeed and sign in with your Indeed account.
+   > In Claude Code, run `/mcp`, pick `dice` or `indeed`, and follow the prompt.
+
+   Ask them to say done or skip. After done, check once more and record the result.
+   Either way, go on: Dice still works through `scan.py`, and Indeed through Chrome or web
+   search. The connectors matter most for scheduled runs.
 
 ## Rules
 

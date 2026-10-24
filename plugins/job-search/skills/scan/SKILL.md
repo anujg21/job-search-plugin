@@ -35,13 +35,13 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    The JSON has `fetched`, `matched`, `new`, `known`, `new_ids`, `errors`, a `filtered`
    breakdown, `dice` (`ok`, `blocked` or `failed` when Dice ran) and `browser_next`. Errors
    are already logged as `source_error` signals by the script. `browser_next` lists what
-   step 4 must do for Indeed, LinkedIn, and Dice when the script could not reach it.
+   step 5 must do for Indeed, LinkedIn, and Dice when the script could not reach it.
    If it has `network_blocked: true`, every board was refused by the network where this
    runs (usually a claude.ai cloud sandbox), not by bad tokens. Put the first error line in
    the summary as is: it names the domains to allow. Do not tell the user their tokens are
    wrong. The fix is the allowlist. Do not suggest running on the Mac or in Claude Desktop
    instead: Desktop scheduled tasks use the same cloud sandbox, and commands it runs on the
-   Mac go through the same allowlist. Still do step 4.
+   Mac go through the same allowlist. Still do steps 4 and 5.
    The guides `sources/greenhouse.md`, `sources/lever.md` and `sources/ashby.md` explain how
    board tokens work, in case an error says a token is wrong.
 
@@ -53,7 +53,13 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    no longer pass, so a preference change (new title words to skip, a different country) also
    cleans up jobs found before the change.
 
-4. Connector and browser sources. Do every item in `browser_next` from step 2 (or, if
+4. Connector check. ToolSearch `dice search_jobs`, then `indeed search_jobs`. For each, run
+   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector <name> ok` when the tool is
+   there, else `... connector <name> missing`. This is how `doctor` knows to remind the user.
+   When one is missing, add one Problems line: "connect <name>: Customize, Plugins, Job
+   search, Connectors, Connect".
+
+5. Connector and browser sources. Do every item in `browser_next` from step 2 (or, if
    `scan.py` did not run, each enabled one of indeed, linkedin). Read
    `${CLAUDE_PLUGIN_ROOT}/sources/<name>.md` and follow it exactly.
    An Indeed item is never skipped: it uses the Indeed connector, else Chrome, else the
@@ -70,13 +76,13 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    - Login wall or CAPTCHA: the guide says to stop that source and log a `source_error`.
    For a dry run, pass `--dry-run` to `add_job.py`.
 
-5. A job the user pasted (a URL or JD text in the request): build one entry with
+6. A job the user pasted (a URL or JD text in the request): build one entry with
    `source: "manual"` (or the board name if the URL is from Greenhouse, Lever, Ashby, Indeed,
    Dice or LinkedIn), write it to a temp file and run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/add_job.py" --home "<home>" --file <tmp> --no-filter --json`.
    The user picked it, so skip the prefilter.
 
-6. Report a short summary, for example:
+7. Report a short summary, for example:
 
    ```
    Scan done. 1,409 postings checked, 40 matched your filters, 12 new, 28 already tracked.

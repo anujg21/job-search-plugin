@@ -25,7 +25,9 @@ then has `"dice": "blocked"` and a `browser_next` item for Dice. Do this instead
    the connector, and the user may also have added it under Customize, Connectors. Tool names
    look like `mcp__plugin_job-search_dice__search_jobs` or end in `search_jobs` under a Dice
    server.
-2. If found, call `search_jobs` once per query with the same arguments as above. For each
+2. Record what you found: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector dice ok`
+   (or `missing` when there is no tool or the call fails). If found, call `search_jobs` once
+   per query with the same arguments as above. For each
    result not already in `<home>/jobs` (a folder starting `dice-` and ending `-<guid>`), call
    `get_job_details` with `job_id` set to its `guid`. Stop at `max_per_run`.
 3. Write the postings as one JSON list to a temp file in the shape from `sources/README.md`:

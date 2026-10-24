@@ -23,11 +23,12 @@ stays in one folder on your computer.
 1. In the **Cowork** tab, open **Customize**, then **Plugins**. Click **Add**, then
    **Add marketplace**, and enter `anujg21/job-search-plugin`.
 2. Under **Discover**, install **job-search**.
-3. Start a Cowork task in a folder called `JobSearch` and type `/job-search:onboard`. It reads
+3. Connect the Dice and Indeed connectors (see [below](#connect-dice-and-indeed)).
+4. Start a Cowork task in a folder called `JobSearch` and type `/job-search:onboard`. It reads
    your resume, researches job titles that fit it, and sets up which boards to search.
-4. Type `/job-search:schedule` and copy its values into two scheduled tasks, one daily and one
+5. Type `/job-search:schedule` and copy its values into two scheduled tasks, one daily and one
    weekly.
-5. After the first run, open `~/JobSearch/dashboard.html` in your browser.
+6. After the first run, open `~/JobSearch/dashboard.html` in your browser.
 
 Stuck at any point? Type `/job-search:help`, or just ask how something works.
 
@@ -88,6 +89,21 @@ resume changes wait for your approval. The plugin never submits an application.
 | LinkedIn | Read in your Chrome, a few saved searches only | Your LinkedIn account |
 
 The plugin bundles the Dice and Indeed connectors. LinkedIn has no job search connector.
+
+### Connect Dice and Indeed
+
+This is a one-time step that only you can do. Claude cannot click Connect or sign in for
+you.
+
+1. In Claude Desktop or claude.ai, open **Customize**, then **Plugins**, then **Job search**.
+2. Open the **Connectors** tab.
+3. Click **Connect** next to **Dice**. It needs no account.
+4. Click **Connect** next to **Indeed** and sign in with your Indeed account.
+
+In Claude Code, run `/mcp`, pick `dice` or `indeed`, and follow the prompt.
+
+Scheduled runs need these most, because they have no Chrome. Onboarding shows these steps,
+and `jobctl.py doctor` warns "Connector dice" or "Connector indeed" until each one works.
 
 LinkedIn is read only and low volume on purpose. Its terms forbid scraping and bots, so the
 plugin reads a few of your saved searches and never applies or messages anyone.

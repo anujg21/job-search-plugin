@@ -124,6 +124,11 @@ Jobs whose location names only other countries are skipped before scoring.
 means Chrome can read Indeed; the Indeed connector is used whenever it is connected. For
 LinkedIn it means the user is signed in in Chrome.
 
+`dice` and `indeed` may also have `connector` (true when the bundled connector worked, false
+when it was missing) and `connector_checked` (a timestamp). The scan and the access check
+set them with `jobctl.py connector <dice|indeed> <ok|missing>`. `doctor` warns, with the
+steps to connect, while `connector` is not true.
+
 ## jobs/<job_id>/job.json
 
 `job_id = jslib.make_job_id(source, company, source_job_id)` →

@@ -34,6 +34,7 @@ Then suggest the one next step that fits:
 | State | Next step |
 |---|---|
 | No data folder | `/job-search:onboard` (about 15 minutes) |
+| Doctor warns "Connector dice" or "Connector indeed" | Customize, Plugins, Job search, Connectors, Connect |
 | Set up, never run | `/job-search:run daily`, then `/job-search:schedule` |
 | No run in the last 2 days | The schedule is not running. See "Scheduled runs" below |
 | Resumes waiting for approval | Open the dashboard, Approvals tab, or `/job-search:approve` |
@@ -113,8 +114,10 @@ short command; the user pastes it into Claude. The page never changes data by it
   is optional; the radar suggests some.
 - **Dice:** Dice's public connector server, searched by `scan.py` with the user's titles. No
   account or Chrome needed.
-- **Indeed:** the Indeed connector, bundled with the plugin. The user connects it once
-  (Customize, Connectors, Indeed, Connect, then sign in to Indeed; in Claude Code, `/mcp`).
+- **Connecting Dice and Indeed:** Customize, Plugins, Job search, Connectors tab, Connect
+  next to each (Indeed asks for an Indeed sign-in). In Claude Code, `/mcp`. `doctor` warns
+  until they are connected.
+- **Indeed:** the Indeed connector, bundled with the plugin.
   Without it, Indeed is read in Chrome or found through web search.
 - **LinkedIn:** no job search connector exists. Read only, low volume, in the user's own
   Chrome through the Claude in Chrome extension while they are signed in. Scheduled cloud
