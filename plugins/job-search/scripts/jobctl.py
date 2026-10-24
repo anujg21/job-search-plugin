@@ -33,7 +33,8 @@ BROWSER_SOURCES = ("indeed", "linkedin")
 GAP_NOTE_STATUSES = ("learning", "ignore", "done")
 CONNECTORS = ("dice", "indeed")
 CONNECT_HOWTO = ("connect it once: in Claude Desktop or claude.ai open Customize, Plugins, Job search, "
-                 "Connectors, then click Connect next to %s%s. In Claude Code run /mcp and pick %s")
+                 "Connectors, then click Connect next to %s%s, and set its tools to Always allow "
+                 "(Customize, Connectors) so scheduled runs can use it. In Claude Code run /mcp and pick %s")
 RUN_KINDS = ("daily", "weekly", "manual")
 
 
@@ -73,6 +74,7 @@ def template_sources() -> dict:
             "dice": {"enabled": False, "has_access": True, "queries": [], "max_per_run": 20},
             "linkedin": {"enabled": False, "has_access": False, "saved_search_urls": [], "max_per_run": 15},
         },
+        "extra_connectors": [],
     }
 
 
@@ -351,10 +353,17 @@ def run_doctor(home: Path, quick: bool = False) -> List[dict]:
 
     if not quick:
         chrome = _find_chrome()
+        try:
+            import xhtml2pdf  # noqa: F401
+            x2p = True
+        except ImportError:
+            x2p = False
         if chrome:
-            add("Chrome for PDF export", "pass", chrome)
+            add("PDF export", "pass", "Chrome: %s" % chrome)
+        elif x2p:
+            add("PDF export", "pass", "xhtml2pdf (no Chrome)")
         else:
-            add("Chrome for PDF export", "warn", "not found. Resumes will be HTML only. Set CHROME_PATH if it is installed.")
+            add("PDF export", "warn", "no Chrome and no xhtml2pdf. Resumes stay HTML. Run: pip install xhtml2pdf")
     return checks
 
 

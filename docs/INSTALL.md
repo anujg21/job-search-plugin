@@ -28,7 +28,10 @@ The plugin lives at [github.com/anujg21/job-search-plugin](https://github.com/an
    called `JobSearch` in your home folder. The plugin keeps all your data there.
 7. Connect the bundled connectors: in **Customize**, **Plugins**, open **Job search**, then
    the **Connectors** tab. Click **Connect** next to **Dice** (no account needed) and next to
-   **Indeed** (sign in with your Indeed account). Only you can do this step.
+   **Indeed** (sign in with your Indeed account). Then open each one under **Customize**,
+   **Connectors** and set its tools to **Always allow**; scheduled runs cannot stop to ask for
+   approval. Only you can do this step. To add other job connectors, see "Connectors: what
+   ships and adding more" in the README.
 8. Type `/job-search:onboard` and press Enter. You can also type `/` to browse the plugin's
    commands.
 
@@ -150,8 +153,10 @@ Your data stays in `~/JobSearch` until you delete that folder yourself.
 | `/job-search:...` commands do not show up | Check the plugin is installed and enabled under Customize, Plugins. Start a new task or session after installing. |
 | "No job-search home" | Run `/job-search:onboard`, or pick your data folder as the task's working folder. |
 | A scheduled run cannot find your data | Set the task's folder to your data folder. See [SCHEDULING.md](SCHEDULING.md). |
-| No PDF next to a tailored resume | Scheduled and claude.ai runs happen in a cloud sandbox without Chrome. `/job-search:apply <job_id>` makes the PDF on a computer with Chrome. Or open `resume.html` in your browser and print it to PDF. |
+| No PDF next to a tailored resume | Cloud runs make PDFs with `xhtml2pdf`, which they install themselves. If that failed, `/job-search:apply <job_id>` makes the PDF, or open `resume.html` and print it to PDF. |
+| The resume does not look like mine | `/job-search:onboard`, pick "Resume look". It reads your original resume's fonts, colors and layout into `profile/resume-style.json`. |
 | Doctor says "Connector dice" or "Connector indeed" | Customize, Plugins, Job search, Connectors tab, then Connect next to it (in Claude Code, `/mcp`). The warning clears after the next scan sees it working. |
+| Connected, but scheduled runs say the connector is not available | Its permission is "Needs approval". Customize, Connectors, pick it, set its tools to **Always allow**. |
 | Indeed found little | Connect the Indeed connector as above. Without it, Indeed uses Chrome or web search. |
 | Dice found nothing in a cloud run | Connect the Dice connector as above, or add `mcp.dice.com` to the domain allowlist (Settings, Capabilities). |
 | LinkedIn found nothing | Sign in to LinkedIn in Chrome and make sure the Claude in Chrome extension is connected. Then run `/job-search:onboard`, pick Job sources, and it checks access again. A login wall or CAPTCHA is logged and skipped, never solved. Scheduled cloud runs have no Chrome and skip LinkedIn. |

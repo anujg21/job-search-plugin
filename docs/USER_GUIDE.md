@@ -49,7 +49,9 @@ approved.
 
 ### Apply to a job
 
-Run `/job-search:apply <job_id>`. You get the tailored resume (PDF and HTML), the cover note,
+Run `/job-search:apply <job_id>`. You get the tailored resume as a PDF in the look of your own
+resume (fonts, colors, headings and skill groups come from the file you imported), plus HTML,
+the cover note,
 the screening answers and the application link. (The dashboard's **Open & apply** link only
 opens the posting; the job detail panel links the resume and answers next to it.) With Claude in Chrome connected, it can fill in the form on Greenhouse, Lever and Ashby
 pages for you. It never clicks Submit. After you submit, click **Mark applied** (or tell

@@ -27,6 +27,8 @@ cannot click Connect or sign in for them.
    > 2. Open the **Connectors** tab.
    > 3. Click **Connect** next to Dice. It needs no account.
    > 4. Click **Connect** next to Indeed and sign in with your Indeed account.
+   > 5. Open each connector under **Customize**, **Connectors** and set its tools to
+   >    **Always allow**. Scheduled runs cannot stop to ask for approval.
    > In Claude Code, run `/mcp`, pick `dice` or `indeed`, and follow the prompt.
 
    Ask them to say done or skip. After done, check once more and record the result.

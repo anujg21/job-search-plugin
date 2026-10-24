@@ -13,7 +13,9 @@ runs `scripts/scan.py` (API sources) or follows the matching guide here (browser
 | Dice | `dice.md` | `scan.py`, Dice's public connector server (the Dice connector if that is blocked) |
 | LinkedIn | `linkedin.md` | Claude in Chrome reads a few saved searches, then `add_job.py` |
 
-The plugin's `.mcp.json` bundles the Dice and Indeed connectors. LinkedIn has no job search
+The plugin's `.mcp.json` bundles the Dice and Indeed connectors, and only those. Users can
+add other job connectors themselves (`other-connectors.md`, saved as `extra_connectors` in
+`profile/sources.json`). LinkedIn has no job search
 connector. `check-access.md` checks the Indeed connector and, in the user's Chrome, whether
 Indeed and LinkedIn can be read. Onboarding uses it instead of asking the user.
 

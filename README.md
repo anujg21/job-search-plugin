@@ -99,13 +99,29 @@ you.
 2. Open the **Connectors** tab.
 3. Click **Connect** next to **Dice**. It needs no account.
 4. Click **Connect** next to **Indeed** and sign in with your Indeed account.
+5. Set each connector's permission to **Always allow** (open the connector under
+   Customize, Connectors, and change its tools from "Needs approval"). Scheduled runs cannot
+   stop to ask, so a connector that needs approval is left out of them.
 
 In Claude Code, run `/mcp`, pick `dice` or `indeed`, and follow the prompt.
 
-Scheduled runs need these most, because they have no Chrome. Scheduled runs sometimes
-start before connectors load, so also add `mcp.dice.com` to the claude.ai domain allowlist
-(Settings, Capabilities), next to the job board domains. Then Dice works in every run. Onboarding shows these steps,
-and `jobctl.py doctor` warns "Connector dice" or "Connector indeed" until each one works.
+Scheduled runs need these most, because they have no Chrome. Also add `mcp.dice.com` to the
+claude.ai domain allowlist (Settings, Capabilities), next to the job board domains, so Dice
+works even without its connector. Onboarding shows these steps, and `jobctl.py doctor`
+warns "Connector dice" or "Connector indeed" until each one works.
+
+### Connectors: what ships and adding more
+
+The plugin ships two job connectors, Dice and Indeed, and keeps it at that. You can add any
+other job search connector from the Claude directory (Customize, Connectors, Browse), for
+example ZipRecruiter:
+
+1. Connect it and set its tools to **Always allow**.
+2. Tell Claude "add ZipRecruiter as a job source", or run `/job-search:onboard` and pick
+   "Job sources".
+
+It is saved under `extra_connectors` in `profile/sources.json`, and every scan searches it
+with your target titles. Details: `plugins/job-search/sources/other-connectors.md`.
 
 LinkedIn is read only and low volume on purpose. Its terms forbid scraping and bots, so the
 plugin reads a few of your saved searches and never applies or messages anyone.
@@ -114,7 +130,8 @@ plugin reads a few of your saved searches and never applies or messages anyone.
 
 - A paid Claude plan. Scheduled runs need Claude Desktop.
 - Python 3.9 or newer (macOS includes it).
-- Google Chrome, for PDF resumes and the LinkedIn source.
+- Google Chrome, for the LinkedIn source and PDF resumes on your computer. Cloud runs make
+  PDFs without it.
 
 ## Privacy
 

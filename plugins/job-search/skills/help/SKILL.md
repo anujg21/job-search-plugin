@@ -115,8 +115,15 @@ short command; the user pastes it into Claude. The page never changes data by it
 - **Dice:** Dice's public connector server, searched by `scan.py` with the user's titles. No
   account or Chrome needed.
 - **Connecting Dice and Indeed:** Customize, Plugins, Job search, Connectors tab, Connect
-  next to each (Indeed asks for an Indeed sign-in). In Claude Code, `/mcp`. `doctor` warns
-  until they are connected.
+  next to each (Indeed asks for an Indeed sign-in). Then set each connector's tools to
+  **Always allow** under Customize, Connectors, or scheduled runs leave them out. In Claude
+  Code, `/mcp`. `doctor` warns until they work.
+- **More connectors:** the plugin ships Dice and Indeed only. Any other job connector the
+  user connects (and sets to Always allow) can be added with "add <name> as a job source";
+  see `sources/other-connectors.md`.
+- **Resume look and PDF:** tailored resumes copy the look of the user's own resume
+  (`profile/resume-style.json`, set up in onboarding, "Resume look"). PDFs come from Chrome,
+  or from `xhtml2pdf` in cloud runs. `/job-search:apply` makes one if it is missing.
 - **Indeed:** the Indeed connector, bundled with the plugin.
   Without it, Indeed is read in Chrome or found through web search.
 - **LinkedIn:** no job search connector exists. Read only, low volume, in the user's own

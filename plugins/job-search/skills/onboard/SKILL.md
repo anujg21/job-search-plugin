@@ -42,6 +42,8 @@ If a data folder already exists, do not start over. Show a short status (name fr
 bank, number of roles and skills, target titles, enabled sources, daily cap) and ask what to
 change:
 - My resume facts
+- Resume look (match the PDF to my own resume: "Keep the resume's look" in step 2, then
+  re-render prepared resumes with `render_resume.py <job_id>` for each)
 - What jobs I want
 - Job sources
 - Schedule
@@ -84,6 +86,33 @@ Save the plain text, cleaned up as Markdown, to `<home>/profile/resume-master.md
 reference copy. Do not change the user's wording in it.
 
 If they have no resume file, ask them to paste it as text.
+
+### Keep the resume's look
+
+Tailored resumes and their PDFs should look like the user's own resume, so they can apply
+with them directly.
+1. Copy the original file into the data folder as `<home>/profile/original-resume.<ext>`.
+2. Read its look and write `<home>/profile/resume-style.json`. Only layout, never content.
+   Every key is optional; leave out what you cannot tell. Keys (defaults in
+   `scripts/render_resume.py`, `DEFAULT_STYLE`):
+   - `font` (a CSS font stack, for example `Calibri, Carlito, Arial, sans-serif`),
+     `base_size_pt`, `name_size_pt`, `text_color`, `accent_color`, `muted_color` (hex)
+   - `page_size` (`Letter` or `A4`), `margins_in` (`[top/bottom, sides]`)
+   - `header_align` (`left` or `center`), `name_caps`, `name_letter_spacing_pt`,
+     `headline_bold`, `contact_separator`
+   - `section_caps`, `section_letter_spacing_pt`, `section_rule` (a line under headings),
+     `section_titles` (for example `{"skills": "Technical Skills"}`)
+   - `role_format`: `company_title` ("Company, Title, Location") or `title_company`;
+     `role_separator` between company and title, copied from the original;
+     `date_style`: `inline_muted` (dates after the role line) or `own_line`
+   - `skills_layout`: `grouped` or `list`; `skill_groups`: the original's group labels, each
+     with the fact bank skill names under it (`{"Cloud & Platform": ["AWS", "Kubernetes"]}`)
+   How to read it: a DOCX keeps fonts in `word/document.xml` (`w:rFonts`), sizes in
+   half points (`w:sz`), colors (`w:color`) and margins in twentieths of a point
+   (`w:pgMar`). For a PDF, read the page and judge the look. Ask the user nothing about it.
+3. Render the master resume to check:
+   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_resume.py" --master` and tell the user
+   where the PDF is, so they can compare it with their original.
 
 ## Step 3: build the fact bank (strictly from the resume)
 
@@ -234,8 +263,13 @@ later.
 **Connect Dice and Indeed.** These are connectors bundled with the plugin, and only the user
 can connect them. Always show the user the numbered steps from "Connectors first" in
 `sources/check-access.md` (Customize, Plugins, Job search, Connectors, Connect), then check
-them as that guide says. Say why in one line: they make scheduled runs find Dice and Indeed
-jobs without Chrome.
+them as that guide says, including setting each one to **Always allow**. Say why in one
+line: they make scheduled runs find Dice and Indeed jobs without Chrome, and a scheduled run
+cannot stop to approve a connector.
+
+**Other connectors (optional).** Say in one line that the plugin ships Dice and Indeed, and
+that any other job connector they connect can be added (`sources/other-connectors.md`). If
+they name one, add it to `extra_connectors` in sources.json. Never block setup on this.
 
 **Check access yourself.** Do not ask "are you signed in?". Follow
 `${CLAUDE_PLUGIN_ROOT}/sources/check-access.md`. It checks the Indeed connector (and helps

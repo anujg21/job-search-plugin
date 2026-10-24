@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Render a resume to ATS-friendly HTML, Markdown and (if Chrome is found) PDF.
+"""Render a resume to ATS-friendly HTML, Markdown and PDF (Chrome, else xhtml2pdf if installed).
+
+Layout comes from profile/resume-style.json when present (see DEFAULT_STYLE).
 
 Usage:
   render_resume.py <job_id> [--no-pdf] [--json] [--home PATH]   # jobs/<id>/resume.{html,md,pdf}
@@ -13,6 +15,7 @@ import argparse
 import html
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -31,6 +34,33 @@ MAC_CHROME = [
 ]
 LINUX_CHROME = ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"]
 TWO_PAGE_WORDS = 950  # rough word budget for two Letter pages at 10.5pt
+
+# Layout only, never content. profile/resume-style.json overrides any key (onboarding writes
+# it from the look of the user's own resume). Missing file means this plain default.
+DEFAULT_STYLE = {
+    "font": 'Arial, Helvetica, "Liberation Sans", sans-serif',
+    "base_size_pt": 10.5,
+    "text_color": "#111111",
+    "accent_color": "#111111",
+    "muted_color": "#333333",
+    "page_size": "Letter",
+    "margins_in": [0.5, 0.6],
+    "header_align": "left",
+    "name_size_pt": 18,
+    "name_caps": False,
+    "name_letter_spacing_pt": 0.2,
+    "headline_bold": True,
+    "contact_separator": " | ",
+    "section_caps": True,
+    "section_letter_spacing_pt": 0.8,
+    "section_rule": True,
+    "skills_layout": "list",
+    "skill_groups": {},
+    "role_format": "title_company",
+    "date_style": "own_line",
+    "section_titles": {},
+    "role_separator": ", ",
+}
 
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -62,6 +92,71 @@ def find_chrome() -> Optional[str]:
         if p:
             return p
     return None
+
+
+def load_style(home: Path) -> dict:
+    style = dict(DEFAULT_STYLE)
+    custom = jslib.read_json(home / "profile" / "resume-style.json", {}) or {}
+    style.update({k: v for k, v in custom.items() if k in DEFAULT_STYLE})
+    return style
+
+
+def css(st: dict) -> str:
+    m = st["margins_in"] if isinstance(st["margins_in"], list) else [st["margins_in"]] * 2
+    caps = "uppercase" if st["section_caps"] else "none"
+    rule = "border-bottom: 1px solid %s; padding-bottom: 1pt;" % st["muted_color"] if st["section_rule"] else ""
+    return """
+  @page { size: %(page)s; margin: %(mv)sin %(mh)sin; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0 auto; max-width: 7.5in; padding: 0.4in 0; font-family: %(font)s;
+    font-size: %(base)spt; line-height: 1.3; color: %(text)s; background: #fff; }
+  @media print { body { padding: 0; max-width: none; } }
+  header { margin-bottom: 6pt; text-align: %(align)s; }
+  h1 { font-size: %(name)spt; margin: 0; letter-spacing: %(nls)spt; color: %(accent)s;
+    text-transform: %(ncaps)s; }
+  .headline { font-weight: %(hw)s; margin: 2pt 0 2pt; }
+  .contact { font-size: %(small)spt; color: %(muted)s; margin: 0; }
+  .contact a { color: %(muted)s; text-decoration: none; }
+  h2 { font-size: %(base)spt; text-transform: %(caps)s; letter-spacing: %(sls)spt;
+    color: %(accent)s; margin: 9pt 0 3pt; %(rule)s }
+  p { margin: 0 0 3pt; }
+  .role { margin: 0 0 5pt; break-inside: avoid-page; page-break-inside: avoid; }
+  .role-head { font-weight: bold; margin: 0; }
+  .role-date { color: %(muted)s; font-weight: normal; white-space: nowrap; }
+  .role-meta { color: %(muted)s; font-size: %(small)spt; margin: 0 0 2pt; }
+  .skill-group { margin: 0 0 1pt; }
+  ul { margin: 2pt 0 0 0; padding-left: 14pt; }
+  li { margin: 0 0 1.5pt; }
+  .item { margin: 0 0 3pt; }
+""" % {"page": st["page_size"], "mv": m[0], "mh": m[1], "font": st["font"],
+       "base": st["base_size_pt"], "small": round(st["base_size_pt"] * 0.9, 1),
+       "text": st["text_color"], "accent": st["accent_color"], "muted": st["muted_color"],
+       "align": st["header_align"], "name": st["name_size_pt"],
+       "nls": st["name_letter_spacing_pt"], "ncaps": "uppercase" if st["name_caps"] else "none",
+       "hw": "bold" if st["headline_bold"] else "normal", "caps": caps,
+       "sls": st["section_letter_spacing_pt"], "rule": rule}
+
+
+def short_url(u: str) -> str:
+    """linkedin.com/in/x instead of https://www.linkedin.com/in/x/, as people write it."""
+    u = re.sub(r"^https?://", "", u or "")
+    return re.sub(r"^www\.", "", u).rstrip("/")
+
+
+def group_skills(skills: List[str], groups: dict) -> List[tuple]:
+    """Put the chosen skills under the user's own group labels, in the user's order."""
+    seen, out = set(), []
+    for label, members in groups.items():
+        names = {str(x).lower() for x in members or []}
+        hit = [s for s in skills if s.lower() in names and s not in seen]
+        if hit:
+            out.append((label, hit))
+            seen.update(hit)
+    rest = [s for s in skills if s not in seen]
+    if rest:
+        out.append(("Other" if out else "", rest))
+    return out
 
 
 def collect(fb: dict, resume: dict) -> dict:
@@ -98,47 +193,71 @@ def collect(fb: dict, resume: dict) -> dict:
     }
 
 
-def to_html(d: dict) -> str:
+def to_html(d: dict, st: Optional[dict] = None) -> str:
+    st = st or DEFAULT_STYLE
     e = html.escape
-    out: List[str] = ["<header>", "<h1>%s</h1>" % e(d["name"])]
+    titles = {"summary": "Summary", "skills": "Skills", "experience": "Experience",
+              "projects": "Projects", "education": "Education", "certifications": "Certifications"}
+    titles.update(st.get("section_titles") or {})
+    if st["section_caps"]:  # done here, not in CSS, so the no-Chrome PDF renderer matches
+        titles = {k: v.upper() for k, v in titles.items()}
+    name = d["name"].upper() if st["name_caps"] else d["name"]
+    out: List[str] = ["<header>", "<h1>%s</h1>" % e(name)]
     if d["headline"]:
         out.append('<p class="headline">%s</p>' % e(d["headline"]))
     bits = [e(c) for c in d["contact"]]
-    bits += ['<a href="%s">%s</a>' % (e(u, quote=True), e(u)) for _, u in d["links"]]
+    bits += ['<a href="%s">%s</a>' % (e(u, quote=True), e(short_url(u))) for _, u in d["links"]]
     if bits:
-        out.append('<p class="contact">%s</p>' % " | ".join(bits))
+        out.append('<p class="contact">%s</p>' % e(st["contact_separator"]).join(bits))
     out.append("</header>")
     if d["summary"]:
-        out += ["<section>", "<h2>Summary</h2>", "<p>%s</p>" % e(d["summary"]), "</section>"]
+        out += ["<section>", "<h2>%s</h2>" % e(titles["summary"]), "<p>%s</p>" % e(d["summary"]), "</section>"]
     if d["skills"]:
-        out += ["<section>", "<h2>Skills</h2>", "<p>%s</p>" % e(", ".join(d["skills"])), "</section>"]
+        out += ["<section>", "<h2>%s</h2>" % e(titles["skills"])]
+        if st["skills_layout"] == "grouped" and st.get("skill_groups"):
+            for label, names in group_skills(d["skills"], st["skill_groups"]):
+                lead = "<strong>%s:</strong> " % e(label) if label else ""
+                out.append('<p class="skill-group">%s%s</p>' % (lead, e(", ".join(names))))
+        else:
+            out.append("<p>%s</p>" % e(", ".join(d["skills"])))
+        out.append("</section>")
     if d["roles"]:
-        out += ["<section>", "<h2>Experience</h2>"]
+        out += ["<section>", "<h2>%s</h2>" % e(titles["experience"])]
         for r in d["roles"]:
             out.append('<div class="role">')
-            out.append('<p class="role-head">%s, %s</p>' % (e(r.get("title", "")), e(r.get("company", ""))))
-            meta = " | ".join(x for x in (date_range(r), r.get("location", "")) if x)
-            if meta:
-                out.append('<p class="role-meta">%s</p>' % e(meta))
+            title, company, loc = r.get("title", ""), r.get("company", ""), r.get("location", "")
+            if st["role_format"] == "company_title":
+                head = e(company) + e(st["role_separator"]) + e(title) + (", " + e(loc) if loc else "")
+                meta = date_range(r)
+            else:
+                head = "%s, %s" % (e(title), e(company))
+                meta = " | ".join(x for x in (date_range(r), loc) if x)
+            if st["date_style"] == "inline_muted" and meta:
+                out.append('<p class="role-head">%s&nbsp;&nbsp;&nbsp;<span class="role-date">%s</span></p>'
+                           % (head, e(meta)))
+            else:
+                out.append('<p class="role-head">%s</p>' % head)
+                if meta:
+                    out.append('<p class="role-meta">%s</p>' % e(meta))
             bullets = [b.get("text", "") for b in r.get("bullets", []) or [] if b.get("text")]
             if bullets:
                 out.append("<ul>" + "".join("<li>%s</li>" % e(b) for b in bullets) + "</ul>")
             out.append("</div>")
         out.append("</section>")
     if d["projects"]:
-        out += ["<section>", "<h2>Projects</h2>"]
+        out += ["<section>", "<h2>%s</h2>" % e(titles["projects"])]
         for p in d["projects"]:
             label = "<strong>%s</strong>: " % e(p["name"]) if p["name"] else ""
             out.append('<p class="item">%s%s</p>' % (label, e(p["text"])))
         out.append("</section>")
     if d["education"]:
-        out += ["<section>", "<h2>Education</h2>"] + ['<p class="item">%s</p>' % e(x) for x in d["education"]] + ["</section>"]
+        out += ["<section>", "<h2>%s</h2>" % e(titles["education"])] + ['<p class="item">%s</p>' % e(x) for x in d["education"]] + ["</section>"]
     if d["certifications"]:
-        out += ["<section>", "<h2>Certifications</h2>"] + ['<p class="item">%s</p>' % e(x) for x in d["certifications"]] + ["</section>"]
+        out += ["<section>", "<h2>%s</h2>" % e(titles["certifications"])] + ['<p class="item">%s</p>' % e(x) for x in d["certifications"]] + ["</section>"]
     body = "\n".join(out)
     tpl = TEMPLATE.read_text(encoding="utf-8")
     title = "%s Resume" % d["name"] if d["name"] else "Resume"
-    return tpl.replace("{{TITLE}}", e(title)).replace("{{BODY}}", body)
+    return tpl.replace("{{TITLE}}", e(title)).replace("{{CSS}}", css(st)).replace("{{BODY}}", body)
 
 
 def to_markdown(d: dict) -> str:
@@ -188,6 +307,23 @@ def print_pdf(chrome: str, html_path: Path, pdf_path: Path) -> Optional[str]:
     return None
 
 
+def pdf_without_chrome(html_path: Path, pdf_path: Path) -> Optional[str]:
+    """Pure Python fallback for places without Chrome (cloud runs). Needs the optional
+    xhtml2pdf package: pip install xhtml2pdf. Returns None on success, else a reason."""
+    try:
+        from xhtml2pdf import pisa  # type: ignore
+    except ImportError:
+        return "no Chrome and no xhtml2pdf; run: pip install xhtml2pdf, or open the HTML and print to PDF"
+    try:
+        with open(pdf_path, "wb") as f:
+            res = pisa.CreatePDF(html_path.read_text(encoding="utf-8"), dest=f)
+    except Exception as ex:  # a broken page should not stop the run
+        return "xhtml2pdf failed: %s" % ex
+    if res.err or not pdf_path.exists() or pdf_path.stat().st_size == 0:
+        return "xhtml2pdf wrote no PDF"
+    return None
+
+
 def render(home: Path, job_id: Optional[str], master: bool, pdf: bool) -> dict:
     fb = jslib.load_fact_bank(home)
     if master:
@@ -204,7 +340,7 @@ def render(home: Path, job_id: Optional[str], master: bool, pdf: bool) -> dict:
     data = collect(fb, resume)
     html_path = base.with_suffix(".html")
     html_path.parent.mkdir(parents=True, exist_ok=True)
-    html_path.write_text(to_html(data), encoding="utf-8")
+    html_path.write_text(to_html(data, load_style(home)), encoding="utf-8")
     md_text = to_markdown(data)
     if md_path:
         md_path.write_text(md_text, encoding="utf-8")
@@ -215,15 +351,12 @@ def render(home: Path, job_id: Optional[str], master: bool, pdf: bool) -> dict:
         result["warnings"].append("about %d words; likely more than 2 pages. Trim low-relevance bullets." % n_words)
     if pdf:
         chrome = find_chrome()
-        if not chrome:
-            result["pdf_note"] = "Chrome not found; skipped PDF. Open the HTML and print to PDF."
+        pdf_path = base.with_suffix(".pdf")
+        err = print_pdf(chrome, html_path, pdf_path) if chrome else pdf_without_chrome(html_path, pdf_path)
+        if err:
+            result["pdf_note"] = err
         else:
-            pdf_path = base.with_suffix(".pdf")
-            err = print_pdf(chrome, html_path, pdf_path)
-            if err:
-                result["pdf_note"] = err
-            else:
-                result["pdf"] = str(pdf_path)
+            result["pdf"] = str(pdf_path)
     else:
         result["pdf_note"] = "PDF skipped (--no-pdf)"
     return result

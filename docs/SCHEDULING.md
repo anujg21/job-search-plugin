@@ -21,8 +21,7 @@ So the Mac should be awake, with Claude Desktop open, at the scheduled time. The
 reaches the web domains your account allows, so add the job board domains first (see
 "network blocked" under Troubleshooting). Connectors are not affected by the allowlist, so
 connect the Indeed connector for the best Indeed results. The sandbox has no Chrome, so
-LinkedIn is skipped and resumes come as HTML. `/job-search:apply` makes the PDF when you
-apply, or open `resume.html` and print it to PDF.
+LinkedIn is skipped. Resume PDFs are made with `xhtml2pdf`, which the run installs.
 
 1. Open Claude Desktop and switch to Cowork.
 2. Click **Scheduled** in the left sidebar.
@@ -120,18 +119,20 @@ A scheduled cloud run has no Chrome, so it always skips LinkedIn. To include Lin
 `/job-search:scan linkedin` in a chat while Chrome is open and you are signed in. If you do
 not want LinkedIn, turn it off with `/job-search:onboard`.
 
-**Dice or Indeed say "connector did not load in this run".**
-Scheduled runs sometimes start before connectors load, even when they are connected. Add
-`mcp.dice.com` to the domain allowlist so Dice works without its connector. Indeed falls
-back to web search in that run; `/job-search:scan indeed` in a chat uses the connector.
+**Dice or Indeed say "connector not available in this run".**
+The connector's permission is most likely "Needs approval". A scheduled run cannot stop to
+ask, so it leaves the connector out. Open Customize, Connectors, pick the connector and set
+its tools to **Always allow**. Adding `mcp.dice.com` to the domain allowlist also lets Dice
+work without its connector.
 
 **Indeed shows "connector not connected".**
 Connect it once: Customize, then Connectors, find Indeed and click Connect, then sign in to
 Indeed. Until then Indeed uses web search.
 
 **No PDF resumes, only HTML.**
-Google Chrome is not installed in a standard place. Install it, or set `CHROME_PATH` to its
-binary. `jobctl.py doctor` shows what it found.
+Cloud runs install `xhtml2pdf` to make PDFs; if that failed, the run log says so. On your
+computer, PDFs come from Chrome, or from `xhtml2pdf` (`pip install xhtml2pdf`).
+`jobctl.py doctor` shows which one it found. `/job-search:apply` also makes a missing PDF.
 
 **Runs take too long.**
 Lower `daily_cap` in `profile/preferences.json`, or watch fewer companies. Scoring is capped

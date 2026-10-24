@@ -75,10 +75,12 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
      (claude.ai names), then
      `select:mcp__plugin_job-search_dice__search_jobs,mcp__plugin_job-search_indeed__search_jobs`
      (Claude Code names). When a connector's tool loads and a call works, record
-     `JOBCTL connector <name> ok`. In an unattended run, never record `missing`: scheduled
-     runs sometimes start before connectors load, so a tool that is not there says nothing
-     about whether the user connected it. Note `<name>: connector did not load in this run`
-     instead.
+     `JOBCTL connector <name> ok`. In an unattended run, never record `missing`: a connected
+     connector whose permission is "Needs approval" is left out of scheduled runs, so a
+     missing tool does not mean the user has not connected it. Note `<name>: connector not
+     available in this run (set it to Always allow)` instead.
+   - **Other connectors.** For each enabled entry in `extra_connectors` in sources.json,
+     follow `sources/other-connectors.md`.
    - **Dice.** If `scan.py` returned `"dice": "blocked"` or `"failed"` and the Dice tool is
      there, search Dice through it (`sources/dice.md`, "When scan.py cannot reach Dice").
    - **Indeed.** The Indeed connector first, then Chrome, then WebSearch
@@ -101,11 +103,11 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    If you are working on a copy of the data folder (a cloud run), add
    `--home-label "<the user's real data folder path>"` so the page shows their path, then
    save every changed file back (see "Cloud runs: stage the whole folder").
-7. **PDFs in a cloud run.** A cloud run cannot make PDFs: neither the sandbox nor the
-   command tool for the user's computer (which also runs in a sandbox, with only the data
-   folder mounted) has Chrome. Do not try. Leave `resume.html`, and in the summary say once:
-   "PDF: made when you run /job-search:apply, or open resume.html and print to PDF".
-   Do not report it as an error.
+7. **PDFs in a cloud run.** The sandbox has no Chrome, so `render_resume.py` uses the
+   pure Python `xhtml2pdf` package instead. Install it once at the start of a cloud run with
+   `pip install --quiet xhtml2pdf` (package installs are allowed in the cloud sandbox). The
+   tailor step then writes `resume.pdf` in the user's resume style. If the install fails,
+   note `pdf: xhtml2pdf not available` and go on; `/job-search:apply` makes the PDF later.
 8. **Mark lessons used.** For each lesson that changed what you did in this run, run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/memory.py" lesson-touch <id>`. Unused lessons
    retire after 60 days, so this keeps the useful ones.

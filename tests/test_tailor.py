@@ -636,8 +636,31 @@ class TestRender(HomeCase):
                 del os.environ["JOBSEARCH_CHROME"]
             else:
                 os.environ["JOBSEARCH_CHROME"] = old
-        self.assertIsNone(res["pdf"])
-        self.assertIn("Chrome not found", res["pdf_note"])
+        try:
+            import xhtml2pdf  # noqa: F401
+        except ImportError:
+            self.assertIsNone(res["pdf"])
+            self.assertIn("no Chrome", res["pdf_note"])
+        else:
+            self.assertTrue(res["pdf"])
+
+    def test_style_file_controls_layout(self):
+        self.write_resume(self.good)
+        style = {"name_caps": True, "role_format": "company_title", "role_separator": " - ",
+                 "date_style": "inline_muted", "skills_layout": "grouped",
+                 "skill_groups": {"Cloud": ["kubernetes", "AWS"]},
+                 "section_titles": {"skills": "Technical Skills"}, "accent_color": "#1F3864",
+                 "not_a_style_key": "ignored"}
+        jslib.write_json(self.home / "profile" / "resume-style.json", style)
+        res = render_resume.render(self.home, JOB_ID, False, False)
+        page = open(res["html"], encoding="utf-8").read()
+        self.assertIn("TECHNICAL SKILLS", page)
+        self.assertIn("#1F3864", page)
+        self.assertIn('class="role-date"', page)
+        self.assertNotIn("not_a_style_key", page)
+        self.assertEqual(render_resume.group_skills(["AWS", "Python", "Kubernetes"], {"Cloud": ["aws", "kubernetes"]}),
+                         [("Cloud", ["AWS", "Kubernetes"]), ("Other", ["Python"])])
+        self.assertEqual(render_resume.short_url("https://www.linkedin.com/in/x/"), "linkedin.com/in/x")
 
 
 # ---------------------------------------------------------------- detect_edits

@@ -151,7 +151,9 @@ try to get around the gate.
 ```
 python3 "$S/render_resume.py" <id>
 ```
-Writes `resume.html`, `resume.md`, and `resume.pdf` when Chrome is installed. If it warns about
+Writes `resume.html`, `resume.md`, and `resume.pdf` in the look from
+`profile/resume-style.json` (the user's own resume). The PDF comes from Chrome, or from
+`xhtml2pdf` when Chrome is missing (`pip install xhtml2pdf` in a cloud session). If it warns about
 length, drop more low-relevance bullets, then repeat steps 4 to 6 once.
 
 ### 7. Write `jobs/<id>/answers.md`

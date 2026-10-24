@@ -59,8 +59,10 @@ for a dry run ("dry run", "just show me"), or ask to check for closed postings o
    When a tool loads, run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector <name> ok`. This is how
    `doctor` knows. Record `... connector <name> missing` only with the user in the chat (not
-   in a scheduled run, where connectors sometimes load late). Then add one Problems line:
-   "connect <name>: Customize, Plugins, Job search, Connectors, Connect".
+   in a scheduled run, which leaves out connectors set to "Needs approval"). Then add one
+   Problems line: "connect <name> and set it to Always allow: Customize, Connectors".
+   Then, for each enabled entry in `extra_connectors` (top level of sources.json), follow
+   `sources/other-connectors.md`.
 
 5. Connector and browser sources. Do every item in `browser_next` from step 2 (or, if
    `scan.py` did not run, each enabled one of indeed, linkedin). Read

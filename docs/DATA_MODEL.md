@@ -23,6 +23,8 @@ Resolved by `jslib.resolve_home(arg)` in this order:
   profile/
     fact-bank.json           # source of truth for everything the resume may say
     resume-master.md         # the user's original resume text (reference only)
+    original-resume.<ext>    # copy of the file the user imported
+    resume-style.json        # layout of the user's own resume, used for tailored HTML and PDF
     preferences.json
     sources.json
     gap-notes.json           # user flags on gaps: {"<gap_key>": {"status":"learning|ignore|done","note":""}}
@@ -128,6 +130,27 @@ LinkedIn it means the user is signed in in Chrome.
 when it was missing) and `connector_checked` (a timestamp). The scan and the access check
 set them with `jobctl.py connector <dice|indeed> <ok|missing>`. `doctor` warns, with the
 steps to connect, while `connector` is not true.
+
+Other job connectors the user adds sit at the top level, next to `sources`:
+`"extra_connectors": [{"name": "ZipRecruiter", "enabled": true, "max_per_run": 20}]`.
+See `sources/other-connectors.md`.
+
+## profile/resume-style.json
+
+Layout only, never content. Every key is optional; `render_resume.py` (`DEFAULT_STYLE`) fills
+the rest. Onboarding writes it from the user's own resume.
+
+```json
+{"font": "Calibri, Carlito, Arial, sans-serif", "base_size_pt": 10, "accent_color": "#1F3864",
+ "muted_color": "#595959", "page_size": "Letter", "margins_in": [0.55, 0.6],
+ "header_align": "center", "name_size_pt": 20, "name_caps": true, "contact_separator": "  |  ",
+ "section_caps": true, "section_rule": false, "section_titles": {"skills": "Technical Skills"},
+ "role_format": "company_title", "role_separator": ", ", "date_style": "inline_muted",
+ "skills_layout": "grouped", "skill_groups": {"Cloud & Platform": ["AWS", "Kubernetes"]}}
+```
+
+Group labels are layout. Only skills the tailored resume already chose are placed under them;
+skills with no group go under "Other".
 
 ## jobs/<job_id>/job.json
 

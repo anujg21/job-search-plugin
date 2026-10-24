@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 (2026-10-24)
+
+- Tailored resumes look like your own resume. Onboarding reads its fonts, sizes, colors,
+  margins, header, heading style and skill groups into `profile/resume-style.json`, and
+  keeps a copy of the file. "Resume look" in `/job-search:onboard` sets it up later.
+- PDFs without Chrome: `render_resume.py` falls back to the pure Python `xhtml2pdf`, which
+  cloud runs install, so scheduled runs make PDFs again. `doctor` checks for either.
+- Connector setup now says to set Dice and Indeed to **Always allow**. A connector that
+  needs approval is left out of scheduled runs; this, not late loading, was the cause of
+  the "not available" runs in 0.4.x.
+- The plugin ships Dice and Indeed only. Other job connectors can be added as
+  `extra_connectors` (`sources/other-connectors.md`); every scan searches them.
+
 ## 0.4.2 (2026-10-24)
 
 - Scheduled runs no longer mark the Dice or Indeed connector as missing when its tools have

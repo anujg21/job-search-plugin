@@ -32,8 +32,9 @@ button that sends the application.**
    - `found` or `scored` with no resume: offer to tailor it now by following
      `${CLAUDE_PLUGIN_ROOT}/skills/tailor/SKILL.md`.
 2. No `resume.pdf` yet (runs in the cloud cannot make one): run
-   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_resume.py" <job_id>`. It makes the PDF where
-   Chrome is installed. If it still says no PDF, tell the user in one line: open
+   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_resume.py" <job_id>`. It makes the PDF with
+   Chrome, or with `xhtml2pdf` where Chrome is missing (`pip install xhtml2pdf` first in a
+   cloud session). If it still says no PDF, tell the user in one line: open
    `resume.html` in their browser, press Cmd+P (Ctrl+P on Windows) and pick "Save as PDF".
 3. Show, in a short list:
    - Company, title, location, score.
