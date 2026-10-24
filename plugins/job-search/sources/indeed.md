@@ -12,8 +12,8 @@ Three routes, tried in this order. Use the first one that works:
 ## Indeed connector
 
 1. ToolSearch with `indeed search_jobs`. Tool names look like
-   `mcp__plugin_job-search_indeed__search_jobs` or end in `search_jobs` under an Indeed
-   server, with a matching `get_job_details`. None found, or a call says the connector is
+   `mcp__Indeed__search_jobs` (claude.ai) or `mcp__plugin_job-search_indeed__search_jobs`
+   (Claude Code), with a matching `get_job_details`. None found, or a call says the connector is
    not connected or needs sign-in: run
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector indeed missing`, go to the
    next route and note `indeed: connector not connected` for the summary.
@@ -24,6 +24,8 @@ Three routes, tried in this order. Use the first one that works:
    the last 7 days if the tool allows it.
 3. Skip results already tracked: `ls "<home>/jobs" | grep '^indeed-'`, matching on the job
    key at the end of the folder name.
+   No results for a query: try it once more with a shorter title (drop words like
+   "Principal", "Staff" or "Senior"), then move on.
 4. For each new result call `get_job_details` for the full description. Stop at
    `max_per_run` (default 20) across all queries.
 5. Map each to the job object in `sources/README.md` with `source: "indeed"`, the job key

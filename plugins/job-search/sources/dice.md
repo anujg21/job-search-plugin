@@ -23,8 +23,8 @@ then has `"dice": "blocked"` and a `browser_next` item for Dice. Do this instead
 
 1. Look for the Dice connector's tools: ToolSearch with `dice search_jobs`. The plugin bundles
    the connector, and the user may also have added it under Customize, Connectors. Tool names
-   look like `mcp__plugin_job-search_dice__search_jobs` or end in `search_jobs` under a Dice
-   server.
+   look like `mcp__Dice__search_jobs` (claude.ai) or
+   `mcp__plugin_job-search_dice__search_jobs` (Claude Code).
 2. Record what you found: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py" connector dice ok`
    (or `missing` when there is no tool or the call fails). If found, call `search_jobs` once
    per query with the same arguments as above. For each

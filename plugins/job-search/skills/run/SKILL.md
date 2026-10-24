@@ -17,6 +17,19 @@ This skill usually runs from a scheduled task with nobody watching.
   or an entry in the run's error list.
 - If one step fails, write down the error and continue with the next step. A run that
   finishes with errors is better than a run that stops.
+- Every run does every step and calls every enabled source again. Never skip a step or a
+  source because an earlier run (today or before) found nothing or failed. The run log is a
+  record, not a reason to skip.
+
+## Cloud runs: stage the whole folder
+
+In a cloud run (claude.ai or a scheduled task) the scripts run on a copy of the data folder.
+- Copy the whole folder, every time. For example, on the user's computer tar it to stdout
+  and decode that in the sandbox. Never run on a partial copy.
+- Never write an archive or temp file (a `.tgz`, a file list) into the data folder. The run
+  cannot delete or overwrite files there with shell commands, so anything it writes stays.
+- At the end, save back the files that changed, one by one, with the tool that saves files
+  to the user's computer.
 
 `JOBCTL` means `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/jobctl.py"`.
 
@@ -56,9 +69,17 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    HTML and PDF match the edit. When tailoring later in this run, reuse the user's own wording
    from those edits where the facts allow.
 2. **Scan.** Follow `skills/scan/SKILL.md`. It runs `scan.py` and the browser sources.
-   Do every item in the `browser_next` list `scan.py` returns. Indeed is in it whenever it
-   is enabled: the Indeed connector first, then Chrome, then WebSearch (see
-   `sources/indeed.md`). A run with no Chrome still searches Indeed. Then
+   Do every item in the `browser_next` list `scan.py` returns. Do not skip these:
+   - **Connectors.** ToolSearch `dice search_jobs` and `indeed search_jobs`. In claude.ai the
+     tools are named like `mcp__Dice__search_jobs` and `mcp__Indeed__search_jobs`; in Claude
+     Code like `mcp__plugin_job-search_dice__search_jobs`. Record each with
+     `JOBCTL connector <dice|indeed> <ok|missing>`.
+   - **Dice.** If `scan.py` returned `"dice": "blocked"` or `"failed"` and the Dice tool is
+     there, search Dice through it (`sources/dice.md`, "When scan.py cannot reach Dice").
+   - **Indeed.** The Indeed connector first, then Chrome, then WebSearch
+     (`sources/indeed.md`). Search every query, every run. A run with no Chrome still
+     searches Indeed.
+   Then
    run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan.py" --verify` so dead postings are closed.
    Take `found` and `new` from its output. Each source error goes in `errors`.
 3. **Score.** Pick the jobs: `JOBCTL list --status found --rank --limit <daily_cap * 3> --json`
@@ -72,13 +93,9 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    `prepared`. Major changes end as `needs_approval` and wait for the user. Count both.
 5. **Gaps.** `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/gaps.py"`.
 6. **Dashboard.** `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/build_dashboard.py"`.
-   If you are working on a copy of the data folder (a cloud run that staged it from the
-   user's computer), add `--home-label "<the user's real data folder path>"` so the page
-   shows their path, then copy every changed file back to the real folder.
-   Staging rule: never write an archive or temp file (a `.tgz`, a file list) into the data
-   folder. A cloud run cannot delete or overwrite files there with shell commands, so
-   anything it writes stays. Read the folder into your copy, and save back only the files
-   that changed, one by one, with the tool that saves files to the user's computer.
+   If you are working on a copy of the data folder (a cloud run), add
+   `--home-label "<the user's real data folder path>"` so the page shows their path, then
+   save every changed file back (see "Cloud runs: stage the whole folder").
 7. **PDFs in a cloud run.** A cloud run cannot make PDFs: neither the sandbox nor the
    command tool for the user's computer (which also runs in a sandbox, with only the data
    folder mounted) has Chrome. Do not try. Leave `resume.html`, and in the summary say once:

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.1 (2026-10-24)
+
+- Runs no longer skip a source because an earlier run found nothing. Every run calls every
+  enabled source again.
+- The run itself checks the Dice and Indeed connectors, records them for `doctor`, and uses
+  the Dice connector when the direct Dice call is blocked. Tool names for claude.ai
+  (`mcp__Dice__search_jobs`, `mcp__Indeed__search_jobs`) are listed in the guides.
+- Cloud runs copy the whole data folder every time, so gaps and the dashboard are rebuilt.
+- Indeed retries a query with a shorter title when it finds nothing.
+
 ## 0.4.0 (2026-10-24)
 
 - Connecting Dice and Indeed is now a clear step. Onboarding always shows how (Customize,
