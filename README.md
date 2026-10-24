@@ -23,7 +23,8 @@ stays in one folder on your computer.
 1. In the **Cowork** tab, open **Customize**, then **Plugins**. Click **Add**, then
    **Add marketplace**, and enter `anujg21/job-search-plugin`.
 2. Under **Discover**, install **job-search**.
-3. Connect the Dice and Indeed connectors (see [below](#connect-dice-and-indeed)).
+3. Connect the Dice and Indeed connectors and set them to Always allow (see
+   [Connectors](#connectors)).
 4. Start a Cowork task in a folder called `JobSearch` and type `/job-search:onboard`. It reads
    your resume, researches job titles that fit it, and sets up which boards to search.
 5. Type `/job-search:schedule` and copy its values into two scheduled tasks, one daily and one
@@ -90,38 +91,46 @@ resume changes wait for your approval. The plugin never submits an application.
 
 The plugin bundles the Dice and Indeed connectors. LinkedIn has no job search connector.
 
-### Connect Dice and Indeed
+### Connectors
 
-This is a one-time step that only you can do. Claude cannot click Connect or sign in for
-you.
+The plugin ships two job connectors, **Dice** and **Indeed**, and keeps it at that. LinkedIn
+has no job search connector. You can add other job connectors yourself.
 
-1. In Claude Desktop or claude.ai, open **Customize**, then **Plugins**, then **Job search**.
-2. Open the **Connectors** tab.
-3. Click **Connect** next to **Dice**. It needs no account.
-4. Click **Connect** next to **Indeed** and sign in with your Indeed account.
-5. Set each connector's permission to **Always allow** (open the connector under
-   Customize, Connectors, and change its tools from "Needs approval"). Scheduled runs cannot
-   stop to ask, so a connector that needs approval is left out of them.
+**Connect Dice and Indeed (one time, only you can do this):**
 
-In Claude Code, run `/mcp`, pick `dice` or `indeed`, and follow the prompt.
+1. In Claude Desktop or claude.ai, open **Customize**, then **Plugins**, then **Job search**,
+   and open the **Connectors** tab.
+2. Click **Connect** next to **Dice**. It needs no account.
+3. Click **Connect** next to **Indeed** and sign in with your Indeed account.
+4. Go to **Customize > Connectors**, select each one, find **Tool permissions** and choose
+   **Always allow**. Scheduled runs cannot stop to ask, so a connector left on
+   "Needs approval" is skipped in them.
 
-Scheduled runs need these most, because they have no Chrome. Also add `mcp.dice.com` to the
-claude.ai domain allowlist (Settings, Capabilities), next to the job board domains, so Dice
-works even without its connector. Onboarding shows these steps, and `jobctl.py doctor`
-warns "Connector dice" or "Connector indeed" until each one works.
+In Claude Code, run `/mcp`, pick `dice` or `indeed`, and follow the prompt. Also add
+`mcp.dice.com` to the claude.ai domain allowlist (Settings, Capabilities), next to the job
+board domains, so Dice works even without its connector. Onboarding shows these steps, and
+`jobctl.py doctor` warns "Connector dice" or "Connector indeed" until each one works.
 
-### Connectors: what ships and adding more
+**Add another job connector (optional):**
 
-The plugin ships two job connectors, Dice and Indeed, and keeps it at that. You can add any
-other job search connector from the Claude directory (Customize, Connectors, Browse), for
-example ZipRecruiter:
+1. Go to **Customize > Connectors** and click **+** next to **Connectors** to open the
+   directory. Search for the job site, for example ZipRecruiter.
+2. Click it, then **Connect**, and finish the sign-in if it asks.
+3. Under **Tool permissions**, choose **Always allow**.
+4. Tell Claude "add ZipRecruiter as a job source", or run `/job-search:onboard` and pick
+   "Job sources". It is saved under `extra_connectors` in `profile/sources.json`, and every
+   scan searches it with your target titles.
 
-1. Connect it and set its tools to **Always allow**.
-2. Tell Claude "add ZipRecruiter as a job source", or run `/job-search:onboard` and pick
-   "Job sources".
+A job site that is not in the directory but runs its own MCP server can be added as a
+custom connector: **Customize > Connectors**, **Add**, **Custom**, **Web**, then its server
+URL. On Team and Enterprise plans an Owner adds connectors and sets tool permissions for
+everyone. Details: `plugins/job-search/sources/other-connectors.md`.
 
-It is saved under `extra_connectors` in `profile/sources.json`, and every scan searches it
-with your target titles. Details: `plugins/job-search/sources/other-connectors.md`.
+Anthropic's guides:
+[Use connectors](https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities),
+[Browse the directory](https://support.claude.com/en/articles/14328846-browse-skills-connectors-and-plugins-in-one-directory),
+[Custom connectors with remote MCP](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp),
+[Scheduled tasks in Cowork](https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-cowork).
 
 LinkedIn is read only and low volume on purpose. Its terms forbid scraping and bots, so the
 plugin reads a few of your saved searches and never applies or messages anyone.

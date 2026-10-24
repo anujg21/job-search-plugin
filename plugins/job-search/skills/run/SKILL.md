@@ -115,7 +115,9 @@ Keep a running tally: `found`, `new`, `scored`, `prepared`, `needs_approval`, `e
    ```
    JOBCTL runlog --kind <daily|weekly> --found N --new N --scored N --prepared N --needs-approval N --errors "<error 1>" --errors "<error 2>"
    ```
-   Then run `build_dashboard.py` once more so the run log shows this run.
+   Then run `build_dashboard.py` once more so the run log shows this run, and show it to the
+   user: share `dashboard.html` with the tool that presents or shares files in the chat
+   (cloud runs), or add `--open` on the user's own computer. Do not only print the path.
 
 ## Weekly steps
 
@@ -148,7 +150,7 @@ New jobs: <new> (from <found> found)
 Prepared: <prepared> resumes ready to apply
 Needs your approval: <needs_approval>
 Top skill gap: <name from gaps.json ranking[0], or "none yet">
-Dashboard: <home>/dashboard.html
+Dashboard: <home>/dashboard.html (shared above, opens with one click)
 ```
 
 Weekly runs add one line after those five: `Career radar: refreshed, <n> new suggestions`,

@@ -130,6 +130,18 @@ h3 { font-size: 15px; margin: 18px 0 8px; font-weight: 650; }
   padding: 14px 16px;
 }
 .stack > * + * { margin-top: 12px; }
+/* start here */
+.start-intro { font-size: 15px; max-width: 760px; margin: 0 0 14px; }
+.start-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 18px; }
+.start-stats .card b { display: block; font-size: 22px; }
+.steps { counter-reset: step; list-style: none; margin: 0; padding: 0; max-width: 760px; }
+.steps li { counter-increment: step; position: relative; padding: 0 0 14px 40px; }
+.steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--accent-wash); color: var(--accent-ink); font-weight: 650;
+  display: flex; align-items: center; justify-content: center; font-size: 13.5px; }
+.steps li b { display: block; }
+.linkish { appearance: none; background: none; border: 0; padding: 0; font: inherit; color: var(--accent-ink);
+  text-decoration: underline; cursor: pointer; }
 /* pipeline funnel */
 .funnel { display: grid; grid-template-columns: 1.6fr repeat(6, minmax(0, 1fr)); background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--radius); }
@@ -836,6 +848,7 @@ footer.foot code { font-family: var(--mono); font-size: 12.5px; }
 
   // ---------- tabs ----------
   var TABS = [
+    { id: "start", label: "Start here", render: renderStart },
     { id: "pipeline", label: "Pipeline", render: renderPipeline },
     { id: "approvals", label: "Approvals", render: renderApprovals, count: function () { return JOBS.filter(isPending).length; } },
     { id: "gaps", label: "Skills gaps", render: renderGaps },
@@ -872,7 +885,7 @@ footer.foot code { font-family: var(--mono); font-size: 12.5px; }
       panels[t.id] = { def: t, el: p, rendered: false };
     });
     var saved = store(TAB_KEY);
-    selectTab(panels[saved] ? saved : "pipeline", false);
+    selectTab(panels[saved] ? saved : "start", false);
   }
   function selectTab(id, remember) {
     Object.keys(panels).forEach(function (k) {
@@ -1957,6 +1970,46 @@ footer.foot code { font-family: var(--mono); font-size: 12.5px; }
       plot,
       h("div", { class: "rc-x", "aria-hidden": "true" }, h("span", null, fmtDate(list[0].ts)), h("span", null, fmtDate(list[list.length - 1].ts))));
   }
+  // ---------- start here ----------
+  function renderStart(root) {
+    clear(root);
+    function go(id, label) {
+      return h("button", { type: "button", class: "linkish", onclick: function () { selectTab(id, true); } }, label);
+    }
+    var ready = JOBS.filter(function (j) { return j.status === "prepared"; }).length;
+    var waiting = JOBS.filter(isPending).length;
+    var runs = DATA.runs || [];
+    root.appendChild(h("h2", null, "What this dashboard is"));
+    root.appendChild(h("p", { class: "start-intro" },
+      "Every day Claude looks for jobs that match your resume and preferences, scores how well each one fits, " +
+      "and writes a tailored resume for the best few. The resume only uses facts from your own resume. " +
+      "Claude never applies for you: you pick the jobs and click Submit yourself."));
+    root.appendChild(h("div", { class: "start-stats" },
+      h("div", { class: "card" }, h("b", null, String(JOBS.length)), "jobs found so far"),
+      h("div", { class: "card" }, h("b", null, String(ready)), "resumes ready to apply"),
+      h("div", { class: "card" }, h("b", null, String(waiting)), "waiting for your OK"),
+      h("div", { class: "card" }, h("b", null, runs.length ? fmtDateTime(runs[0].ts) : "Never"), "last search")));
+    root.appendChild(h("h2", null, "How to use it"));
+    root.appendChild(h("ol", { class: "steps" },
+      h("li", null, h("b", null, "Say yes or no to big resume changes"),
+        "Open ", go("approvals", "Approvals"), ". Resumes that changed a lot wait there for you."),
+      h("li", null, h("b", null, "Apply to the jobs that are ready"),
+        "Open ", go("pipeline", "Pipeline"), " and click a job marked Prepared. You get the PDF resume, " +
+        "the cover note, the answers to common questions and the apply link. After you submit, click Mark applied."),
+      h("li", null, h("b", null, "See what to learn next"),
+        go("gaps", "Skills gaps"), " lists the skills these jobs ask for that your resume does not show yet, most common first."),
+      h("li", null, h("b", null, "Check where your career is heading"),
+        go("radar", "Career radar"), " shows job titles that fit you and skills that are growing."),
+      h("li", null, h("b", null, "Make sure the daily search runs"),
+        go("runs", "Runs"), " shows each search and anything that went wrong. ",
+        go("learned", "What I've learned"), " shows changes Claude suggests from your feedback.")));
+    root.appendChild(h("h2", null, "How the buttons work"));
+    root.appendChild(h("p", { class: "start-intro" },
+      "This page never changes anything by itself. A button copies a short command. Paste it into your " +
+      "Claude chat and Claude does the rest. To see new results, ask Claude to refresh the dashboard " +
+      "(/job-search:dashboard) and reload this page. Stuck? Ask Claude, or type /job-search:help."));
+  }
+
   function renderRuns(root) {
     clear(root);
     var runs = DATA.runs || [];

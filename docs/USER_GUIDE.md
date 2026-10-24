@@ -24,12 +24,15 @@ what is waiting, apply to the jobs you like, and log replies when they come in.
 
 ## The dashboard
 
-Open `~/JobSearch/dashboard.html` in your browser. Buttons on the page copy a short command.
+After every run Claude opens the dashboard for you: in your browser when it runs on your
+computer, or as a file in the chat (click it) when it runs in the cloud. You can also open
+`~/JobSearch/dashboard.html` in your browser yourself. Buttons on the page copy a short command.
 Paste it into Claude (a Cowork task or a Claude Code session) and Claude does the rest. The
 page itself never changes your data.
 
 | Tab | What you see | What you do there |
 |---|---|---|
+| Start here | What the dashboard is, how many resumes are ready, and five steps for using it. It opens first until you pick another tab | Follow the links to the tab you need |
 | Pipeline | A funnel from Found to Interviews, then every job with its score, status and resume badge | Click a funnel step to filter. Click a job for details. |
 | Job detail (click a row) | Fit score against your minimum, matched and missing skills, what changed in the resume, status timeline | Mark applied, Not interested, Something's wrong, log a reply or interview, approve or reject resume changes |
 | Approvals | Resumes with big changes waiting for you | Approve, reject with a reason, or re-tailor when a check failed |

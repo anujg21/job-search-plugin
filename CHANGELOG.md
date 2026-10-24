@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (2026-10-24)
+
+- The dashboard has a **Start here** tab for first-time users: what it offers, live counts,
+  and five simple steps. It opens first until you pick another tab.
+- Runs show the dashboard instead of only naming the path: `build_dashboard.py --open` opens
+  it in your browser on your computer, and cloud runs share the file in the chat.
+- Connector instructions follow Anthropic's menus (Customize > Connectors, Tool permissions,
+  Always allow), cover adding other job connectors and custom connectors, and link
+  Anthropic's guides.
+
 ## 0.5.0 (2026-10-24)
 
 - Tailored resumes look like your own resume. Onboarding reads its fonts, sizes, colors,

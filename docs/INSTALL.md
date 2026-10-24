@@ -28,10 +28,11 @@ The plugin lives at [github.com/anujg21/job-search-plugin](https://github.com/an
    called `JobSearch` in your home folder. The plugin keeps all your data there.
 7. Connect the bundled connectors: in **Customize**, **Plugins**, open **Job search**, then
    the **Connectors** tab. Click **Connect** next to **Dice** (no account needed) and next to
-   **Indeed** (sign in with your Indeed account). Then open each one under **Customize**,
-   **Connectors** and set its tools to **Always allow**; scheduled runs cannot stop to ask for
-   approval. Only you can do this step. To add other job connectors, see "Connectors: what
-   ships and adding more" in the README.
+   **Indeed** (sign in with your Indeed account). Then go to **Customize > Connectors**, select
+   each one, find **Tool permissions** and choose **Always allow**; scheduled runs cannot stop
+   to ask for approval. Only you can do this step. To add other job connectors, see
+   "Connectors" in the README, or Anthropic's guide
+   [Use connectors](https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities).
 8. Type `/job-search:onboard` and press Enter. You can also type `/` to browse the plugin's
    commands.
 

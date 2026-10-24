@@ -13,7 +13,10 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import webbrowser
 from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -257,6 +260,20 @@ def build(home: Path, out: Path = None, home_label: str = None) -> Path:
     return out
 
 
+def open_in_browser(path: Path) -> bool:
+    """Open the page in the user's default browser. Works only where a desktop is attached
+    (Claude Code or Claude Desktop on the user's computer); False in a cloud sandbox."""
+    if sys.platform == "darwin" and shutil.which("open"):
+        return subprocess.run(["open", str(path)], stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL).returncode == 0
+    if sys.platform.startswith("linux") and not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+        return False
+    try:
+        return bool(webbrowser.open(path.resolve().as_uri()))
+    except webbrowser.Error:
+        return False
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Build the static dashboard.html for the job-search home.")
     ap.add_argument("--home")
@@ -264,15 +281,17 @@ def main(argv=None) -> int:
     ap.add_argument("--home-label", help="data folder path to show on the page, when building from "
                     "a copy (a cloud run stages the folder elsewhere)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--open", action="store_true", help="open the page in the default browser if possible")
     args = ap.parse_args(argv)
     home = jslib.require_home(args.home)
     out = build(home, Path(args.out) if args.out else None, args.home_label)
     njobs = sum(1 for _ in jslib.iter_jobs(home))
+    opened = open_in_browser(out) if args.open else False
     if args.json:
-        print(json.dumps({"path": str(out), "jobs": njobs}))
+        print(json.dumps({"path": str(out), "jobs": njobs, "opened": opened}))
     else:
         print("Dashboard written to %s (%d jobs)." % (out, njobs))
-        print("Open it: file://%s" % out)
+        print("Opened it in your browser." if opened else "Open it: file://%s" % out)
     return 0
 
 

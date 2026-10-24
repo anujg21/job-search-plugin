@@ -26,9 +26,15 @@ description: Rebuilds the local job search dashboard (one static HTML file with 
 3. Check whether the local server is already running:
    `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/serve_dashboard.py" --check`
    Exit code 0 means it is running and `http://127.0.0.1:8765/dashboard.html` already works.
-4. Tell the user, in a few short lines:
-   - The file path, `<home>/dashboard.html`, and that they can open it in any browser
-     (on a Mac: `open "<home>/dashboard.html"`).
+4. Show it to the user right away, do not just name the path:
+   - On the user's own computer (Claude Code, or Claude Desktop with a real shell): build
+     with `--open` (`build_dashboard.py --open`), which opens it in their browser.
+   - In a cloud session (claude.ai, Cowork, a scheduled task), `--open` cannot reach their
+     browser. Share `dashboard.html` with the tool that presents or shares files in the
+     chat, so it opens there with one click.
+   Then tell them, in a few short lines:
+   - The file path, `<home>/dashboard.html` (the real folder, not a sandbox copy), so they can
+     open it again later in any browser.
    - If the server is running: the URL. Reload the page to see the new data.
    - If it is not running: offer to start it. A local URL is handy for bookmarking and makes
      the copy buttons work in every browser. If they say yes, start it in the background:
@@ -40,8 +46,8 @@ description: Rebuilds the local job search dashboard (one static HTML file with 
    `/job-search:feedback applied <job_id>`. The user pastes it here, and the `feedback` skill
    acts on it. The page itself never changes any files.
 
-If this skill runs unattended (from `run` or a scheduled task), do steps 1 and 2 only and
-do not offer to start the server.
+If this skill runs unattended (from `run` or a scheduled task), do steps 1 and 2, share
+the file as in step 4, and do not offer to start the server.
 
 ## Learning from this session
 If the user corrects you, repeats an instruction they gave before, or sounds frustrated
