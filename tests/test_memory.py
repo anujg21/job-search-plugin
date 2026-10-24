@@ -213,6 +213,23 @@ class TestJobctl(Base):
         self.assertEqual(res["profile/preferences.json"], "fail")
 
 
+    def test_doctor_fails_when_no_source_can_find_jobs(self):
+        p = self.home / "profile" / "sources.json"
+        src = jslib.read_json(p)
+        for k, v in src["sources"].items():
+            v["enabled"] = k in ("greenhouse", "lever", "ashby")
+            v["companies"] = []
+        jslib.write_json(p, src)
+        code, out = run(jobctl, "doctor", "--quick", "--json", *self.h)
+        self.assertEqual(code, 1)
+        res = {c["check"]: c["status"] for c in json.loads(out)["checks"]}
+        self.assertEqual(res["A source that can find jobs"], "fail")
+        src["sources"]["indeed"]["enabled"] = True
+        jslib.write_json(p, src)
+        code, out = run(jobctl, "doctor", "--quick", "--json", *self.h)
+        res = {c["check"]: c["status"] for c in json.loads(out)["checks"]}
+        self.assertNotIn("A source that can find jobs", res)
+
 class TestLessons(Base):
     def test_add_render_touch_retire(self):
         code, out = run(memory, "lesson-add", *self.h, "--text", "Never use the word 'spearheaded'.",

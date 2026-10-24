@@ -1,6 +1,6 @@
 ---
 name: gaps
-description: Rebuilds the skills gap ledger from every scored job and writes a short weekly nudge about the top 3 gaps that matter for the user's goals, with an honest link to their existing experience and one concrete next step each. Saves it to runs/nudge-<date>.md. Safe to run unattended. Use when the user runs /job-search:gaps, asks what skills they are missing, or the weekly run calls it.
+description: Rebuilds the skills gap ledger from every scored job and writes a short weekly nudge about the top 3 gaps that matter for the user's goals, with an honest link to their existing experience and one concrete next step each. Saves it to the runs folder as a dated nudge file. Safe to run unattended. Use when the user runs /job-search:gaps, asks what skills they are missing, or the weekly run calls it.
 ---
 
 # Gaps

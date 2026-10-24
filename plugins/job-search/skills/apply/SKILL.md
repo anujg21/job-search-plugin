@@ -1,6 +1,6 @@
 ---
 name: apply
-description: Helps the user apply to one prepared job. Shows the tailored resume and prepared answers, opens the application page, and can prefill the form in Chrome on Greenhouse, Lever and Ashby pages. Never clicks Submit. Marks the job applied once the user says they submitted. Use when the user runs /job-search:apply <job_id> or asks to apply to a job.
+description: Helps the user apply to one prepared job. Shows the tailored resume and prepared answers, opens the application page, and can prefill the form in Chrome on Greenhouse, Lever and Ashby pages. Never clicks Submit. Marks the job applied once the user says they submitted. Use when the user runs /job-search:apply with a job id or asks to apply to a job.
 ---
 
 # Apply

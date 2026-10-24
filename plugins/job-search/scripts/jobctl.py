@@ -314,6 +314,13 @@ def run_doctor(home: Path, quick: bool = False) -> List[dict]:
             add("At least one source enabled", "pass", ", ".join(enabled))
         else:
             add("At least one source enabled", "fail", "turn on a source in /job-search:onboard")
+        usable = [k for k in enabled
+                  if (sources[k].get("companies") if k in API_SOURCES
+                      else (k == "indeed" or sources[k].get("has_access")))]
+        if enabled and not usable:
+            add("A source that can find jobs", "fail",
+                "no companies listed and Indeed, Dice, LinkedIn are off; add companies or turn on "
+                "Indeed with /job-search:onboard (Job sources)")
         for k in enabled:
             v = sources[k]
             if k in API_SOURCES and not v.get("companies"):

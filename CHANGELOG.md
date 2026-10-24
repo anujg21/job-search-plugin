@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 (2026-10-24)
+
+- Skill descriptions no longer contain angle brackets, which claude.ai rejects on sync.
+- `jobctl.py doctor` fails when no source can find jobs (no companies listed and Indeed,
+  Dice and LinkedIn off). Onboarding turns Indeed on in that case.
+- Onboarding shows job boards the radar found by company name instead of board id.
+
 ## 0.2.0 (2026-10-24)
 
 - New `/job-search:help` skill. It answers questions about the plugin and suggests the next

@@ -194,7 +194,10 @@ skip)". Then:
 - Add the job boards the radar found: run
   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/radar.py" boards --json` and offer them as a
   multi-select ("The radar found jobs that fit you on these boards"). This gives the user
-  companies without having to name any.
+  companies without having to name any. Show each by its company name, not the token
+  (tokens can be numbers, like `8451` for 84.51°). Greenhouse gives the name at
+  `https://boards-api.greenhouse.io/v1/boards/<token>`; for Lever and Ashby use the company
+  name from the radar posting.
 - For each company the user names, find its board token and check it works:
   - Greenhouse: `https://boards-api.greenhouse.io/v1/boards/<token>/jobs`
   - Lever: `https://api.lever.co/v0/postings/<token>?mode=json`
@@ -204,7 +207,9 @@ skip)". Then:
   Put the company in the list for the board that answered. Tell the user which you found
   and which you could not, and move on.
 - No companies at all is fine. Indeed, Dice and LinkedIn still search by title, and the
-  weekly radar suggests boards later.
+  weekly radar suggests boards later. But at least one source must be able to find jobs:
+  if no company was added and Dice and LinkedIn end up off, turn Indeed on (it works without
+  Chrome through web search). Never finish setup with nothing that can find jobs.
 
 **Searches are built for the user.** Do not ask for search terms or saved search URLs. For
 Indeed and Dice, make one query per target title (up to 3) with the first location, or
